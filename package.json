@@ -21,5 +21,6 @@
     "trailingComma": "all",
     "arrowParens": "always"
   },
-  "private": true
+  "private": true,
+  "packageManager": "yarn@4.10.3"
 }
