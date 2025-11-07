@@ -39,8 +39,8 @@ type TextAreaFocusHandler = React.ComponentProps<typeof TextArea>['onFocus'];
  *
  */
 export function useKASVWorkaround() {
-  const scrollRef = React.useRef<JSX.Element>();
-  const scrollToInputRef = React.useRef<ScrollToInput>();
+  const scrollRef = React.useRef<KASVRef | null>(null);
+  const scrollToInputRef = React.useRef<ScrollToInput | null>(null);
 
   function innerRef(ref: KASVRef) {
     scrollRef.current = ref;

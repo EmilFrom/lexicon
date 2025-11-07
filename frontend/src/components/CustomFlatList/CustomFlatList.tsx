@@ -99,8 +99,8 @@ function BaseCustomFlatList<ItemType>(
 
   const baseFlatListRef = useRef<FlatList<ItemType>>(null);
 
-  const scrollToIndexParam = useRef<ScrollToIndexParams>();
-  const shouldInternalScroll = useRef<boolean>();
+  const scrollToIndexParam = useRef<ScrollToIndexParams | null>(null);
+  const shouldInternalScroll = useRef<boolean | null>(null);
   const itemRenderCount = useRef<number>(0);
 
   const internalOnEndReached = () => {

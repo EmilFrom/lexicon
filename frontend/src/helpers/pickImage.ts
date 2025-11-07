@@ -1,57 +1,65 @@
 import { Platform } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import {
+  launchImageLibraryAsync,
+  requestMediaLibraryPermissionsAsync,
+  MediaTypeOptions,
+  ImagePickerOptions,
+} from 'expo-image-picker';
 
 import { getFormat } from './getFormat';
 
-export async function pickImage(extensions?: Array<string>) {
-  const ios = Platform.OS === 'ios';
-  let permissionCameraRollResult =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+// Define a consistent return type for this helper function
+type PickImageResult =
+  | { uri: string }
+  | { error: 'denied' | 'cancelled' | 'format' };
 
-  if (permissionCameraRollResult.status !== 'granted') {
+export async function pickImage(
+  extensions?: Array<string>,
+): Promise<PickImageResult | null> {
+  // 1. Request permissions first. The new API returns a more detailed object.
+  const permissionResult = await requestMediaLibraryPermissionsAsync();
+
+  if (permissionResult.granted === false) {
+    // The user has explicitly denied permissions.
     return {
       error: 'denied',
     };
   }
 
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  // 2. Define the options for the image picker.
+  const options: ImagePickerOptions = {
+    mediaTypes: MediaTypeOptions.Images,
     quality: 1,
-  });
+    // The modern API supports 'allowsMultipleSelection', but the old code's logic
+    // was designed for a single image, so we keep it that way.
+    allowsMultipleSelection: false,
+  };
 
-  if (!ios && !result) {
-    // On Android, `result` can sometimes be `undefined`. The official Expo
-    // documentation has a workaround for this, which is to retrieve it from
-    // `getPenderingResultAsync`.
-    //
-    // Read more: https://docs.expo.dev/versions/latest/sdk/imagepicker/#imagepickergetpendingresultasync
-    let pendingResults = await ImagePicker.getPendingResultAsync();
+  // 3. Launch the image library.
+  const result = await launchImageLibraryAsync(options);
 
-    // For now, we only ever want a single image that was selected.
-    // If this ever changes in the future, be sure to update `result`
-    // to reflect that it will be an array of `uri`s.
-    const [firstResult] = pendingResults;
-    result =
-      'canceled' in firstResult
-        ? firstResult
-        : { canceled: true, assets: null };
-  }
-
-  if (result.canceled || !result.assets.length) {
+  // 4. The modern API has a much simpler cancellation check.
+  //    The 'getPendingResultAsync' workaround is no longer needed.
+  if (result.canceled) {
     return {
       error: 'cancelled',
     };
   }
 
-  let format = getFormat(result.assets[0].uri);
+  // 5. If not cancelled, the 'assets' array is guaranteed to have at least one item.
+  //    The old logic for checking !result.assets.length is redundant.
+  const firstAsset = result.assets[0];
 
+  // 6. Perform the format validation.
+  const format = getFormat(firstAsset.uri);
   if (extensions && !extensions.includes(format)) {
     return {
       error: 'format',
     };
   }
 
+  // 7. Return the URI in the expected object format.
   return {
-    uri: result.assets[0].uri,
+    uri: firstAsset.uri,
   };
 }

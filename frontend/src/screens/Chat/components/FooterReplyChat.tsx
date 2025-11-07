@@ -18,7 +18,7 @@ import { useDevice } from '../../../utils';
 import { ReplyInputField } from '../../MessageDetail/components';
 
 type Props<T> = {
-  listRef: React.RefObject<VirtualizedList<T>>; // A reference to the chat list component.
+  listRef: React.RefObject<VirtualizedList<T> | null>; // A reference to the chat list component.
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>; // Function to update the state of text input focus.
   onReply: (message: string) => void; // Callback function invoked when the reply button is clicked.
   replyLoading?: boolean; // loading when try hit hook reply chat

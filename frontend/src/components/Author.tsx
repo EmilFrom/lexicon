@@ -1,4 +1,4 @@
-import React, { ReactChild } from 'react';
+import React, { ReactNode } from 'react';
 import {
   ImageStyle,
   StyleProp,
@@ -18,7 +18,7 @@ type Props = TouchableOpacityProps &
     avatarLabel?: string;
     variant?: FontVariant;
     subtitle?: string;
-    children?: ReactChild;
+    children?: ReactNode;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
     imageStyle?: StyleProp<ImageStyle>;

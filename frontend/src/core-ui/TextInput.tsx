@@ -23,7 +23,7 @@ type Props = Omit<TextInputProps, 'style'> & {
   iconSize?: IconSize;
   onPressIcon?: () => void;
   errorMsg?: string;
-  inputRef?: RefObject<BaseTextInput>;
+  inputRef?: RefObject<BaseTextInput | null>;
   inputStyle?: StyleProp<TextStyle>;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;

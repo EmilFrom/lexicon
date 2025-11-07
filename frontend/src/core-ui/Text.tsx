@@ -1,4 +1,4 @@
-import React, { ReactChild } from 'react';
+import React, { ReactNode } from 'react';
 import { Text as BaseText, TextProps } from 'react-native';
 
 import { Color, FontSize, FontVariant, useTheme } from '../theme';
@@ -7,7 +7,7 @@ type Props = TextProps & {
   variant?: FontVariant;
   size?: FontSize;
   color?: Color;
-  children?: ReactChild;
+  children?: ReactNode;
 };
 
 export function Text(props: Props) {

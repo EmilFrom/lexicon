@@ -135,7 +135,7 @@ export function useLikeTopicOrPost() {
   const { navigate } = useNavigation<StackNavProp<'PostDetail' | 'TabNav'>>();
   const { removeOngoingLikedTopic, addOngoingLikedTopic } =
     useOngoingLikedTopic();
-  let topicIdRef = useRef<number>();
+  const topicIdRef = useRef<number | null>(null);
 
   const update: MutationUpdate = (cache, { data }) => {
     if (!data) {

@@ -41,7 +41,7 @@ export default function PostDraft() {
   const { colors } = useTheme();
   const storage = useStorage();
 
-  const draftKeyOnFocusRef = useRef<string>();
+  const draftKeyOnFocusRef = useRef<string | null>(null);
   const draftKeyOnFocus = draftKeyOnFocusRef.current;
 
   const ios = Platform.OS === 'ios';

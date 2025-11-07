@@ -19,7 +19,7 @@ type Props = ViewProps & {
   members?: Array<SelectedUserProps>;
   mentionLoading: boolean;
   rawText: string;
-  textRef: RefObject<TextInputType>;
+  textRef: RefObject<TextInputType | null>;
   setRawText?: (value: string) => void;
   setShowUserList: (value: boolean) => void;
   viewStyle?: StyleProp<ViewStyle>;

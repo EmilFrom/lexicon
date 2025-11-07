@@ -115,7 +115,7 @@ export default function PostDetail() {
   const [isHidden, setHidden] = useState(hidden ?? false);
   const [flatListReady, setFlatListReady] = useState(false);
 
-  const postIdOnFocusRef = useRef<number>();
+  const postIdOnFocusRef = useRef<number | null>(null);
   const postIdOnFocus = postIdOnFocusRef.current;
 
   const { setValue, reset: resetForm } = useFormContext<NewPostForm>();

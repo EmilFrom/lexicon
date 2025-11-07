@@ -26,7 +26,7 @@ type Props = ViewProps & {
   onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
   onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
   onSelectedChange: (cursor: CursorPosition) => void;
-  inputRef?: RefObject<TextInputType>;
+  inputRef?: RefObject<TextInputType | null>;
   mentionToggled?: boolean;
   isKeyboardShow: boolean;
   selectionCursor?: { start: number; end: number };
