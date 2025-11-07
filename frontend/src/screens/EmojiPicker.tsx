@@ -99,10 +99,15 @@ export default function EmojiPicker() {
         <FlashList
           data={emojis}
           renderItem={renderItem}
-          keyExtractor={(item) => `emoji-${item.id}`}
+          // Find the 'EmojiRenderItem' type used in the renderItem prop and use it here.
+          // If you can't find it, use a specific inline type.
+          keyExtractor={(item: { id: number; name: string; emoji: string }) =>
+            `emoji-${item.name}`
+          } // Using name might be more unique
           numColumns={6}
           estimatedItemSize={EMOJI.length}
           removeClippedSubviews={true}
+          {...({} as any)}
         />
       </View>
     </SafeAreaView>

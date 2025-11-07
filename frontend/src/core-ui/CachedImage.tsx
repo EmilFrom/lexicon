@@ -1,203 +1,53 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// source: https://github.com/lane-c-wagner/react-native-expo-cached-image
+// src/core-ui/CachedImage.tsx
+// A modern replacement for the legacy class component, using expo-image.
 
-import React, { Component } from 'react';
-import {
-  Image,
-  ImageStyle,
-  ImageURISource,
-  InteractionManager,
-  StyleProp,
-} from 'react-native';
-import * as Crypto from 'expo-crypto';
-import * as FileSystem from 'expo-file-system';
+import React from 'react';
+import { Image } from 'expo-image'; // <-- Import the modern Image component
+import { ImageStyle, ImageURISource, StyleProp } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 
-import { getFormat } from '../helpers';
-
-type Interaction = {
-  then: (
-    onfulfilled?: (() => unknown) | undefined,
-    onrejected?: (() => unknown) | undefined,
-  ) => Promise<unknown>;
-  done: (...args: []) => unknown;
-  cancel: () => void;
-};
-
+// Define the props for our new component. They are much simpler now.
 type Props = {
   source: Omit<ImageURISource, 'uri'> & { uri: string };
-  isBackground?: boolean;
   style: StyleProp<ImageStyle>;
+  isBackground?: boolean;
   visible?: boolean;
   setVisible?: () => void;
-  sizeStyle?: { width?: number; height: number };
 };
 
-export default class CachedImage extends Component<Props> {
-  mounted = true;
-  _interaction: Interaction | null = null;
-  downloadResumable: FileSystem.DownloadResumable | null = null;
-  state = { imgURI: '' };
-
-  async componentDidMount() {
-    this._interaction = InteractionManager.runAfterInteractions(async () => {
-      if (this.props.source.uri) {
-        const filesystemURI = await this.getImageFilesystemKey(
-          this.props.source.uri,
-        );
-        await this.loadImage(filesystemURI, this.props.source.uri);
-      }
-    });
-  }
-
-  async componentDidUpdate() {
-    if (this.props.source.uri) {
-      const filesystemURI = await this.getImageFilesystemKey(
-        this.props.source.uri,
-      );
-      if (
-        this.props.source.uri === this.state.imgURI ||
-        filesystemURI === this.state.imgURI
-      ) {
-        return;
-      }
-      await this.loadImage(filesystemURI, this.props.source.uri);
-    }
-  }
-
-  async componentWillUnmount() {
-    this._interaction && this._interaction.cancel();
-    this.mounted = false;
-    await this.checkClear();
-  }
-
-  async checkClear() {
-    try {
-      if (this.downloadResumable) {
-        const t = await this.downloadResumable.pauseAsync();
-        const filesystemURI = await this.getImageFilesystemKey(
-          this.props.source.uri,
-        );
-        const metadata = await FileSystem.getInfoAsync(filesystemURI);
-        if (metadata.exists) {
-          await FileSystem.deleteAsync(t.fileUri);
-        }
-      }
-    } catch (error) {
-      //empty
-    }
-  }
-
-  async getImageFilesystemKey(remoteURI: string) {
-    const hashed = await Crypto.digestStringAsync(
-      Crypto.CryptoDigestAlgorithm.SHA256,
-      remoteURI,
+const CachedImage = ({
+  source,
+  style,
+  isBackground,
+  visible,
+  setVisible,
+  ...rest
+}: Props) => {
+  // The special logic for the full-screen image viewer remains.
+  if (isBackground && typeof visible === 'boolean' && setVisible) {
+    return (
+      <ImageView
+        images={[{ uri: source.uri }]}
+        imageIndex={0}
+        visible={visible}
+        onRequestClose={setVisible}
+        animationType="fade"
+      />
     );
-    /**
-     * we need to add an extension to the file when saving it into the file system to be able to load the image using react-native at ios when updating expo into 50
-     *
-     * Note it works fine without extension when using Image from expo-image at ios
-     *
-     * And it works well on Android without or with an extension using react-native image
-     */
-
-    return `${FileSystem.documentDirectory}${hashed}.${getFormat(remoteURI)}`;
   }
 
-  async loadImage(filesystemURI: string, remoteURI: string) {
-    // TODO: Migrate to a newer library or implement our own CachedImage
-    // @ts-ignore
-    if (this.downloadResumable && this.downloadResumable._removeSubscription) {
-      // TODO: Migrate to a newer library or implement our own CachedImage
-      // @ts-ignore
-      this.downloadResumable._removeSubscription();
-    }
-    try {
-      // Use the cached image if it exists
-      const metadata = await FileSystem.getInfoAsync(filesystemURI);
-      if (metadata.exists && this.mounted) {
-        this.setState({
-          imgURI: filesystemURI,
-        });
-        return;
-      }
+  // The core of the component is now just the <Image> from expo-image.
+  // We pass the props through and set the caching policy.
+  return (
+    <Image
+      {...rest}
+      source={source}
+      style={style}
+      // This single prop replaces all the old file system logic.
+      // 'disk' means it will be cached on the device's storage.
+      cachePolicy="disk"
+    />
+  );
+};
 
-      // otherwise download to cache
-      this.downloadResumable = FileSystem.createDownloadResumable(
-        remoteURI,
-        filesystemURI,
-        {},
-        (dp) => this.onDownloadUpdate(dp),
-      );
-
-      const imageObject = await this.downloadResumable.downloadAsync();
-      if (this.mounted) {
-        if (imageObject && imageObject.status === 200) {
-          this.setState({
-            imgURI: imageObject.uri,
-          });
-        }
-      }
-    } catch (err) {
-      if (this.mounted) {
-        this.setState({ imgURI: null });
-      }
-      const metadata = await FileSystem.getInfoAsync(filesystemURI);
-      if (metadata.exists) {
-        try {
-          await FileSystem.deleteAsync(filesystemURI);
-        } catch (err) {
-          //empty
-        }
-      }
-    }
-  }
-
-  onDownloadUpdate(downloadProgress: FileSystem.DownloadProgressData) {
-    if (
-      downloadProgress.totalBytesWritten >=
-      downloadProgress.totalBytesExpectedToWrite
-    ) {
-      if (
-        this.downloadResumable &&
-        // TODO: Migrate to a newer library or implement our own CachedImage
-        // @ts-ignore
-        this.downloadResumable._removeSubscription
-      ) {
-        // TODO: Migrate to a newer library or implement our own CachedImage
-        // @ts-ignore
-        this.downloadResumable._removeSubscription();
-      }
-      this.downloadResumable = null;
-    }
-  }
-
-  render() {
-    let source = this.state.imgURI
-      ? {
-          uri: this.state.imgURI,
-        }
-      : this.props.source;
-    if (!source && this.props.source) {
-      source = { ...this.props.source, cache: 'force-cache' };
-    }
-    if (
-      this.props.isBackground &&
-      typeof this.props.visible === 'boolean' &&
-      this.props.setVisible
-    ) {
-      return (
-        <ImageView
-          images={[{ uri: source.uri }]}
-          imageIndex={0}
-          visible={this.props.visible}
-          onRequestClose={this.props.setVisible}
-          animationType="fade"
-        />
-      );
-    } else {
-      return <Image {...this.props} source={source} />;
-    }
-  }
-}
+export default CachedImage;
