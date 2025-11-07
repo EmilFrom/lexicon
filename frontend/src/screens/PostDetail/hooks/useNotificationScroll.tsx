@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { CustomFlatlistRefType } from '../../../components';
 
 type Params = {
-  virtualizedListRef: React.RefObject<CustomFlatlistRefType>;
+  virtualizedListRef: React.RefObject<CustomFlatlistRefType | null>;
   index?: number;
   shouldScroll?: boolean;
 };

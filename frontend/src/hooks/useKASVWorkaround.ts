@@ -84,8 +84,14 @@ export function useKASVWorkaround() {
     if (!scrollToFocusedInput) {
       return;
     }
+    // First, check the input argument.
+    if (target == null) {
+      // If the target (the ref.current) is null, we can't get a handle.
+      // Exit the function early.
+      return;
+    }
 
-    const handle = findNodeHandle(target);
+    const handle = findNodeHandle(target as any);
     if (handle == null) {
       return;
     }

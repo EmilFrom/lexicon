@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-import { DebouncedState } from 'use-debounce';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { draftSaveManager } from '../constants';
 
@@ -9,7 +9,10 @@ import { draftSaveManager } from '../constants';
  */
 
 type inputHookAutoSaveManager = {
-  debounceSaveDraft: DebouncedState<() => void>;
+  debounceSaveDraft: {
+    (): void; // This means it can be called like a function
+    cancel: () => void; // This means it also has a .cancel() method
+  };
 };
 export function useAutoSaveManager({
   debounceSaveDraft,

@@ -43,6 +43,8 @@ export const DEFAULT_NOTIFICATION_BEHAVIOUR = {
   shouldShowAlert: true,
   shouldPlaySound: false,
   shouldSetBadge: false,
+  shouldShowBanner: true,
+  shouldShowList: true,
 };
 
 export const DEFAULT_NOTIFICATION_CHANNEL_INPUT = {

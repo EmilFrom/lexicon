@@ -143,17 +143,20 @@ export default function PostReply() {
 
   const [isKeyboardShow, setKeyboardShow] = useState(false);
 
-  const debounced = useDebouncedCallback((value, token) => {
-    if (imagesArray[token - 1]) {
-      let newText = getReplacedImageUploadStatus(
-        value,
-        token,
-        imagesArray[token - 1].link,
-      );
+  const debounced = useDebouncedCallback(
+    ({ value, token }: { value: string; token: number }) => {
+      if (imagesArray[token - 1]) {
+        let newText = getReplacedImageUploadStatus(
+          value,
+          token,
+          imagesArray[token - 1].link,
+        );
 
-      setValue('raw', newText);
-    }
-  }, 1500);
+        setValue('raw', newText);
+      }
+    },
+    1500,
+  );
 
   const postReplyRef = useRef<TextInputType>(null);
 
@@ -197,7 +200,7 @@ export default function PostReply() {
   useEffect(() => {
     const { raw } = getValues();
     if (completedToken) {
-      debounced(raw, completedToken);
+      debounced({ value: raw, token: completedToken });
     }
     setImagesArray(tempArray);
   }, [getValues, tempArray, debounced, completedToken]);
@@ -555,7 +558,10 @@ export default function PostReply() {
                   setMentionKeyword,
                 );
                 onChange(text);
-                debounced(text, currentUploadToken);
+                debounced({
+                  value: text,
+                  token: currentUploadToken,
+                });
 
                 debounceSaveDraft();
 

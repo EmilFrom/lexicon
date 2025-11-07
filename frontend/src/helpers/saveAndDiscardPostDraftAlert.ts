@@ -1,7 +1,7 @@
 import { EventArg, NavigationAction } from '@react-navigation/native';
 import { UseFormGetValues, UseFormReset } from 'react-hook-form';
 import { Alert } from 'react-native';
-import { DebouncedState } from 'use-debounce';
+import { useDebouncedCallback } from 'use-debounce';
 
 import {
   draftSaveManager,
@@ -34,7 +34,10 @@ type SaveDraftAlertInput = {
   draftType: PostDraftType;
   topicId?: number;
   replyToPostId?: number;
-  debounceSaveDraft: DebouncedState<() => void>;
+  debounceSaveDraft: {
+    (): void; // This means it can be called like a function
+    cancel: () => void; // This means it also has a .cancel() method
+  };
 };
 
 export function saveAndDiscardPostDraftAlert(input: SaveDraftAlertInput) {

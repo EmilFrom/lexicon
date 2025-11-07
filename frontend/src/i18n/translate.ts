@@ -1,6 +1,6 @@
 import * as Localization from 'expo-localization';
 
-export const LOCALE = Localization.locale;
+export const LOCALE = Localization.getLocales()[0]?.languageCode;
 
 type ParamsObject = {
   [key: string]: unknown;

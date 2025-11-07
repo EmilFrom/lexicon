@@ -21,7 +21,7 @@ type Props = ViewProps & {
   onBlur?: () => void;
   onSelectedChange: (cursor: CursorPosition) => void;
   onChangeValue: (value: string) => void;
-  inputRef?: RefObject<TextInputType>;
+  inputRef?: RefObject<TextInputType | null>;
 };
 
 export function ReplyInputField(props: Props) {

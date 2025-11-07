@@ -18,7 +18,7 @@ export function formatDateTime(
   dateString: string,
   format: DateFormat = 'medium',
   time?: boolean,
-  locale: string = LOCALE,
+  locale: string = LOCALE ?? 'en', // Use 'en' as the fallback if LOCALE is null/undefined
 ): string {
   let date = new Date(dateString);
 
@@ -39,7 +39,7 @@ export function formatDateTime(
 export function formatTime({
   dateString,
   hour12 = false,
-  locale = LOCALE,
+  locale = LOCALE ?? 'en',
 }: {
   dateString: string;
   hour12?: boolean;
