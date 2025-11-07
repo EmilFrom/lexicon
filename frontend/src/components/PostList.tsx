@@ -41,13 +41,16 @@ function PostList<T extends ItemType>(props: Props<T>) {
     return `topic-${item.topicId}`;
   };
 
+  const FlatListWithAnimated = Animated.FlatList as any;
+
   return (
     /**
      * Migrated to animated.flatlist to fix onEndReached not triggered when we still use
      * VirtualizedList with injected Animated.ScrollView on renderScrollComponent props.
      * https://github.com/kodefox/lexicon/pull/923#issuecomment-1408529189
+     * Updated animated.flatlist as any type
      */
-    <Animated.FlatList
+    <FlatListWithAnimated
       ref={postListRef}
       data={data}
       refreshControl={

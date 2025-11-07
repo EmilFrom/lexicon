@@ -8,7 +8,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
     "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\"",
     "jestTest": "jest --coverage --passWithNoTests",
-    "test": "yarn graphql:generate && yarn typecheck && yarn format:check && yarn jestTest",
+    "test": "yarn graphql:generate && yarn lint && yarn typecheck && yarn format:check && yarn jestTest",
     "eject": "expo eject",
     "graphql:generate": "graphql-codegen --config codegen.ts",
     "postinstall": "patch-package",

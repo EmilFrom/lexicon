@@ -37,7 +37,7 @@ export function ToolTip(props: Props) {
   const [menuVerticalPosition, setMenuVerticalPosition] = useState(0);
   const [heightMenu, setHeightMenu] = useState(0);
 
-  let menuAnchorRef = useRef<TouchableOpacity>(null);
+  let menuAnchorRef = useRef<View | null>(null);
 
   /**
    * This use effect will be calculate position of anchor after keyboard close
@@ -68,11 +68,20 @@ export function ToolTip(props: Props) {
   };
 
   const measureDefaultPosition = () => {
-    menuAnchorRef.current?.measure((_x, _y, _w, h, _pageX, pageY) => {
-      setMenuVerticalPosition(
-        Platform.OS === 'android' ? pageY - h - spacing.m : pageY,
-      );
-    });
+    menuAnchorRef.current?.measure(
+      (
+        _x: number,
+        _y: number,
+        _w: number,
+        h: number,
+        _pageX: number,
+        pageY: number,
+      ) => {
+        setMenuVerticalPosition(
+          Platform.OS === 'android' ? pageY - h - spacing.m : pageY,
+        );
+      },
+    );
   };
 
   return (
