@@ -9073,6 +9073,53 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-dev-client@npm:~6.0.17":
+  version: 6.0.17
+  resolution: "expo-dev-client@npm:6.0.17"
+  dependencies:
+    expo-dev-launcher: "npm:6.0.17"
+    expo-dev-menu: "npm:7.0.16"
+    expo-dev-menu-interface: "npm:2.0.0"
+    expo-manifests: "npm:~1.0.8"
+    expo-updates-interface: "npm:~2.0.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/aa3a323834d325267777f36d4756436824a6792490ef30cac57b2965ed836452eb519a19e539c7006ea3234fe6c4642bcdb7bf46e895db0149f88ed0d5e352b2
+  languageName: node
+  linkType: hard
+
+"expo-dev-launcher@npm:6.0.17":
+  version: 6.0.17
+  resolution: "expo-dev-launcher@npm:6.0.17"
+  dependencies:
+    expo-dev-menu: "npm:7.0.16"
+    expo-manifests: "npm:~1.0.8"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/6a4a389b7c9efc4c4c99bd27f3a20808f84661ddc64f8bde93acea55c936b766639a7b81641a4069cc6d2bfedaacb3979e2cbb8f9d4563977f91290ef86e19e1
+  languageName: node
+  linkType: hard
+
+"expo-dev-menu-interface@npm:2.0.0":
+  version: 2.0.0
+  resolution: "expo-dev-menu-interface@npm:2.0.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/ef85287262acce5822cd274f91b908bccbc590d3eba2fb34f037271f6f7d6d9e312655c72fca82f890035ed5954e47c58e4509ad5b925737da61d656c48170a4
+  languageName: node
+  linkType: hard
+
+"expo-dev-menu@npm:7.0.16":
+  version: 7.0.16
+  resolution: "expo-dev-menu@npm:7.0.16"
+  dependencies:
+    expo-dev-menu-interface: "npm:2.0.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/3e2e23e304327959cfe6641623a690967e9e0c1715dc6ad1d12a47fad7b61f45f6c2273993354d85d396504f8a5cf16fe7d338aa166cd74daecf78409833f5a2
+  languageName: node
+  linkType: hard
+
 "expo-device@npm:~8.0.9":
   version: 8.0.9
   resolution: "expo-device@npm:8.0.9"
@@ -9433,7 +9480,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.18.2, express@npm:^4.20.0":
+"express@npm:^4.18.2, express@npm:^4.20.0, express@npm:^4.21.2":
   version: 4.21.2
   resolution: "express@npm:4.21.2"
   dependencies:
@@ -9566,6 +9613,16 @@ __metadata:
   dependencies:
     punycode: "npm:^1.3.2"
   checksum: 10c0/d85c5c409cf0215417380f98a2d29c23a95004d93ff0d8bdf1af5f1a9d1fc608ac89ac6ffe863783d2c73efb3850dd35390feb1de3296f49877bfee0392eb5d3
+  languageName: node
+  linkType: hard
+
+"fastlane@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "fastlane@npm:0.0.9"
+  dependencies:
+    express: "npm:^4.21.2"
+    zod: "npm:^3.24.2"
+  checksum: 10c0/0ab37625d659af156c015ee9be3eb58281b12326135cd238f6d940fd1d1814a30ecb19892939e4158b43af269ade91341c494fb032457a9f62abe1387a6f705e
   languageName: node
   linkType: hard
 
@@ -9874,6 +9931,7 @@ __metadata:
     expo-apple-authentication: "npm:~8.0.7"
     expo-constants: "npm:~18.0.10"
     expo-crypto: "npm:~15.0.7"
+    expo-dev-client: "npm:~6.0.17"
     expo-device: "npm:~8.0.9"
     expo-file-system: "npm:~19.0.17"
     expo-image: "npm:^3.0.10"
@@ -9890,6 +9948,7 @@ __metadata:
     expo-system-ui: "npm:~6.0.8"
     expo-updates: "npm:~29.0.12"
     express: "npm:^4.20.0"
+    fastlane: "npm:^0.0.9"
     form-data: "npm:^4.0.1"
     graphql: "npm:^16.9.0"
     jest: "npm:~29.7.0"
@@ -9914,6 +9973,7 @@ __metadata:
     react-native-image-zoom-viewer: "npm:^3.0.1"
     react-native-keyboard-accessory: "npm:^0.1.16"
     react-native-keyboard-aware-scroll-view: "npm:0.9.5"
+    react-native-linear-gradient: "npm:^2.8.3"
     react-native-markdown-display: "npm:^7.0.2"
     react-native-modal-datetime-picker: "npm:^17.1.0"
     react-native-parsed-text: "npm:^0.0.22"
@@ -9930,7 +9990,8 @@ __metadata:
     react-native-webview: "npm:13.15.0"
     react-native-worklets: "npm:0.5.1"
     react-test-renderer: "npm:18.0.0"
-    reactotron-react-native: "npm:^5.1.10"
+    reactotron-core-client: "npm:^2.9.9"
+    reactotron-react-native: "npm:^5.1.18"
     runtypes: "npm:^5.0.1"
     ts-jest: "npm:^26.1.4"
     typescript: "npm:^5.9.3"
@@ -15402,6 +15463,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-linear-gradient@npm:^2.8.3":
+  version: 2.8.3
+  resolution: "react-native-linear-gradient@npm:2.8.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/cd41bf28e9f468173f1e5e768685128ebf8bbf9077710e43b63482c1a76f37bff8ab3d1d6adfd7b4d54e648672356c02bea46c47cdbdb1844ebe5c5caf720114
+  languageName: node
+  linkType: hard
+
 "react-native-markdown-display@npm:^7.0.2":
   version: 7.0.2
   resolution: "react-native-markdown-display@npm:7.0.2"
@@ -15722,31 +15793,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reactotron-core-client@npm:2.9.6":
-  version: 2.9.6
-  resolution: "reactotron-core-client@npm:2.9.6"
+"reactotron-core-client@npm:2.9.9, reactotron-core-client@npm:^2.9.9":
+  version: 2.9.9
+  resolution: "reactotron-core-client@npm:2.9.9"
   dependencies:
-    reactotron-core-contract: "npm:0.2.4"
-  checksum: 10c0/038a019b354d1b2243ba56d1170e006413ef22632d3c5320ba791adc866b5666477129f39246b465986d2000930b52f1bf8a4e0191bd2c3a6a405fb6e88ebf48
+    reactotron-core-contract: "npm:0.3.2"
+  checksum: 10c0/50ecae82ddbc73ba0bd1e3d15e3cea6d84fcf8d8a1e39875f52db88156984c9489b97b479580f0744759ebbfb66142b8f37388a4a29860c8ee03e064d6c64354
   languageName: node
   linkType: hard
 
-"reactotron-core-contract@npm:0.2.4":
-  version: 0.2.4
-  resolution: "reactotron-core-contract@npm:0.2.4"
-  checksum: 10c0/5e675766340be8b19d1f4320fc6bac251333d517b9626aa23b2ed6fed26d349021ff832b77e2d98b7b0eec3f166c91a6cfaaee9dfddf67d76a27532f5435ad80
+"reactotron-core-contract@npm:0.3.2":
+  version: 0.3.2
+  resolution: "reactotron-core-contract@npm:0.3.2"
+  checksum: 10c0/c6c9e401964a97d225bbbfd9f306def33f1f67a6d9bfcb685b32331f19d111bfae7d73699e281a02fe30be44bbe707337cf7c3155cc04da4692c81a8eb1351fa
   languageName: node
   linkType: hard
 
-"reactotron-react-native@npm:^5.1.10":
-  version: 5.1.10
-  resolution: "reactotron-react-native@npm:5.1.10"
+"reactotron-react-native@npm:^5.1.18":
+  version: 5.1.18
+  resolution: "reactotron-react-native@npm:5.1.18"
   dependencies:
     mitt: "npm:^3.0.1"
-    reactotron-core-client: "npm:2.9.6"
+    reactotron-core-client: "npm:2.9.9"
   peerDependencies:
     react-native: ">=0.40.0"
-  checksum: 10c0/36fa44de497f57428bf0f288e0a4bba2037bafe56e4bd13fdaeffb3f8ec3bd567135ef663d5168401b64770b306cfa7eccaa01abf14daef23925010b55998d09
+  checksum: 10c0/d5819d12c79c5a6ad1a4d618c9a043819a49539991fd3df34210a46d9fc4a94f4eb30aa0c654424383d740fa7e748130d65d461a383e7dc6dde47ad7ace0b0a9
   languageName: node
   linkType: hard
 
@@ -18939,7 +19010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.25.76":
+"zod@npm:^3.24.2, zod@npm:^3.25.76":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c

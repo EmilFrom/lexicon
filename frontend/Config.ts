@@ -17,7 +17,7 @@ const config: Config = {
    * to EAS Build.
    */
   localDevelopment: {
-    discourseUrl: 'http://localhost:4200',
+    discourseUrl: 'https://discourse.taenketanken.org',
     inferDevelopmentHost: true, // Specific to local development with Expo Go & the Android simulator. See docs.
   },
   /**
@@ -33,13 +33,13 @@ const config: Config = {
    */
   buildChannels: {
     preview: {
-      discourseUrl: 'http://PLACEHOLDER.change.this.to.your.discourse.url',
+      discourseUrl: 'https://discourse.taenketanken.org',
     },
     production: {
-      discourseUrl: 'http://PLACEHOLDER.change.this.to.your.discourse.url',
+      discourseUrl: 'https://discourse.taenketanken.org',
     },
     test: {
-      discourseUrl: 'http://localhost:4200',
+      discourseUrl: 'https://discourse.taenketanken.org',
     },
   },
 };

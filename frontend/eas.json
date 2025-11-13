@@ -22,6 +22,7 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "corepack": "true",
       "ios": {
         "simulator": true
       },

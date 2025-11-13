@@ -378,6 +378,11 @@ const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
 
 const restLink: RestLink = new RestLink({
   uri: discourseHost,
+  headers: {
+    // This is the crucial part. We are pretending to be a mobile browser.
+    'User-Agent':
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+  },
   // Example if we want custom type response
   typePatcher: typePatchers,
 

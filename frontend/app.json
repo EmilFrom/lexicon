@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "<insert your app name>",
-    "slug": "insert-your-app-name",
+    "name": "<tt-discourse>",
+    "slug": "tt-discourse",
     "scheme": "your-scheme-here",
     "version": "1.0.0",
     "orientation": "default",
@@ -23,7 +23,10 @@
         "@config-plugins/detox",
         {
           "skipProguard": false,
-          "subdomains": ["localhost", "10.0.2.2"]
+          "subdomains": [
+            "localhost",
+            "10.0.2.2"
+          ]
         }
       ],
       [
@@ -37,11 +40,15 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "extra": {
-      "experienceId": "@<username>/<slugName>"
+      "experienceId": "@<username>/<slugName>",
+      "eas": {
+        "projectId": "189fd7ee-1374-4dac-8101-f84046de3198"
+      }
     },
-
     "ios": {
       "supportsTablet": true,
       "buildNumber": "1.0.0",
@@ -53,19 +60,27 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
-            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-            "NSPrivacyAccessedAPITypeReasons": ["DDA9.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "DDA9.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
-            "NSPrivacyAccessedAPITypeReasons": ["8FFB.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "8FFB.1"
+            ]
           }
         ]
       }
