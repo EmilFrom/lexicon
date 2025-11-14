@@ -583,6 +583,10 @@ export default function PostDetail() {
     { item }: PostReplyItem,
     { isItemLoading, onLayout }: RenderItemCustomOption,
   ) => {
+    // --- THIS IS THE ONLY LOG YOU NEED ---
+    console.log('--- Post object passed to NestedComment ---', JSON.stringify(item, null, 2));
+    // --- END OF LOG ---
+
     const { replyToPostNumber, canEdit, canFlag, hidden, id } = item;
 
     const replyToPostId =

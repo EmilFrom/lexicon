@@ -11,17 +11,13 @@ type Topic = NonNullable<
 
 type Params = Topic & { channels?: Array<Channel> };
 
-/**
- * Transforming topic type from our graphql response
- * to a Post type that we usually based our component props on
- */
 const transformTopicToPost = ({
   posters,
   id,
   title,
   excerpt,
   visible,
-  authorUserId,
+  authorUserId, // We'll keep this for a fallback
   pinned,
   liked,
   likeCount,
@@ -33,14 +29,34 @@ const transformTopicToPost = ({
   channels,
   imageUrl,
 }: Params): PostWithoutId => {
-  const author = posters?.find((poster) => {
-    return 'userId' in poster && poster.userId === authorUserId;
-  });
+
+  // --- THIS IS THE DEFINITIVE FIX ---
+  // The primary method for finding the author should be by their description,
+  // as the `authorUserId` can be null.
+  let author = posters?.find((poster) =>
+    poster.description.includes('Oprindelig forfatter'),
+  );
+
+  // As a fallback, if the description method fails, try the original ID-based method.
+  if (!author) {
+    author = posters?.find(
+      (poster) => poster.userId != null && poster.userId === authorUserId,
+    );
+  }
+  
+  // As a final fallback, just take the first poster in the list.
+  if (!author && posters && posters.length > 0) {
+      author = posters[0];
+  }
+
+  const authorUser = author?.user;
+  // --- END OF FIX ---
 
   const frequentUserArray: Array<User> = [];
   posters?.forEach((poster) => {
-    if ('user' in poster && poster.user) {
+    if (poster.user) {
       const { user } = poster;
+      // The log shows the property is named `avatar`, not `avatarTemplate`.
       frequentUserArray.push({
         id: user.id,
         username: user.username,
@@ -54,14 +70,13 @@ const transformTopicToPost = ({
     channels,
   });
 
-  const authorUser = author?.user;
-
   return {
     topicId: id,
     title,
     content: excerpt || NO_EXCERPT_WORDING,
     hidden: !visible,
     username: authorUser?.username ?? '',
+    // The log shows the property is named `avatar`.
     avatar: authorUser ? getImage(authorUser.avatar) : '',
     pinned,
     replyCount: postsCount - 1,

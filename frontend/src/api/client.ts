@@ -391,48 +391,43 @@ const restLink: RestLink = new RestLink({
   // matching the expected format for the Discourse API.
   fieldNameDenormalizer: (key) => changeCase.snakeCase(key),
 
-  // in client.ts (THE NEW DIAGNOSTIC VERSION)
   responseTransformer: async (response, typeName) => {
-  // 1. Get the raw response text first. This is crucial for debugging.
-  const rawResponseText = await response.text();
-  console.log(`--- RAW RESPONSE for typeName: ${typeName} ---`, rawResponseText);
+  if (!response) {
+    throw new Error(`Network request failed for ${typeName}: Received null response.`);
+  }
+
+  // --- THIS IS THE NEW FIX ---
+  // Check the Content-Type header before doing anything else.
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    console.warn(`[responseTransformer] Received non-JSON response for ${typeName}. Content-Type: ${contentType}`);
+    // If it's not JSON, we can't process it. Throw an error.
+    throw new Error(`Server returned non-JSON response for ${typeName}`);
+  }
+  // --- END OF NEW FIX ---
 
   try {
-    // 2. Safely handle empty responses.
+    const rawResponseText = await response.text();
     if (!rawResponseText) {
-      console.warn(`[responseTransformer] Received an empty response for ${typeName}`);
       return null;
     }
-
-    // 3. Parse the JSON inside a try...catch block.
     const dataJson = JSON.parse(rawResponseText);
-
-    // 4. Find the specific transformer.
     const transformer = responseTransformers[typeName];
-
-    // 5. If no transformer exists, return the parsed JSON as is.
-    if (!transformer) {
-      return dataJson;
+    if (transformer) {
+      return transformer(dataJson, typeName, client);
     }
-
-    // 6. If a transformer exists, apply it.
-    console.log(`[responseTransformer] Applying transformer for ${typeName}...`);
-    const transformedData = transformer(dataJson, typeName, client);
-    return transformedData;
-
+    return dataJson;
   } catch (error) {
-    console.error(`!!!!!!!!!! responseTransformer CRASHED for typeName: ${typeName} !!!!!!!!!!!`);
-    console.error('The specific error was:', error);
-    // Re-throw the error so Apollo still knows the request failed.
+    console.warn(`[responseTransformer] Error parsing JSON for typeName "${typeName}":`, error);
     throw error;
   }
 },
 
-  /**
-   * For file upload implementation based on https://github.com/apollographql/apollo-link-rest/issues/200#issuecomment-509287597
-   */
-  bodySerializers,
-});
+    /**
+     * For file upload implementation based on https://github.com/apollographql/apollo-link-rest/issues/200#issuecomment-509287597
+     */
+    bodySerializers,
+  });
 
 export const client = new ApolloClient({
   link: ApolloLink.from([errorLink, authLink, restLink]),
