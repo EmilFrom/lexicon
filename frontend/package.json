@@ -151,22 +151,6 @@
       "\\.svg$": "<rootDir>/src/__mocks__/svgMock.js"
     }
   },
-  "eslintConfig": {
-    "extends": "kodefox/react-native",
-    "plugins": [
-      "t",
-      "styles"
-    ],
-    "rules": {
-      "@typescript-eslint/no-duplicate-enum-values": "off",
-      "t/string-literal": 1,
-      "styles/style-maker-no-unused": 1,
-      "operator-assignment": [
-        "warn",
-        "always"
-      ]
-    }
-  },
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all",
