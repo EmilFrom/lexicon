@@ -11,13 +11,13 @@ type Creator<T> = (theme: Theme) => T;
 export function makeStyles<T extends NamedStyles<T>>(
   stylesOrCreator: T | Creator<T>,
 ) {
-  let creator: Creator<T> =
+  const creator: Creator<T> =
     typeof stylesOrCreator === 'function'
       ? stylesOrCreator
       : (_: Theme) => stylesOrCreator;
 
-  let useStyles = () => {
-    let theme = useTheme();
+  const useStyles = () => {
+    const theme = useTheme();
     return useMemo(() => StyleSheet.create(creator(theme)), [theme]);
   };
 

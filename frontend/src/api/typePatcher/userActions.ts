@@ -4,7 +4,7 @@ import { userActivityMarkdownContent } from '../../helpers/api';
 import { getNormalizedUrlTemplate } from '../discourse-apollo-rest/utils';
 
 export const userActionsPatcher: RestLink.FunctionalTypePatcher = (data) => {
-  let userActions = data;
+  const userActions = data;
   if (!userActions) {
     return data;
   }

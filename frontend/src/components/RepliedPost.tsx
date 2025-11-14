@@ -29,7 +29,7 @@ type BaseRepliedPostProps = GeneralRepliedPostProps &
 function BaseRepliedPost(props: BaseRepliedPostProps) {
   const styles = useStyles();
 
-  let { avatar, username, markdownContent, mentions, hideAuthor } = props;
+  const { avatar, username, markdownContent, mentions, hideAuthor } = props;
 
   return (
     <View style={styles.nestedRowContainer}>
@@ -87,7 +87,7 @@ export function RepliedPost(props: RepliedPostProps) {
     return <RepliedPostLoadingOrError loading={loading} error={!!error} />;
   }
 
-  let {
+  const {
     replyingTo: { post },
   } = data;
 
@@ -99,7 +99,7 @@ type LocalRepliedPostProps = {
 } & GeneralRepliedPostProps;
 
 export function LocalRepliedPost(props: LocalRepliedPostProps) {
-  let replyingTo = client.readFragment<PostFragment>({
+  const replyingTo = client.readFragment<PostFragment>({
     fragment: PostFragmentDoc,
     fragmentName: 'PostFragment',
     id: `Post:${String(props.replyToPostId)}`,

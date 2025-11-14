@@ -21,7 +21,7 @@ type DraftDataInput =
       recipients?: string;
     });
 
-export let createAndUpdatePostDraftResolver: Resolver = async (
+export const createAndUpdatePostDraftResolver: Resolver = async (
   _,
   { draftData, draftKey, sequence }: CreateAndUpdatePostDraftMutationVariables,
   { client }: { client: Apollo },
@@ -74,12 +74,12 @@ export let createAndUpdatePostDraftResolver: Resolver = async (
     };
   }
 
-  let dataInputStringify = JSON.stringify(dataInput);
+  const dataInputStringify = JSON.stringify(dataInput);
 
   // Check if draftKey exists. If it does, this is an update; otherwise, generate a new draft key.
   let newDraftKey = draftKey;
   if (!newDraftKey) {
-    let time = new Date().getTime();
+    const time = new Date().getTime();
     newDraftKey = isNewTopic
       ? 'new_topic_' + time
       : isNewPrivateMessage

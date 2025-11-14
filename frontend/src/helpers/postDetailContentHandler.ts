@@ -96,7 +96,7 @@ export function postDetailContentHandler({
   };
 
   const postComments: Array<Post> = [];
-  let {
+  const {
     stream,
     posts: basePostComments,
     firstPost: originalFirstPost,
@@ -143,12 +143,12 @@ export function postDetailContentHandler({
   };
 }
 
-export let transformPostsToFrontendPost = (params: {
+export const transformPostsToFrontendPost = (params: {
   post: TopicDetail['postStream']['posts'][0];
   channel?: Channel;
   freqPosters: Array<User>;
 }): Post => {
-  let {
+  const {
     actionsSummary,
     id,
     topicId,

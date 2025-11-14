@@ -156,7 +156,7 @@ export default function ImagePreview() {
    */
   const onAddImage = async () => {
     try {
-      let result = await imagePickerHandler(normalizedExtensions);
+      const result = await imagePickerHandler(normalizedExtensions);
       if (!user || !result || !result.uri) {
         return;
       }
@@ -207,7 +207,7 @@ export default function ImagePreview() {
    *
    */
   const onDeleteImage = (index: number) => {
-    let newImageList = [
+    const newImageList = [
       ...imageList.slice(0, index),
       ...imageList.slice(index + 1),
     ];

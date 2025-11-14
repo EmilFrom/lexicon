@@ -47,7 +47,7 @@ export function combineImageMarkdownWithContent({
     return content;
   }
 
-  let imagesMarkdown = imageList
+  const imagesMarkdown = imageList
     .map(({ imageMarkdown }) => imageMarkdown)
     .join('\n');
   return imagesMarkdown + '\n' + content;

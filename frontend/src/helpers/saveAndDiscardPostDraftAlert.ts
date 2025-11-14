@@ -65,7 +65,7 @@ export function saveAndDiscardPostDraftAlert(input: SaveDraftAlertInput) {
       return;
     }
     draftSaveManager.startSaving();
-    let {
+    const {
       raw: content,
       title,
       polls,
@@ -137,7 +137,7 @@ export function saveAndDiscardPostDraftAlert(input: SaveDraftAlertInput) {
   };
 
   const handleDiscardDraft = () => {
-    let { sequence, isDraft, draftKey } = getValues();
+    const { sequence, isDraft, draftKey } = getValues();
     if (typeof sequence === 'number' && isDraft && draftKey) {
       debounceSaveDraft.cancel();
       deletePostDraft({

@@ -2,12 +2,12 @@ import { LOCALE } from '../i18n/translate';
 
 type Presets = Record<string, Intl.DateTimeFormatOptions>;
 
-let presets: Presets = {
+const presets: Presets = {
   medium: { year: 'numeric', month: 'short', day: 'numeric' },
   short: { year: 'numeric', month: '2-digit', day: '2-digit' },
 };
 
-let presetTime: Intl.DateTimeFormatOptions = {
+const presetTime: Intl.DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
 };
@@ -20,7 +20,7 @@ export function formatDateTime(
   time?: boolean,
   locale: string = LOCALE ?? 'en', // Use 'en' as the fallback if LOCALE is null/undefined
 ): string {
-  let date = new Date(dateString);
+  const date = new Date(dateString);
 
   if (isNaN(date.getDate())) {
     return '';
@@ -45,7 +45,7 @@ export function formatTime({
   hour12?: boolean;
   locale?: string;
 }) {
-  let date = new Date(dateString);
+  const date = new Date(dateString);
 
   if (isNaN(date.getDate())) {
     return '';

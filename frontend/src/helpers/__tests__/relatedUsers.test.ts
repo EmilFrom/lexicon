@@ -1,13 +1,13 @@
 import mock from '../../__mocks__/mockData';
 import { defaultUser, getParticipants } from '../relatedUsers';
 
-let users = mock.users;
-let ids = mock.users.map(({ id }) => id);
-let myUser = mock.users[0];
+const users = mock.users;
+const ids = mock.users.map(({ id }) => id);
+const myUser = mock.users[0];
 let lastPoster = mock.users[2];
 
 it('should return 1 participant', () => {
-  let { participants, participantsToShow } = getParticipants(
+  const { participants, participantsToShow } = getParticipants(
     ids.slice(1, 2),
     users,
     myUser.username,
@@ -20,7 +20,7 @@ it('should return 1 participant', () => {
 });
 
 it('should return the other 2 participants', () => {
-  let { participants, participantsToShow } = getParticipants(
+  const { participants, participantsToShow } = getParticipants(
     ids.slice(1, 3),
     users,
     myUser.username,
@@ -34,7 +34,7 @@ it('should return the other 2 participants', () => {
 });
 
 it('should return 2 participants with different order', () => {
-  let { participants, participantsToShow } = getParticipants(
+  const { participants, participantsToShow } = getParticipants(
     ids.slice(1, 3),
     users,
     myUser.username,
@@ -47,7 +47,7 @@ it('should return 2 participants with different order', () => {
 });
 
 it('should return 3 participants', () => {
-  let { participants, participantsToShow } = getParticipants(
+  const { participants, participantsToShow } = getParticipants(
     ids.slice(1, 4),
     users,
     myUser.username,
@@ -62,7 +62,7 @@ it('should return 3 participants', () => {
 });
 
 it('should return 3 participants with different order', () => {
-  let { participants, participantsToShow } = getParticipants(
+  const { participants, participantsToShow } = getParticipants(
     ids.slice(1, 4),
     users,
     myUser.username,
@@ -78,7 +78,7 @@ it('should return 3 participants with different order', () => {
 
 it('should return 3 participants with different order', () => {
   lastPoster = mock.users[1];
-  let { participants, participantsToShow } = getParticipants(
+  const { participants, participantsToShow } = getParticipants(
     ids.slice(1, 4),
     users,
     myUser.username,
@@ -91,7 +91,7 @@ it('should return 3 participants with different order', () => {
 });
 
 it('should return real user and default users', () => {
-  let { participants } = getParticipants(
+  const { participants } = getParticipants(
     [100, -20, ids[1]],
     users,
     myUser.username,
@@ -105,7 +105,7 @@ it('should return real user and default users', () => {
 });
 
 it(`should return a default user when there's no participant`, () => {
-  let { participants, participantsToShow } = getParticipants(
+  const { participants, participantsToShow } = getParticipants(
     [],
     users,
     myUser.username,

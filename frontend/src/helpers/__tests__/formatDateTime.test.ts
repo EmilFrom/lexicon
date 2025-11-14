@@ -1,6 +1,6 @@
 import { formatDateTime } from '../formatDateTime';
 
-let time = /(?:[01]\d):(?:[012345]\d)/;
+const time = /(?:[01]\d):(?:[012345]\d)/;
 
 it('should return the right format for date', () => {
   expect(

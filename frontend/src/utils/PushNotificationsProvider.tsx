@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function PushNotificationsProvider({ children }: Props) {
-  let { pushNotificationsPreferences, setPnPreferences } =
+  const { pushNotificationsPreferences, setPnPreferences } =
     usePushNotificationsPreferences();
 
   const value = useMemo(

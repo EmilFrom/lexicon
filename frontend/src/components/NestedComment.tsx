@@ -224,7 +224,7 @@ function BaseNestedComment(props: Props) {
   );
 }
 
-export let NestedComment = React.memo(BaseNestedComment);
+export const NestedComment = React.memo(BaseNestedComment);
 
 const useStyles = makeStyles(({ fontSizes, spacing, colors }) => ({
   authorContainer: {

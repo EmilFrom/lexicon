@@ -11,7 +11,7 @@ import {
 } from '../../../generatedAPI/server';
 import { Apollo } from '../../../types';
 
-export let logoutMutationResolver: Resolver = async (
+export const logoutMutationResolver: Resolver = async (
   _,
   { pushNotificationsToken }: LogoutMutationVariables,
   { client }: { client: Apollo },

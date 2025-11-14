@@ -66,7 +66,7 @@ export function useMessageTiming(
   // should not try to report timing information.
   const skip = !username;
 
-  let refetchQueries = [
+  const refetchQueries = [
     { query: MessageListDocument, variables: { username } },
   ];
 

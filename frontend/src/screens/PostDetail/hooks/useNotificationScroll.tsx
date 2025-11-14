@@ -13,7 +13,7 @@ export default function useNotificationScroll({
   index,
   shouldScroll = true,
 }: Params) {
-  let alreadyScrolled = useRef(false);
+  const alreadyScrolled = useRef(false);
 
   useEffect(() => {
     if (

@@ -21,7 +21,7 @@ import { ChannelList, Search } from './components';
 
 const title = t('Live Chat');
 
-let chatSegmentedOption = [
+const chatSegmentedOption = [
   { index: 0, name: ChatChannelStatus.All, label: t('All') },
   { index: 1, name: ChatChannelStatus.Open, label: t('Open') },
   { index: 2, name: ChatChannelStatus.Closed, label: t('Closed') },
@@ -48,7 +48,7 @@ export default function ChannelChat() {
   const [offset, setOffset] = useState(FIRST_OFFSET);
   const [hasMoreChannels, setHasMoreChannels] = useState(false);
 
-  let isFetchingMoreChannels = useRef(false);
+  const isFetchingMoreChannels = useRef(false);
 
   const onChangeValue = useCallback(
     (text: string) => {
@@ -180,7 +180,7 @@ export default function ChannelChat() {
 
     try {
       isFetchingMoreChannels.current = true;
-      let result = await fetchMoreChannels({ variables });
+      const result = await fetchMoreChannels({ variables });
       isFetchingMoreChannels.current = false;
       if (result.data.getChatChannels?.channels.length === 0) {
         setHasMoreChannels(false);
@@ -228,7 +228,7 @@ export default function ChannelChat() {
     <View
       style={styles.container}
       onLayout={(event) => {
-        let { width } = event.nativeEvent.layout;
+        const { width } = event.nativeEvent.layout;
         setWidth(width);
       }}
     >

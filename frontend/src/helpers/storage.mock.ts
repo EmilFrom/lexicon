@@ -1,13 +1,13 @@
 let token = '1234567890';
 
-export let setToken = (userToken: string) => {
+export const setToken = (userToken: string) => {
   return (token = userToken);
 };
 
-export let getToken = async () => {
+export const getToken = async () => {
   return token;
 };
 
-export let removeToken = async () => {
+export const removeToken = async () => {
   return (token = '');
 };

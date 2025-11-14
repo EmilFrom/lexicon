@@ -53,9 +53,9 @@ export default function SelectUser() {
   );
 
   const onSelectedUser = (username: string) => {
-    let tempUsers = new Set(currentUsers);
-    let tempUserList = new Set(selectedUsers);
-    let chosenList = data?.searchUser.users.filter((user) =>
+    const tempUsers = new Set(currentUsers);
+    const tempUserList = new Set(selectedUsers);
+    const chosenList = data?.searchUser.users.filter((user) =>
       user.username.match(username),
     );
 
@@ -197,7 +197,7 @@ export default function SelectUser() {
               .map((user) => {
                 if (user.username !== ownerUsername) {
                   const isCheck = currentUsers.includes(user.username);
-                  let userImage = getImage(user.avatar || '');
+                  const userImage = getImage(user.avatar || '');
 
                   return (
                     <UserItem
@@ -221,7 +221,7 @@ export default function SelectUser() {
             selectedUsers.map((user) => {
               if (user.username) {
                 const isCheck = currentUsers.includes(user.username);
-                let userImage = getImage(user.avatar || '');
+                const userImage = getImage(user.avatar || '');
                 return (
                   <UserItem
                     key={user.username}

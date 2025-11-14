@@ -70,7 +70,7 @@ export default function Messages() {
 
         const tempParticipants = allMessages.map(
           ({ participants, lastPosterUsername, posters }) => {
-            let userIds: Array<number> = participants?.length
+            const userIds: Array<number> = participants?.length
               ? participants?.map(({ userId }, idx) => userId ?? idx)
               : // This condition only happen when the only participant has left the message
                 posters

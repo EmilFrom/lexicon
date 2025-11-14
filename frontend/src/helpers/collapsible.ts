@@ -108,12 +108,12 @@ function extractCollapsible(content: string) {
 }
 
 export function extractCollapsibleContent(collapsible: string) {
-  let title =
+  const title =
     collapsible
       .match(/^\[details="(.*?)"\]/)
       ?.pop()
       ?.trim() || '';
-  let details =
+  const details =
     collapsible
       .match(/^\[details=".*?"\](.+?)\[\/details\]$/s)
       ?.pop()
@@ -134,9 +134,9 @@ export function separateCollapsibleInContent(content: string) {
     return [content];
   }
 
-  let splittedContent: Array<string> = [];
+  const splittedContent: Array<string> = [];
   collapsibles.forEach((collapsible, index) => {
-    let endIndex = content.indexOf(collapsible);
+    const endIndex = content.indexOf(collapsible);
 
     const beforeCollapsible = content.substring(0, endIndex).trim();
     if (beforeCollapsible) {

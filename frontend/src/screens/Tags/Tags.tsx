@@ -121,7 +121,7 @@ export default function Tags() {
   }
 
   function onSelectedTag(id: string) {
-    let tagsIds = new Set(currentTagsIds);
+    const tagsIds = new Set(currentTagsIds);
 
     if (tagsIds.has(id)) {
       tagsIds.delete(id);
@@ -143,14 +143,14 @@ export default function Tags() {
       return;
     }
 
-    let tagsIds = new Set(currentTagsIds);
+    const tagsIds = new Set(currentTagsIds);
     if (tagsIds.has(formatTag(content, maxTagLength))) {
       setErrorMessage('EXIST');
       return;
     }
 
     setError(null);
-    let newTag = {
+    const newTag = {
       id: formatTag(content),
       text: formatTag(content),
       count: 0,

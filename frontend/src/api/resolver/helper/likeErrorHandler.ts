@@ -17,7 +17,7 @@ type Params = {
  * to find the reason why the like action failed.
  */
 export function likeErrorHandler(e: ApolloError, params: Params) {
-  let { actionsSummary, likableEntity, like } = params;
+  const { actionsSummary, likableEntity, like } = params;
 
   const likeActionSummary = actionsSummary?.find(
     (actionSummary: { id: number }) => actionSummary.id === LIKE_ACTION_ID,

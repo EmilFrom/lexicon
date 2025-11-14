@@ -20,7 +20,7 @@ export function computeRelativeTime(
   showFutureDate = false,
   currentDate: Date = new Date(),
 ): TimeFormat | null {
-  let date = new Date(dateString);
+  const date = new Date(dateString);
 
   if (isNaN(date.getDay())) {
     return null;
@@ -43,14 +43,14 @@ export function computeRelativeTime(
 }
 
 function sameWeekInterval(timeInterval: number): TimeFormat | null {
-  let timeScales: Array<TimeScale> = [
+  const timeScales: Array<TimeScale> = [
     { scale: dayInMiliSecs, type: 'DAY_DIFF' },
     { scale: hourInMiliSecs, type: 'HOUR_DIFF' },
     { scale: minInMiliSecs, type: 'MIN_DIFF' },
     { scale: secInMiliSecs, type: 'SEC_DIFF' },
   ];
 
-  for (let timeScale of timeScales) {
+  for (const timeScale of timeScales) {
     const result = timeInterval / timeScale.scale;
     if ((result >= 1 && timeScale.type !== 'SEC_DIFF') || result > 44) {
       return { type: timeScale.type, data: Math.floor(result) };
@@ -65,7 +65,7 @@ export function formatRelativeTime(
   showFutureDate = false,
   showDetail = true,
 ): string {
-  let result = computeRelativeTime(dateString, showFutureDate);
+  const result = computeRelativeTime(dateString, showFutureDate);
 
   if (result == null) {
     return t('A long time ago');

@@ -233,7 +233,7 @@ export default function ThreadDetails() {
     onCompleted: async ({ replyChat }) => {
       const { messageId } = replyChat;
       setMessage('');
-      let { data } = await refetch({
+      const { data } = await refetch({
         threadId,
         channelId,
         targetMessageId: messageId,

@@ -125,7 +125,7 @@ export default function NewPost() {
     getFieldState,
   } = useFormContext<NewPostForm>();
 
-  let { params } = useRoute<RootStackRouteProp<'NewPost'>>();
+  const { params } = useRoute<RootStackRouteProp<'NewPost'>>();
   let {
     editPostId,
     editTopicId,
@@ -184,7 +184,7 @@ export default function NewPost() {
   const debounced = useDebouncedCallback(
     ({ value, token }: { value: string; token: number }) => {
       if (imagesArray[token - 1]) {
-        let newText = getReplacedImageUploadStatus(
+        const newText = getReplacedImageUploadStatus(
           value,
           token,
           imagesArray[token - 1].link,
@@ -201,7 +201,7 @@ export default function NewPost() {
   const newPostRef = useRef<TextInputType>(null);
 
   if (hyperlinkUrl) {
-    let { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
+    const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
     hyperlinkUrl = newUrl;
     hyperlinkTitle = newTitle;
   }
@@ -224,8 +224,8 @@ export default function NewPost() {
     if (!hyperlinkUrl || !hyperlinkTitle) {
       return;
     }
-    let { raw } = getValues();
-    let result = insertHyperlink(raw, hyperlinkTitle, hyperlinkUrl);
+    const { raw } = getValues();
+    const result = insertHyperlink(raw, hyperlinkTitle, hyperlinkUrl);
     setValue('raw', result);
   }, [getValues, setValue, hyperlinkUrl, hyperlinkTitle]);
 
@@ -304,7 +304,7 @@ export default function NewPost() {
       return;
     }
     const { raw } = getValues();
-    let result = insertImageUploadStatus(
+    const result = insertImageUploadStatus(
       raw,
       cursorPosition.start,
       imagesArray.length + 1,

@@ -14,7 +14,7 @@ it('should error when no URL is set', () => {
 });
 
 it('should error when the value does not start with http or https', () => {
-  let discourseUrl = 'htp://127.0.0.1:8080';
+  const discourseUrl = 'htp://127.0.0.1:8080';
 
   expect(() => {
     getDiscourseEndpoint(discourseUrl);
@@ -22,25 +22,25 @@ it('should error when the value does not start with http or https', () => {
 });
 
 it('should be valid when no port or subpath is provided', () => {
-  let discourseUrl = 'http://127.0.0.1';
+  const discourseUrl = 'http://127.0.0.1';
 
   expect(getDiscourseEndpoint(discourseUrl)).toEqual('http://127.0.0.1');
 });
 
 it('should be valid when a port number is included', () => {
-  let discourseUrl = 'http://127.0.0.1:8080';
+  const discourseUrl = 'http://127.0.0.1:8080';
 
   expect(getDiscourseEndpoint(discourseUrl)).toEqual('http://127.0.0.1:8080');
 });
 
 it('should be valid when a subpath is included', () => {
-  let discourseUrl = 'http://127.0.0.1/test';
+  const discourseUrl = 'http://127.0.0.1/test';
 
   expect(getDiscourseEndpoint(discourseUrl)).toEqual('http://127.0.0.1/test');
 });
 
 it('should be valid when both a port number and subpath are included', () => {
-  let discourseUrl = 'http://127.0.0.1:8080/test';
+  const discourseUrl = 'http://127.0.0.1:8080/test';
 
   expect(getDiscourseEndpoint(discourseUrl)).toEqual(
     'http://127.0.0.1:8080/test',

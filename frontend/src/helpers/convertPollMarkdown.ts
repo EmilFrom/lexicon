@@ -5,7 +5,7 @@ import { generatePollFormFromMarkdown } from './generatePollFormFromMarkdown';
 import { changeListNumberOption, getListNumberStep } from './listNumberStep';
 
 export function convertPollMarkdown(pollMarkdown: Array<string>) {
-  let polls: Array<PollFormContextValues> =
+  const polls: Array<PollFormContextValues> =
     pollMarkdown.map((poll) => {
       const pollForm = generatePollFormFromMarkdown(poll);
       return {

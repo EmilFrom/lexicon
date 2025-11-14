@@ -6,7 +6,7 @@ export function decodeToken(token: string | null) {
   }
   const base64TokenRegex =
     /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-  let isValidToken = base64TokenRegex.test(token);
+  const isValidToken = base64TokenRegex.test(token);
   if (!isValidToken) {
     return '';
   }

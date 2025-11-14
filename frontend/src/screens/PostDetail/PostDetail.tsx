@@ -184,7 +184,7 @@ export default function PostDetail() {
 
   const { checkPostDraft } = useLazyCheckPostDraft();
 
-  let postDetailContent = useMemo(() => {
+  const postDetailContent = useMemo(() => {
     if (!data) {
       return;
     }
@@ -213,7 +213,7 @@ export default function PostDetail() {
 
   useEffect(() => {
     if (postDetailContent) {
-      let { firstLoadedCommentIndex, lastLoadedCommentIndex } =
+      const { firstLoadedCommentIndex, lastLoadedCommentIndex } =
         postDetailContent;
       if (firstLoadedCommentIndex && lastLoadedCommentIndex) {
         setFirstLoadedCommentIndex(firstLoadedCommentIndex);
@@ -244,7 +244,7 @@ export default function PostDetail() {
     if (topicDetailLoading) {
       return;
     }
-    let newPostIndex = await loadMorePosts({
+    const newPostIndex = await loadMorePosts({
       fetchMore,
       firstLoadedPostIndex: firstLoadedCommentIndex,
       lastLoadedPostIndex: lastLoadedCommentIndex,
@@ -266,12 +266,12 @@ export default function PostDetail() {
 
   useTopicTiming(topicId, firstLoadedCommentIndex, stream ?? undefined);
 
-  let firstCommentId = stream?.[1];
-  let hasOlderPost =
+  const firstCommentId = stream?.[1];
+  const hasOlderPost =
     stream && postComments?.length
       ? firstCommentId !== postComments[0].id
       : false;
-  let hasNewerPost =
+  const hasNewerPost =
     stream && postComments?.length
       ? stream[stream.length - 1] !== postComments[postComments.length - 1].id
       : false;
@@ -318,7 +318,7 @@ export default function PostDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prevScreen, focusedPostNumber, topicDetailLoading]);
 
-  let scrollIndex = postComments?.findIndex(
+  const scrollIndex = postComments?.findIndex(
     ({ postNumber: itemPostNumber }) => postNumber === itemPostNumber,
   );
 
@@ -465,7 +465,7 @@ export default function PostDetail() {
   );
 
   const actionItemOptions = () => {
-    let options: ActionSheetProps['options'] = [];
+    const options: ActionSheetProps['options'] = [];
     ios && options.push({ label: t('Cancel') });
     canEditFocusPost && options.push({ label: t('Edit Post') });
     !flaggedByCommunity &&
@@ -506,7 +506,7 @@ export default function PostDetail() {
         return;
       }
       const draftKey = `topic_${topicId}`;
-      let { data, error } = await checkPostDraft({
+      const { data, error } = await checkPostDraft({
         variables: { draftKey },
       });
 
@@ -520,7 +520,7 @@ export default function PostDetail() {
 
         if (
           checkPostDraft.draft &&
-          // eslint-disable-next-line no-underscore-dangle
+           
           checkPostDraft.draft.__typename === 'PostReplyDraft'
         ) {
           return checkDraftAlert({
@@ -556,7 +556,7 @@ export default function PostDetail() {
     ],
   );
 
-  let onPressReplyProps: PostDetailHeaderItemProps['onPressReply'] = ({
+  const onPressReplyProps: PostDetailHeaderItemProps['onPressReply'] = ({
     postId,
   }) => {
     postId && onPressReply({ replyToPostId: postId });
@@ -604,7 +604,7 @@ export default function PostDetail() {
     // The setTimeout behavior removed as this will create infinite loop
   };
 
-  let isLoading = (loading || replyLoading) && !error;
+  const isLoading = (loading || replyLoading) && !error;
   if (error) {
     return (
       <LoadingOrError

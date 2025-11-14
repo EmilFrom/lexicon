@@ -17,7 +17,7 @@ export function mentionHelper(
     setShowUserList(false);
   }
 
-  let keywords = text.match(/@[A-Za-z0-9._-]*$/);
+  const keywords = text.match(/@[A-Za-z0-9._-]*$/);
   setMentionKeyword(keywords ? keywords[0].substr(1) : '');
 
   if (keywords && keywords[0].substr(1).length > 0) {

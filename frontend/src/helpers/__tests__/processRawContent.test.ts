@@ -40,19 +40,19 @@ describe('getPostShortUrl return short urls from raw content', () => {
 });
 
 describe('sortImageUrl return array of image urls and sort it according to short url', () => {
-  let shortUrls = [
+  const shortUrls = [
     'upload://example1.jpg',
     'upload://example2.jpg',
     'upload://example3.jpg',
   ];
 
-  let originalUrls = [
+  const originalUrls = [
     'uploaded/path/picexample1.jpg',
     'uploaded/path/picexample2.jpg',
     'uploaded/path/picexample3.jpg',
   ];
 
-  let lookUpUrls = [
+  const lookUpUrls = [
     { shortUrl: shortUrls[1], url: originalUrls[1] },
     { shortUrl: shortUrls[2], url: originalUrls[2] },
     { shortUrl: shortUrls[0], url: originalUrls[0] },

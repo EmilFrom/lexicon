@@ -29,7 +29,7 @@ export function useMutation<TData, TVariables = OperationVariables>(
     ...otherOptions
   } = others;
 
-  let [mutationFunction, mutationResult] = useMutationBase<TData, TVariables>(
+  const [mutationFunction, mutationResult] = useMutationBase<TData, TVariables>(
     query,
     {
       onError,

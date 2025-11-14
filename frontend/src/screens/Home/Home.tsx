@@ -70,12 +70,12 @@ import { ChannelSideBarContent, ChannelSideBarDrawer } from '../Channels';
 
 import { HomeNavBar, HomeTabletNavBar, SearchBar } from './components';
 
-let sortTypes = {
+const sortTypes = {
   LATEST: { label: () => t('Latest') },
   TOP: { label: () => t('Top') },
 };
 
-let sortOptionsArray = Object.entries(sortTypes).map(
+const sortOptionsArray = Object.entries(sortTypes).map(
   ([name, { label }], index) => ({ index, name, label }),
 );
 
@@ -192,8 +192,8 @@ export default function Home() {
     {
       onCompleted: (data) => {
         if (data && data.category.categories) {
-          let channels = data.category.categories.map((channel) => {
-            let { id, color, name, descriptionText } = channel;
+          const channels = data.category.categories.map((channel) => {
+            const { id, color, name, descriptionText } = channel;
             return { id, color, name, description: descriptionText ?? null };
           });
           storage.setItem('channels', channels);
@@ -221,11 +221,11 @@ export default function Home() {
 
   const setData = useCallback(
     ({ topics }: TopicsQuery) => {
-      let rawTopicsData = topics?.topicList?.topics
+      const rawTopicsData = topics?.topicList?.topics
         ? topics.topicList.topics
         : [];
-      let channelsData = storage.getItem('channels');
-      let normalizedTopicsData: Array<PostWithoutId> = rawTopicsData.map(
+      const channelsData = storage.getItem('channels');
+      const normalizedTopicsData: Array<PostWithoutId> = rawTopicsData.map(
         (topic) => {
           return transformTopicToPost({
             ...topic,
@@ -306,7 +306,7 @@ export default function Home() {
        */
 
       const receivedChannelId = storage.getItem('homeChannelId');
-      let channels = storage.getItem('channels');
+      const channels = storage.getItem('channels');
       if (channels && receivedChannelId) {
         setSelectedChannelId(receivedChannelId);
       } else if (channels) {
@@ -458,7 +458,7 @@ export default function Home() {
 
   const onPressReply = useCallback(
     async (param: { topicId: number }) => {
-      let { topicId } = param;
+      const { topicId } = param;
       const cacheTopic = client.readFragment<TopicFragment>({
         id: `Topic:${topicId}`,
         fragment: TopicFragmentDoc,
@@ -466,10 +466,10 @@ export default function Home() {
       if (!cacheTopic) {
         return null;
       }
-      let { title, replyCount } = transformTopicToPost(cacheTopic);
+      const { title, replyCount } = transformTopicToPost(cacheTopic);
 
       const draftKey = `topic_${topicId}`;
-      let { data, error } = await checkPostDraft({
+      const { data, error } = await checkPostDraft({
         variables: { draftKey },
       });
 
@@ -478,7 +478,7 @@ export default function Home() {
 
         if (
           checkPostDraft.draft &&
-          // eslint-disable-next-line no-underscore-dangle
+           
           checkPostDraft.draft.__typename === 'PostReplyDraft'
         ) {
           return checkDraftAlert({
@@ -511,7 +511,7 @@ export default function Home() {
     ],
   );
 
-  let isFetchingMoreTopics = useRef(false);
+  const isFetchingMoreTopics = useRef(false);
 
   const onEndReached = async () => {
     if (!hasMoreTopics || isFetchingMoreTopics.current || !fetchMoreTopics) {
@@ -531,7 +531,7 @@ export default function Home() {
     }
     try {
       isFetchingMoreTopics.current = true;
-      let result = await fetchMoreTopics({ variables });
+      const result = await fetchMoreTopics({ variables });
       isFetchingMoreTopics.current = false;
       if (result.data.topics.topicList?.topics?.length === 0) {
         setHasMoreTopics(false);
@@ -546,15 +546,15 @@ export default function Home() {
   };
 
   const selectedIndex = () => {
-    let index = sortOptionsArray.findIndex((item) => item.name === sortState);
+    const index = sortOptionsArray.findIndex((item) => item.name === sortState);
     return index !== -1 ? index : 0;
   };
 
-  let getChannelName = (): string => {
-    let channels = storage.getItem('channels');
+  const getChannelName = (): string => {
+    const channels = storage.getItem('channels');
     if (channels) {
       if (isChannelFilter(selectedChannelId)) {
-        let channel = channels.find(
+        const channel = channels.find(
           (channel) => channel.id === selectedChannelId,
         );
         return channel ? channel.name : '';
@@ -644,7 +644,7 @@ export default function Home() {
       <View
         style={styles.container}
         onLayout={(event) => {
-          let { width } = event.nativeEvent.layout;
+          const { width } = event.nativeEvent.layout;
           setWidth(width);
         }}
       >

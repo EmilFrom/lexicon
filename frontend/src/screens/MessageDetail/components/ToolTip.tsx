@@ -37,7 +37,7 @@ export function ToolTip(props: Props) {
   const [menuVerticalPosition, setMenuVerticalPosition] = useState(0);
   const [heightMenu, setHeightMenu] = useState(0);
 
-  let menuAnchorRef = useRef<View | null>(null);
+  const menuAnchorRef = useRef<View | null>(null);
 
   /**
    * This use effect will be calculate position of anchor after keyboard close

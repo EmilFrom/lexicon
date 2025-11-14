@@ -89,6 +89,6 @@ const useStyles = makeStyles(({ colors, spacing, shadow }) => ({
   },
 }));
 
-let ThreadDetailsHeader = React.memo(BaseThreadDetailsHeader);
+const ThreadDetailsHeader = React.memo(BaseThreadDetailsHeader);
 
 export { ThreadDetailsHeader };

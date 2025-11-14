@@ -104,7 +104,7 @@ export function HeaderItem(props: HeaderItemProps) {
   const styles = useStyles();
   const { colors } = useTheme();
 
-  let {
+  const {
     label = '',
     icon,
     loading = false,

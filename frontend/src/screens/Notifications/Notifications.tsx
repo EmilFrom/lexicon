@@ -128,8 +128,8 @@ export default function Notifications() {
     }
   };
 
-  let rawNotifications = data?.notificationQuery.notifications ?? [];
-  let handledNotifications = notificationHandler(
+  const rawNotifications = data?.notificationQuery.notifications ?? [];
+  const handledNotifications = notificationHandler(
     rawNotifications,
     navToPostDetail,
     navToMessageDetail,

@@ -14,7 +14,7 @@ describe('convertPollMarkdown', () => {
     [/poll]
     `;
 
-    let result = [
+    const result = [
       {
         minChoice: 0,
         maxChoice: 0,
@@ -31,7 +31,7 @@ describe('convertPollMarkdown', () => {
       },
     ];
 
-    let result2 = [
+    const result2 = [
       {
         minChoice: 0,
         maxChoice: 0,
@@ -71,8 +71,8 @@ describe('convertPollMarkdown', () => {
       },
     ];
 
-    let pollForm = convertPollMarkdown([markdown]);
-    let multiplePollForm = convertPollMarkdown([markdown, markdownNumber]);
+    const pollForm = convertPollMarkdown([markdown]);
+    const multiplePollForm = convertPollMarkdown([markdown, markdownNumber]);
     expect(pollForm).toEqual(result);
     expect(multiplePollForm.length).toBe(2);
     expect(multiplePollForm).toEqual(result2);

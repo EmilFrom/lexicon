@@ -17,7 +17,7 @@ export type UserMap = {
 export function convertPrivateMessageRecipientsDraftIntoUserObject(
   recipients: Array<NewPrivateMessageReceiptsDraft>,
 ): UserMap {
-  let userMap: UserMap = {
+  const userMap: UserMap = {
     usernames: [],
     userDetails: [],
   };

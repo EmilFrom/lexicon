@@ -133,7 +133,7 @@ export default function EditUserStatus() {
     await deleteUserStatus();
   };
   const onDone = handleSubmit(async (data) => {
-    let selectedValue = SelectionList.find(({ id }) => id === data.checked);
+    const selectedValue = SelectionList.find(({ id }) => id === data.checked);
 
     let endDate;
 

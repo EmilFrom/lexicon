@@ -60,7 +60,7 @@ export default function NewPoll() {
 
   const navigation = useNavigation<RootStackNavProp<'NewPoll'>>();
   const { navigate, goBack } = navigation;
-  let { params } = useRoute<RootStackRouteProp<'NewPoll'>>();
+  const { params } = useRoute<RootStackRouteProp<'NewPoll'>>();
 
   const { groups } = useSiteSettings({
     fetchPolicy: 'network-only',
@@ -112,7 +112,7 @@ export default function NewPoll() {
   useEffect(() => {
     const polls: Array<PollFormContextValues> = getValues('polls');
 
-    let findPollByIndex =
+    const findPollByIndex =
       params && params.pollIndex !== undefined && polls.length > 0
         ? polls[params.pollIndex]
         : undefined;
@@ -133,10 +133,10 @@ export default function NewPoll() {
     }
   }, [getValues, params, resetPollValues]);
 
-  let pollTypeNumber = pollChoiceState === PollType.Number;
-  let pollTypeMultiple = pollChoiceState === PollType.Multiple;
+  const pollTypeNumber = pollChoiceState === PollType.Number;
+  const pollTypeMultiple = pollChoiceState === PollType.Multiple;
   const ios = Platform.OS === 'ios';
-  let watchPollOptions = watchPollValues('pollOptions');
+  const watchPollOptions = watchPollValues('pollOptions');
 
   /**
    * isPollOptionsValid checks the validity of poll options.
@@ -144,7 +144,7 @@ export default function NewPoll() {
    * If indexParam is not provided, it checks if there are any duplicate options in the list.
    */
 
-  let isPollOptionsValid = useCallback(
+  const isPollOptionsValid = useCallback(
     (indexParam?: number) => {
       const cleanedPollOptions = watchPollOptions.map((item) =>
         typeof item === 'string' ? item.trim() : item.option.trim(),
@@ -162,7 +162,7 @@ export default function NewPoll() {
     [watchPollOptions],
   );
 
-  let isPollValid = useCallback(() => {
+  const isPollValid = useCallback(() => {
     if (pollTypeNumber) {
       return true;
     }
@@ -184,7 +184,7 @@ export default function NewPoll() {
     return isValid && isPollOptionsValid();
   }, [isPollOptionsValid, pollTypeNumber, watchPollOptions]);
 
-  let filteredPollOptions = () => {
+  const filteredPollOptions = () => {
     return watchPollOptions.filter((pollOption) =>
       typeof pollOption === 'string'
         ? pollOption !== ''
@@ -209,7 +209,7 @@ export default function NewPoll() {
       replace(newStepNumber);
     }
 
-    let closeDateTime = closeDate
+    const closeDateTime = closeDate
       ? new Date(
           closeDate.getFullYear(),
           closeDate.getMonth(),
@@ -220,7 +220,7 @@ export default function NewPoll() {
         ).toISOString()
       : '';
 
-    let newPoll = generatePollMarkdown({
+    const newPoll = generatePollMarkdown({
       type: pollChoiceState,
       options: pollTypeNumber ? [] : filteredPollOptions(),
       results: RESULTS_DROPDOWN_OPTIONS[results].value,
@@ -336,7 +336,7 @@ export default function NewPoll() {
 
               if (pollChoice.value === PollType.Multiple) {
                 clearErrors();
-                let options = filteredPollOptions();
+                const options = filteredPollOptions();
                 setPollValues(
                   'maxChoice',
                   options.length === 0 ? DEFAULT_MIN_CHOICE : options.length,
@@ -625,10 +625,10 @@ export default function NewPoll() {
                       placeholder={t('Select...')}
                       options={groupsDropdownOptions}
                       onSelect={(option) => {
-                        let oldGroups = getPollValues('groups') || [];
+                        const oldGroups = getPollValues('groups') || [];
 
                         if (oldGroups.includes(option.value)) {
-                          let newGroups = [...oldGroups];
+                          const newGroups = [...oldGroups];
                           newGroups.splice(oldGroups.indexOf(option.value), 1);
                           onChange(newGroups);
                         } else {
@@ -667,7 +667,7 @@ export default function NewPoll() {
                 <RadioButton
                   selected={neverClosePoll}
                   onPress={() => {
-                    let closeDate = new Date();
+                    const closeDate = new Date();
                     // NOTE: We set the intial time to 00:00:00,
                     // the same with what Discourse site does.
                     closeDate.setHours(0);

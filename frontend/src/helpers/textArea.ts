@@ -54,7 +54,7 @@ export function onKeyPress({
       previousTextBeforeCursorPlatform,
     );
     if (checkBulletNumbering.isBulletOrNumbering) {
-      let checkResultDelete = deleteLastLineEmptyBulletOrNumberingList(
+      const checkResultDelete = deleteLastLineEmptyBulletOrNumberingList(
         previousTextBeforeCursorPlatform,
       );
       if (checkResultDelete.isEmptyBulletAndNumbering) {

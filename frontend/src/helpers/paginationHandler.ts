@@ -1,4 +1,4 @@
-/* eslint-disable no-underscore-dangle */
+ 
 import { FieldPolicy } from '@apollo/client';
 import { SafeReadonly } from '@apollo/client/cache/core/types/common';
 import { Reference } from '@apollo/client/utilities';
@@ -135,7 +135,7 @@ export function appendPagination<T extends Reference>(
             const parsedIncoming = Notifications.safeParse(incoming);
 
             if (parsedExisting.success && parsedIncoming.success) {
-              let newData = handleDuplicateRef(
+              const newData = handleDuplicateRef(
                 parsedExisting.data[
                   'notifications@type({"name":"NotificationsData"})'
                 ],
@@ -213,8 +213,8 @@ export function prependAppendPagination<T extends Reference>(
        *
        */
 
-      let lastExisting = getLatestApolloId(existing);
-      let lastIncoming = getLatestApolloId(incoming);
+      const lastExisting = getLatestApolloId(existing);
+      const lastIncoming = getLatestApolloId(incoming);
 
       return mergeReferenceData({
         existing,

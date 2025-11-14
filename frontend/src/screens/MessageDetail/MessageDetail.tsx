@@ -224,7 +224,7 @@ export default function MessageDetail() {
             }),
           );
           messageMembers && setMembers(messageMembers);
-          let participants: Array<User> = result.details.participants.map(
+          const participants: Array<User> = result.details.participants.map(
             ({ avatar, __typename, ...otherProps }) => ({
               ...otherProps,
               avatar: getImage(avatar),
@@ -435,7 +435,7 @@ export default function MessageDetail() {
     if (messageDetailLoading) {
       return;
     }
-    let newPostIndex = await loadMorePosts({
+    const newPostIndex = await loadMorePosts({
       fetchMore,
       firstLoadedPostIndex,
       lastLoadedPostIndex,
@@ -507,11 +507,11 @@ export default function MessageDetail() {
   const onPressImage = async ({ isShowPicker }: { isShowPicker?: boolean }) => {
     if (isShowPicker) {
       try {
-        let result = await imagePickerHandler(normalizedExtensions);
+        const result = await imagePickerHandler(normalizedExtensions);
         if (!user || !result || !result.uri) {
           return;
         }
-        let imageUri = result.uri;
+        const imageUri = result.uri;
         const reactNativeFile = createReactNativeFile(imageUri);
         if (reactNativeFile) {
           upload({
@@ -924,10 +924,10 @@ export default function MessageDetail() {
       if (!postNumber) {
         virtualListRef.current?.scrollToEnd({ animated: true });
       } else {
-        let postIndex = postNumber - FIRST_POST_NUMBER;
-        let postIndexInLoadedList = postIndex - firstLoadedPostIndex;
+        const postIndex = postNumber - FIRST_POST_NUMBER;
+        const postIndexInLoadedList = postIndex - firstLoadedPostIndex;
 
-        let index = Math.min(MAX_INITIAL_LAST_INDEX, postIndexInLoadedList);
+        const index = Math.min(MAX_INITIAL_LAST_INDEX, postIndexInLoadedList);
 
         try {
           virtualListRef.current?.scrollToIndex({
@@ -958,7 +958,7 @@ export default function MessageDetail() {
   };
 
   const actionItemOptions = () => {
-    let options: ActionSheetProps['options'] = [];
+    const options: ActionSheetProps['options'] = [];
 
     if (ios) {
       options.push({ label: t('Cancel') });

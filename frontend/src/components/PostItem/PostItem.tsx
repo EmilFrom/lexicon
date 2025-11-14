@@ -285,5 +285,5 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
   pinned: { marginLeft: spacing.s },
   pinnedBorder: { borderLeftWidth: 4, borderColor: colors.primary },
 }));
-let PostItem = React.memo(BasePostItem);
+const PostItem = React.memo(BasePostItem);
 export { PostItem, Props as PostItemProps };

@@ -5,7 +5,7 @@ export function addHour({
   dateString: string | number;
   hour: number;
 }) {
-  let date = new Date(dateString);
+  const date = new Date(dateString);
   if (isNaN(date.getDate())) {
     return '';
   }

@@ -14,7 +14,7 @@ export function generatePollPatcher({
   pollName: string;
   poll: Poll;
 }) {
-  let formattedPoll = {
+  const formattedPoll = {
     ...poll,
     ...formatPreloadedVoters(postId, pollName, poll.preloadedVoters),
     options: poll.options.map((option: PollOption) => ({

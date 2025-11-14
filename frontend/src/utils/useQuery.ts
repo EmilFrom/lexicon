@@ -30,7 +30,7 @@ export function useQuery<TData, TVariables = OperationVariables>(
     ...otherOptions
   } = others;
 
-  let queryResult = useQueryBase<TData, TVariables>(query, {
+  const queryResult = useQueryBase<TData, TVariables>(query, {
     fetchPolicy,
     nextFetchPolicy,
     notifyOnNetworkStatusChange,

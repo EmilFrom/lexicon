@@ -45,7 +45,7 @@ type FontParams = ButtonBarParams & { type: 'Bold' | 'Italic' };
 type ListParams = ButtonBarParams & { type: 'Number' | 'Bullet' };
 
 export function bottomMenu(params: BottomMenuParams) {
-  let {
+  const {
     isKeyboardShow,
     user,
     navigate,

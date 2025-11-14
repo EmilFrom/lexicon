@@ -49,9 +49,9 @@ export default function Search() {
   const { getPosts, error, refetch, fetchMore } = useSearchPost({
     onCompleted: ({ search: result }) => {
       if (result) {
-        let tempPosts: Array<Post> = [];
-        let postsData = result.posts;
-        let topicsData = result.topics;
+        const tempPosts: Array<Post> = [];
+        const postsData = result.posts;
+        const topicsData = result.topics;
         postsData.forEach(
           ({
             id,
@@ -62,12 +62,12 @@ export default function Search() {
             likeCount,
             topicId,
           }) => {
-            let tempTopicData = topicsData.find((item) => item.id === topicId);
+            const tempTopicData = topicsData.find((item) => item.id === topicId);
 
             const channel = channels?.find(
               (channel) => channel.id === tempTopicData?.categoryId,
             );
-            let tags: Array<string> = tempTopicData?.tags || [];
+            const tags: Array<string> = tempTopicData?.tags || [];
 
             tempPosts.push({
               id,

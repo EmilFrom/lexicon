@@ -42,8 +42,8 @@ function BaseSearchPostItem(props: Props) {
       id: postId,
     },
   });
-  let cachedSearchTopic = cachedSearchTopicResult.data;
-  let cacheSearchPost = cacheSearchPostResult.data;
+  const cachedSearchTopic = cachedSearchTopicResult.data;
+  const cacheSearchPost = cacheSearchPostResult.data;
 
   if (
     !cachedSearchTopicResult.complete ||
@@ -57,7 +57,7 @@ function BaseSearchPostItem(props: Props) {
      */
     throw new Error('Post not found');
   }
-  let channels = storage.getItem('channels');
+  const channels = storage.getItem('channels');
   const channel = findChannelByCategoryId({
     categoryId: cachedSearchTopic.categoryId,
     channels,
@@ -80,5 +80,5 @@ function BaseSearchPostItem(props: Props) {
   );
 }
 
-let SearchPostItem = React.memo(BaseSearchPostItem);
+const SearchPostItem = React.memo(BaseSearchPostItem);
 export { SearchPostItem, Props as SearchPostItemProps };

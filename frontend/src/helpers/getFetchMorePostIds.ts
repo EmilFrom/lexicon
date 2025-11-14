@@ -16,7 +16,7 @@ export function getFetchMorePostIds(params: Params) {
   if (params.type === 'newer') {
     const { lastLoadedPostIndex } = params;
     nextFirstLoadedPostIndex = lastLoadedPostIndex + 1;
-    let newDataCount = Math.min(
+    const newDataCount = Math.min(
       LOAD_MORE_POST_COUNT,
       totalPostCount - nextFirstLoadedPostIndex,
     );
@@ -25,7 +25,7 @@ export function getFetchMorePostIds(params: Params) {
     // Index range to fetch older posts
     const { firstLoadedPostIndex } = params;
     nextLastLoadedPostIndex = firstLoadedPostIndex;
-    let newDataCount = Math.min(
+    const newDataCount = Math.min(
       LOAD_MORE_POST_COUNT,
       totalPostCount - nextLastLoadedPostIndex,
     );
@@ -35,7 +35,7 @@ export function getFetchMorePostIds(params: Params) {
     );
   }
 
-  let postIds = stream.slice(nextFirstLoadedPostIndex, nextLastLoadedPostIndex);
+  const postIds = stream.slice(nextFirstLoadedPostIndex, nextLastLoadedPostIndex);
   /**
    * The last index is not included in Array.slice(), so
    * we need to substract 1 from nextLastLoadedPostIndex

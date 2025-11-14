@@ -69,7 +69,7 @@ export function useLoadMorePost(topicId: number) {
         return;
       }
 
-      let { error } = await fetchMore({
+      const { error } = await fetchMore({
         variables: {
           topicId,
           postIds,

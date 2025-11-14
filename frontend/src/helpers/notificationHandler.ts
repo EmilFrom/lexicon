@@ -51,7 +51,7 @@ export function notificationHandler(
   ) => void,
   navToThread: (params: RootStackParamList['ThreadDetail']) => void,
 ): Array<NotificationDataType> {
-  let tempNotification: Array<NotificationDataType> = [];
+  const tempNotification: Array<NotificationDataType> = [];
 
   data.forEach((item) => {
     const { data, notificationType: notifType } = item;

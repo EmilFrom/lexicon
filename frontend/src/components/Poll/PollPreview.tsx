@@ -120,7 +120,7 @@ export function PollPreview(props: Props) {
     return Number.isInteger(result) ? result : result.toFixed(2);
   };
 
-  let pieChartData = useMemo(() => {
+  const pieChartData = useMemo(() => {
     return poll.options.map((option) =>
       getPercentage(option.votes || 0, voters),
     );
@@ -138,14 +138,14 @@ export function PollPreview(props: Props) {
   ];
   const { votePoll } = useVotePoll({
     onError(error) {
-      let post = client.readFragment<PostFragment>({
+      const post = client.readFragment<PostFragment>({
         fragment: PostFragmentDoc,
         fragmentName: 'PostFragment',
         id: `Post:${String(postId)}`,
       });
 
-      let currentPoll = post?.polls?.find((poll) => poll.name === name);
-      let currentPollVotes = post?.pollsVotes?.find(
+      const currentPoll = post?.polls?.find((poll) => poll.name === name);
+      const currentPollVotes = post?.pollsVotes?.find(
         (pollVotes) => pollVotes.pollName === name,
       )?.pollOptionIds;
 
@@ -178,13 +178,13 @@ export function PollPreview(props: Props) {
 
           const { polls: previousPolls, pollsVotes: previousPollsVotes } = data;
 
-          let polls = previousPolls.map((poll: Poll) => {
+          const polls = previousPolls.map((poll: Poll) => {
             if (poll.name === name) {
               return newPoll;
             }
             return poll;
           });
-          let pollsVotes = previousPollsVotes
+          const pollsVotes = previousPollsVotes
             ? previousPollsVotes.map((pollVote: PollsVotes) => {
                 if (pollVote.pollName === name) {
                   return { ...pollVote, pollOptionIds: newVote };
@@ -230,11 +230,11 @@ export function PollPreview(props: Props) {
       setVotes(newVotes);
       setCanUndoVote(true);
       setPoll((poll) => {
-        let { voters, options, preloadedVoters } = poll;
+        const { voters, options, preloadedVoters } = poll;
         const newVoters = canUndoVote ? voters : voters + 1;
 
-        let newOptions = options.map((option) => {
-          let newOption = { ...option };
+        const newOptions = options.map((option) => {
+          const newOption = { ...option };
           if (option.id === newVote) {
             newOption.votes = option.votes ? option.votes + 1 : 1;
           }
@@ -439,7 +439,7 @@ export function PollPreview(props: Props) {
     }
   };
 
-  let loading = loadingToggle || loadingUndoVote;
+  const loading = loadingToggle || loadingUndoVote;
 
   return (
     <View style={styles.container} testID="PollPreview:View">

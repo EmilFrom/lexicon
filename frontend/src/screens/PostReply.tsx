@@ -146,7 +146,7 @@ export default function PostReply() {
   const debounced = useDebouncedCallback(
     ({ value, token }: { value: string; token: number }) => {
       if (imagesArray[token - 1]) {
-        let newText = getReplacedImageUploadStatus(
+        const newText = getReplacedImageUploadStatus(
           value,
           token,
           imagesArray[token - 1].link,
@@ -224,7 +224,7 @@ export default function PostReply() {
       return;
     }
     const { raw } = getValues();
-    let result = insertImageUploadStatus(
+    const result = insertImageUploadStatus(
       raw,
       cursorPosition.start,
       imagesArray.length + 1,
@@ -254,7 +254,7 @@ export default function PostReply() {
   ]);
 
   if (hyperlinkUrl) {
-    let { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
+    const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
     hyperlinkUrl = newUrl;
     hyperlinkTitle = newTitle;
   }
@@ -264,8 +264,8 @@ export default function PostReply() {
   }, [setModal]);
 
   useEffect(() => {
-    let postReplyObject = getValues();
-    let result = insertHyperlink(
+    const postReplyObject = getValues();
+    const result = insertHyperlink(
       postReplyObject.raw,
       hyperlinkTitle,
       hyperlinkUrl,

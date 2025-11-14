@@ -1,4 +1,4 @@
-/* eslint-disable no-underscore-dangle */
+ 
 import { Reference } from '@apollo/client';
 
 export function handleDuplicateRef<T extends Reference>(

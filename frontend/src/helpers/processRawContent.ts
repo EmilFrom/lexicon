@@ -77,8 +77,8 @@ export function anchorToMarkdown(rawContent: string): MarkdownWithImage {
   //mention
   const mentionRegex = /<a class=\"mention\".*?>@(.*?)<\/a>/g;
   //get list of mentions
-  let keywords = content.match(mentionRegex) ?? [];
-  let mentionedUsers = keywords?.map((item) =>
+  const keywords = content.match(mentionRegex) ?? [];
+  const mentionedUsers = keywords?.map((item) =>
     item.replace(mentionRegex, '$1'),
   );
   content = content.replace(mentionRegex, '@$1');
@@ -103,8 +103,8 @@ export function anchorToMarkdown(rawContent: string): MarkdownWithImage {
   content = content === '' ? NO_EXCERPT_WORDING : content;
 
   //get first image url
-  let imagesUrl = rawContent.match(imgRegex) ?? [];
-  let imageUrl = imagesUrl[0]
+  const imagesUrl = rawContent.match(imgRegex) ?? [];
+  const imageUrl = imagesUrl[0]
     ? imagesUrl[0].replace(imgRegex, '$1')
     : undefined;
 
@@ -150,7 +150,7 @@ export function filterMarkdownContentPoll(content?: string) {
     };
   }
 
-  let result = content;
+  const result = content;
 
   const pollRegex = /\[(poll)([\s\S]*?)(\[\/\1)\]/g;
 
@@ -197,7 +197,7 @@ export function replaceImageMarkdownWithPlaceholder({
   const regexImage =
     /!\[([^\|]+)\|(\d+)\s*x\s*(\d+)\]\((upload:\/\/\S+(?:jpe?g|png|gif|heic|heif))\)/g;
 
-  let result = content;
+  const result = content;
 
   return {
     imageMarkdowns: result.match(regexImage) || [],

@@ -45,7 +45,7 @@ export default function PostDraft() {
   const draftKeyOnFocus = draftKeyOnFocusRef.current;
 
   const ios = Platform.OS === 'ios';
-  let channels = storage.getItem('channels') ?? [];
+  const channels = storage.getItem('channels') ?? [];
 
   const navigation = useNavigation<RootStackNavProp<'PostDraft'>>();
   const { navigate } = navigation;
@@ -80,7 +80,7 @@ export default function PostDraft() {
     },
   });
 
-  let postDrafts = useMemo(() => {
+  const postDrafts = useMemo(() => {
     if (!data) {
       return;
     }
@@ -207,7 +207,7 @@ export default function PostDraft() {
   }, []);
 
   const actionItemOptions = () => {
-    let options: ActionSheetProps['options'] = [];
+    const options: ActionSheetProps['options'] = [];
     ios && options.push({ label: t('Cancel') });
     options.push({ label: t('Edit Draft') });
     options.push({ label: t('Delete Draft') });

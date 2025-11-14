@@ -25,7 +25,7 @@ import { likeErrorHandler } from '../helper/likeErrorHandler';
 
 type LikableEntity = 'post' | 'topic';
 
-export let likeTopicOrPostResolver = async (
+export const likeTopicOrPostResolver = async (
   _: Record<string, unknown>,
   { postId, topicId, unlike }: LikeTopicOrPostMutationVariables,
   { client }: { client: Apollo },
@@ -40,7 +40,7 @@ export let likeTopicOrPostResolver = async (
 
   // Get the first post actions summary and ID of the topic
   if (topicId) {
-    let { data: topicDetailData } = await client.query<
+    const { data: topicDetailData } = await client.query<
       GetTopicDetailType,
       GetTopicDetailQueryVariables
     >({
@@ -51,7 +51,7 @@ export let likeTopicOrPostResolver = async (
         topicDetailPath: topicsDetailPathBuilder,
       },
     });
-    let { likeCount, postStream } = topicDetailData.topicDetail;
+    const { likeCount, postStream } = topicDetailData.topicDetail;
 
     likableEntity = 'topic';
     const post = postStream.firstPost;
@@ -73,7 +73,7 @@ export let likeTopicOrPostResolver = async (
   try {
     // Unliking topic or post
     if (unlike) {
-      let { data } = await client.mutate<
+      const { data } = await client.mutate<
         UnlikeTopicOrPostType,
         UnlikeTopicOrPostMutationVariables
       >({
@@ -95,7 +95,7 @@ export let likeTopicOrPostResolver = async (
 
     // Liking topic or post
     if (postId) {
-      let { data } = await client.mutate<
+      const { data } = await client.mutate<
         LikeTopicOrPostRestType,
         LikeTopicOrPostRestMutationVariables
       >({
@@ -127,7 +127,7 @@ export let likeTopicOrPostResolver = async (
        * type is topic
        */
       if (likableEntity === 'post' && postId) {
-        let { data } = await client.query<PostType, PostQueryVariables>({
+        const { data } = await client.query<PostType, PostQueryVariables>({
           query: PostQueryDocument,
           variables: {
             postId,

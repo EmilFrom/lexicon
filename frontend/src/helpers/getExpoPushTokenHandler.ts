@@ -64,7 +64,7 @@ export async function getExpoPushTokenHandler(): ExpoPushTokenHandlerResult {
      * for more detail. Check this link https://docs.expo.dev/versions/latest/sdk/notifications/#expopushtokenoptions
      */
 
-    let { data: token } = await Notifications.getExpoPushTokenAsync({
+    const { data: token } = await Notifications.getExpoPushTokenAsync({
       projectId: Constants.expoConfig?.extra?.eas?.projectId,
     });
     return {
@@ -73,7 +73,7 @@ export async function getExpoPushTokenHandler(): ExpoPushTokenHandlerResult {
       token: token,
     };
   } catch (error) {
-    let errorMessage =
+    const errorMessage =
       error instanceof Error ? error.message : 'Something unexpected happened.';
     return {
       success: false,

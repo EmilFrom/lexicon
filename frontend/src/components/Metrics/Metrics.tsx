@@ -87,7 +87,7 @@ export function Metrics(props: Props) {
 
     const { liked: likedTopic, likeCount: topicLikeCount } =
       likedTopics[topicId] ?? {};
-    let liked = likedTopic ?? isLiked;
+    const liked = likedTopic ?? isLiked;
     let likeCount = topicLikeCount ?? likeCountProps;
 
     if (!isFirstPost) {
@@ -199,7 +199,7 @@ function BaseMetricsView(props: MetricViewProps) {
 
   const styles = useStyles();
   const { colors } = useTheme();
-  let isLoading = !postId && !postList;
+  const isLoading = !postId && !postList;
 
   return (
     <View
@@ -240,7 +240,7 @@ function BaseMetricsView(props: MetricViewProps) {
   );
 }
 
-let MetricsView = memo(BaseMetricsView);
+const MetricsView = memo(BaseMetricsView);
 
 const useStyles = makeStyles(({ spacing }) => ({
   container: {

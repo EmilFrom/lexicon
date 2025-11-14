@@ -35,7 +35,7 @@ function getDuration(start: Date, end: Date, combineTime?: boolean) {
   }
 
   if (combineTime) {
-    let result = [];
+    const result = [];
     if (hours) {
       result.push(`${hours}h`);
     }

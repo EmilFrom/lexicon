@@ -34,7 +34,7 @@ export const checkPostDraftResultResponseTransformer = async (
     return { draft: null, sequence: data.draft_sequence };
   }
 
-  let newDraftData = await transformDraftData(data.draft, client);
+  const newDraftData = await transformDraftData(data.draft, client);
 
   return {
     draft: newDraftData,

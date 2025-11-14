@@ -29,10 +29,10 @@ export default function EmailAddress() {
   const { loading: userLoading, refetch } = useProfile({
     variables: { username },
     onCompleted: ({ profile: result }) => {
-      // eslint-disable-next-line no-underscore-dangle
+       
       if (result.user.__typename === 'UserDetail') {
         const { email, secondaryEmails, unconfirmedEmails } = result.user;
-        let temp: Array<EmailAddressType> = [];
+        const temp: Array<EmailAddressType> = [];
         temp[0] = { emailAddress: email, type: 'PRIMARY' };
         secondaryEmails?.forEach((emailAddress) =>
           temp.push({ emailAddress, type: 'SECONDARY' }),

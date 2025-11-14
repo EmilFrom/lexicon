@@ -9,16 +9,16 @@ import { makeStyles } from '../theme';
 import { RootStackRouteProp } from '../types';
 
 export default function Troubleshoot() {
-  let style = useStyles();
-  let {
+  const style = useStyles();
+  const {
     params: { type },
   } = useRoute<RootStackRouteProp<'Troubleshoot'>>();
-  let isDiscourseReachable =
+  const isDiscourseReachable =
     type !== 'NoConnection' && type !== 'DiscourseUnreachable';
-  let { title, description, documentationLink } = troubleshootContent[type];
+  const { title, description, documentationLink } = troubleshootContent[type];
 
-  let contents: Array<TroubleshootSectionProps> = useMemo(() => {
-    let contents = [
+  const contents: Array<TroubleshootSectionProps> = useMemo(() => {
+    const contents = [
       {
         title,
         description,
@@ -60,8 +60,8 @@ type TroubleshootSectionProps = {
   content?: ReactNode;
 };
 function TroubleshootSection(props: TroubleshootSectionProps) {
-  let style = useStyles();
-  let { title, description, content } = props;
+  const style = useStyles();
+  const { title, description, content } = props;
   return (
     <View style={style.sectionContainer}>
       {title && (
@@ -81,7 +81,7 @@ type TroubleshootContent = {
   documentationLink?: string;
 };
 
-let troubleshootContent: Record<
+const troubleshootContent: Record<
   WithRequestFailed<Exclude<NetworkStatus, 'Online'>>,
   TroubleshootContent
 > = {
@@ -102,7 +102,7 @@ let troubleshootContent: Record<
   },
 };
 
-let useStyles = makeStyles(({ colors, spacing }) => ({
+const useStyles = makeStyles(({ colors, spacing }) => ({
   container: {
     padding: spacing.xxl,
     backgroundColor: colors.background,

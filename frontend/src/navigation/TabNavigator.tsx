@@ -115,12 +115,12 @@ export default function TabNavigator() {
   const { isTablet, isPortrait } = useDevice();
   const useAuthResults = useAuth();
   const token = !useAuthResults.isLoading && !!useAuthResults.token;
-  let currentScreen = useReactiveVar(currentScreenVar);
+  const currentScreen = useReactiveVar(currentScreenVar);
 
   useEffect(() => {
     const checkScreenOrientation = async () => {
       const currentOrientation = await ScreenOrientation.getOrientationAsync();
-      let { screen, params } = currentScreen;
+      const { screen, params } = currentScreen;
 
       if (
         currentOrientation === 1 ||

@@ -33,7 +33,7 @@ export function AvailableTags(props: Props) {
   } = props;
 
   let searchSpecialCase;
-  let isSearchSelected = selectedTags?.includes(searchTag);
+  const isSearchSelected = selectedTags?.includes(searchTag);
 
   if (searchTag) {
     if (isSearchSelected) {
@@ -53,7 +53,7 @@ export function AvailableTags(props: Props) {
     }
   }
 
-  let loadingOrNoData =
+  const loadingOrNoData =
     tags.length === 0 && !isSearchSelected ? (
       <View style={styles.content}>
         {!loading ? (

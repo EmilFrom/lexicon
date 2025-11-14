@@ -6,7 +6,7 @@ it('latest', () => {
     sort: 'LATEST',
   };
   const expectedOutput = 'latest';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });
 
@@ -15,7 +15,7 @@ it('top', () => {
     sort: 'TOP',
   };
   const expectedOutput = 'top';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });
 
@@ -25,7 +25,7 @@ it('top daily', () => {
     topPeriod: 'DAILY',
   };
   const expectedOutput = 'top/daily';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });
 
@@ -35,7 +35,7 @@ it('top monthly', () => {
     topPeriod: 'MONTHLY',
   };
   const expectedOutput = 'top/monthly';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });
 
@@ -45,7 +45,7 @@ it('latest art tag', () => {
     tag: 'art',
   };
   const expectedOutput = 'tag/art/l/latest';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });
 
@@ -56,7 +56,7 @@ it('latest art tag with game category', () => {
     categoryId: 2,
   };
   const expectedOutput = 'tags/c/2/art/l/latest';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });
 
@@ -68,7 +68,7 @@ it('top art tag with game category with no daily because there is tag', () => {
     topPeriod: 'DAILY',
   };
   const expectedOutput = 'tags/c/2/art/l/top';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });
 
@@ -78,6 +78,6 @@ it('latest with game category', () => {
     categoryId: 2,
   };
   const expectedOutput = 'c/2/l/latest';
-  let topicUrl = parseTopicUrl(filterInput);
+  const topicUrl = parseTopicUrl(filterInput);
   expect(topicUrl).toEqual(expectedOutput);
 });

@@ -35,7 +35,7 @@ function BaseHomePostItem(props: Props) {
       id: topicId,
     },
   });
-  let cacheTopic = cacheTopicResult.data;
+  const cacheTopic = cacheTopicResult.data;
 
   if (!cacheTopicResult.complete || !cacheTopic) {
     /**
@@ -45,8 +45,8 @@ function BaseHomePostItem(props: Props) {
     throw new Error('Post not found');
   }
 
-  let channelsData = storage.getItem('channels');
-  let {
+  const channelsData = storage.getItem('channels');
+  const {
     title,
     avatar,
     username,
@@ -120,5 +120,5 @@ const useStyles = makeStyles(({ spacing }) => ({
     paddingTop: spacing.m,
   },
 }));
-let HomePostItem = React.memo(BaseHomePostItem);
+const HomePostItem = React.memo(BaseHomePostItem);
 export { HomePostItem, Props as HomePostItemProps };

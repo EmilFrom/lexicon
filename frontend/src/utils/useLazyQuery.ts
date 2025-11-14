@@ -40,7 +40,7 @@ export function useLazyQuery<TData, TVariables = OperationVariables>(
     ...otherOptions
   } = others;
 
-  let [queryFunction, queryResult] = useLazyQueryBase<TData, TVariables>(
+  const [queryFunction, queryResult] = useLazyQueryBase<TData, TVariables>(
     query,
     {
       fetchPolicy,

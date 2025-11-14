@@ -49,5 +49,5 @@ const useStyles = makeStyles(({ colors, spacing, fontSizes }) => ({
   },
 }));
 
-let Search = React.memo(BaseSearch);
+const Search = React.memo(BaseSearch);
 export default Search;

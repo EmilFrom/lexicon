@@ -33,7 +33,7 @@ function BaseUserInformationPostItem(props: Props) {
       actionType,
     },
   });
-  let cacheUserAction = cacheUserActionResult.data;
+  const cacheUserAction = cacheUserActionResult.data;
 
   if (!cacheUserActionResult.complete || !cacheUserAction) {
     /**
@@ -43,7 +43,7 @@ function BaseUserInformationPostItem(props: Props) {
     throw new Error('Post not found');
   }
 
-  let {
+  const {
     title,
     excerpt,
     avatarTemplate,
@@ -60,8 +60,8 @@ function BaseUserInformationPostItem(props: Props) {
     channels,
   });
 
-  let avatar = getImage(avatarTemplate);
-  let isLiked = actionType === LIKED_ACTION_TYPE;
+  const avatar = getImage(avatarTemplate);
+  const isLiked = actionType === LIKED_ACTION_TYPE;
 
   return (
     <PostItem
@@ -82,5 +82,5 @@ function BaseUserInformationPostItem(props: Props) {
   );
 }
 
-let UserInformationPostItem = React.memo(BaseUserInformationPostItem);
+const UserInformationPostItem = React.memo(BaseUserInformationPostItem);
 export { UserInformationPostItem, Props as UserInformationPostItemProps };

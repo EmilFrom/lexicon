@@ -13,7 +13,7 @@ export const PollVoteOutputPatcher: RestLink.FunctionalTypePatcher = (
   const { postId, pollName } = ctx.resolverParams.args;
   const votePollData = data.poll;
 
-  let formattedPoll = generatePollPatcher({
+  const formattedPoll = generatePollPatcher({
     pollName,
     postId,
     poll: votePollData,

@@ -70,10 +70,10 @@ export function MessageCard(props: Props) {
 
       if (
         checkPostDraft.draft &&
-        // eslint-disable-next-line no-underscore-dangle
+         
         checkPostDraft.draft.__typename === 'PrivateMessageReplyDraft'
       ) {
-        let draftData = checkPostDraft.draft;
+        const draftData = checkPostDraft.draft;
 
         const { imageMessageReplyList, newContentFilterRaw, polls } =
           processDraftPollAndImageForPrivateMessageReply({

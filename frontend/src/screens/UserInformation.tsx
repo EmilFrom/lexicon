@@ -83,7 +83,7 @@ export default function UserInformation() {
   };
 
   if (error || profileError) {
-    let errorMessage = error
+    const errorMessage = error
       ? errorHandler(error, true)
       : profileError
       ? errorHandler(profileError, true)

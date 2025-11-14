@@ -5,7 +5,7 @@ function removeLineBreaks(text: string) {
 }
 
 it('should generate the right makdown format based on poll settings', () => {
-  let regularPoll = generatePollMarkdown({
+  const regularPoll = generatePollMarkdown({
     chartType: 'bar',
     options: ['Banana', 'Apple'],
     type: 'regular',
@@ -20,7 +20,7 @@ it('should generate the right makdown format based on poll settings', () => {
       '[/poll]',
   );
 
-  let multipleChoicePoll = generatePollMarkdown({
+  const multipleChoicePoll = generatePollMarkdown({
     chartType: 'bar',
     options: ['Banana', 'Apple', 'Mango'],
     type: 'multiple',
@@ -38,7 +38,7 @@ it('should generate the right makdown format based on poll settings', () => {
       '[/poll]',
   );
 
-  let advancedSettingsPoll = generatePollMarkdown({
+  const advancedSettingsPoll = generatePollMarkdown({
     chartType: 'pie',
     options: ['Banana', 'Apple', 'Grape', 'Melon'],
     type: 'regular',
@@ -59,7 +59,7 @@ it('should generate the right makdown format based on poll settings', () => {
       '[/poll]',
   );
 
-  let numberRatingPoll = generatePollMarkdown({
+  const numberRatingPoll = generatePollMarkdown({
     options: [],
     type: 'number',
     results: 'always',

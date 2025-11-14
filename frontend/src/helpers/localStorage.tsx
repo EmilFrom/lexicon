@@ -13,13 +13,13 @@ import { ChannelList } from '../types';
 
 import { createCachedStorage } from './createCachedStorage';
 
-let ColorScheme = Literal('light')
+const ColorScheme = Literal('light')
   .Or(Literal('dark'))
   .Or(Literal('no-preference'));
 
-let Aesthetic = Literal('ios').Or(Literal('android'));
+const Aesthetic = Literal('ios').Or(Literal('android'));
 
-export let User = Record({
+export const User = Record({
   id: Number,
   name: String,
   username: String,
@@ -28,26 +28,26 @@ export let User = Record({
   groups: Array(String),
 });
 
-export let UserStatus = Record({
+export const UserStatus = Record({
   emojiSet: String,
   externalEmojiUrl: String,
   discourseBaseUrl: String,
 });
 
-export let PollSetting = Record({
+export const PollSetting = Record({
   allowPoll: Boolean,
   pollCreateMinimumTrustLevel: Number,
 });
 
-export let PushNotificationsPreferences = Record({
+export const PushNotificationsPreferences = Record({
   shouldShowAlert: Boolean,
   shouldPlaySound: Boolean,
   shouldSetBadge: Boolean,
 });
 
-export let SelectedHomeChannelId = Number;
+export const SelectedHomeChannelId = Number;
 
-let [StorageProvider, useStorage] = createCachedStorage(
+const [StorageProvider, useStorage] = createCachedStorage(
   {
     colorScheme: (value) => ColorScheme.check(value),
     aesthetic: (value) => Aesthetic.check(value),

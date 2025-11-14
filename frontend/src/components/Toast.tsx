@@ -6,7 +6,7 @@ import { makeStyles } from '../theme';
 import { Icon } from '../core-ui/Icon';
 import { IconName } from '../icons';
 
-let toastConfig: ToastConfig = {
+const toastConfig: ToastConfig = {
   noConnectionToast: ({ text1 = '', props }) => (
     <ToastItem {...props} mainText={text1} iconName="NoConnection" />
   ),
@@ -30,8 +30,8 @@ type ToastItemProps = {
   onMoreInfoPress?: () => void;
 };
 
-let ToastItem = ({ mainText, iconName, onMoreInfoPress }: ToastItemProps) => {
-  let styles = useStyles();
+const ToastItem = ({ mainText, iconName, onMoreInfoPress }: ToastItemProps) => {
+  const styles = useStyles();
 
   return (
     <View style={styles.toastContainer}>

@@ -70,7 +70,7 @@ export function existingPostIsValid({
 
   const topicModified = titleIsValid || channelIsValid || tagsIsValid;
   const postModified = pollIsValid || contentIsValid;
-  let submissionDetails = { isValid: false, editType: EditType.Both };
+  const submissionDetails = { isValid: false, editType: EditType.Both };
 
   submissionDetails.isValid =
     (topicModified || postModified) &&

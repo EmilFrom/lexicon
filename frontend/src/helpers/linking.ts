@@ -143,7 +143,7 @@ export function navigatePostOrMessageDetail(
   isTablet?: boolean,
   isTabletLandscape?: boolean,
 ) {
-  let navigationRoutes = postOrMessageDetailPathToRoutes({
+  const navigationRoutes = postOrMessageDetailPathToRoutes({
     route,
     pathParams,
     isTablet,
@@ -213,7 +213,7 @@ export function navigateChatOrThread({
   route,
   pathParams,
 }: ChatOrThreadPathToRoutesParams) {
-  let navigationRoutes = chatOrThreadPathToRoutes({
+  const navigationRoutes = chatOrThreadPathToRoutes({
     route,
     pathParams,
   });
@@ -303,7 +303,7 @@ export function extractPathname(url: string) {
   }
 
   const [pathname] = url.slice(slashIndex + 1).split('?');
-  let regex = /t\/([a-z'-]+)\/\d+(\/\d)?/;
+  const regex = /t\/([a-z'-]+)\/\d+(\/\d)?/;
   if (!regex.test(pathname)) {
     return '';
   }

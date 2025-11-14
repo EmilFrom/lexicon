@@ -174,14 +174,14 @@ export default function ChatChannelDetail() {
     },
   });
 
-  let channelDetail = client.readFragment<ChannelListFragment>({
+  const channelDetail = client.readFragment<ChannelListFragment>({
     fragment: ChannelListFragmentDoc,
     fragmentName: 'ChannelListFragment',
     id: `ChannelList:${String(channelId)}`,
   });
 
   useEffect(() => {
-    let unsubscribe = addListener('focus', () => {
+    const unsubscribe = addListener('focus', () => {
       // setInitialLoad(true);
       // Check if data channel at cache empty or not and param memberCount or threadEnabled undefined
       if (
@@ -339,7 +339,7 @@ export default function ChatChannelDetail() {
   };
 
   const actionItemOptions = () => {
-    let options: ActionSheetProps['options'] = [];
+    const options: ActionSheetProps['options'] = [];
 
     if (ios) {
       options.push({ label: t('Cancel') });

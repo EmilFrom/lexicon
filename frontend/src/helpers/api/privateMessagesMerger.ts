@@ -8,9 +8,9 @@ export function privateMessagesMerger(
   pmInbox?: PrivateMessageList,
   pmSent?: PrivateMessageList,
 ) {
-  let inboxTopic = pmInbox?.topicList.topics || [];
-  let sentTopic = pmSent?.topicList.topics || [];
-  let allTopics = inboxTopic
+  const inboxTopic = pmInbox?.topicList.topics || [];
+  const sentTopic = pmSent?.topicList.topics || [];
+  const allTopics = inboxTopic
     .concat(sentTopic)
     .reduce<Array<PrivateMessageTopic>>((prev, curr) => {
       if (prev.find(({ id }) => id === curr.id)) {
@@ -19,9 +19,9 @@ export function privateMessagesMerger(
         return [...prev, curr];
       }
     }, []);
-  let inboxUser = pmInbox?.users || [];
-  let sentUser = pmSent?.users || [];
-  let allUser = inboxUser
+  const inboxUser = pmInbox?.users || [];
+  const sentUser = pmSent?.users || [];
+  const allUser = inboxUser
     .concat(sentUser)
     .reduce<Array<UserIcon>>((prev, curr) => {
       if (prev.find(({ id }) => id === curr.id)) {
@@ -35,7 +35,7 @@ export function privateMessagesMerger(
   const outboxGroups = pmSent?.primaryGroups ?? [];
   const primaryGroups = [...new Set([...inboxGroups, ...outboxGroups])];
 
-  let completePM = {
+  const completePM = {
     primaryGroups,
     topicList: {
       ...pmInbox?.topicList,

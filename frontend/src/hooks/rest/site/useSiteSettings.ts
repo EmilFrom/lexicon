@@ -8,7 +8,7 @@ import {
 import { useLazyQuery, useQuery } from '../../../utils';
 
 export function useSiteSettings(options?: QueryHookOptions<SiteQuery>) {
-  let { data, loading, error, refetch } = useQuery<SiteQuery>(
+  const { data, loading, error, refetch } = useQuery<SiteQuery>(
     SiteDocument,
     {
       notifyOnNetworkStatusChange: true,
@@ -81,7 +81,7 @@ export function useSiteSettings(options?: QueryHookOptions<SiteQuery>) {
 export function useGetSiteSettings(
   options?: LazyQueryHookOptions<SiteQuery, SiteQueryVariables>,
 ) {
-  let [getSiteSettings, { data, loading, error, refetch }] = useLazyQuery<
+  const [getSiteSettings, { data, loading, error, refetch }] = useLazyQuery<
     SiteQuery,
     SiteQueryVariables
   >(SiteDocument, { ...options }, 'HIDE_ALERT');

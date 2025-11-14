@@ -15,7 +15,7 @@ import {
 } from '../../../generatedAPI/server';
 import { Apollo } from '../../../types';
 
-export let editProfileResolver = async (
+export const editProfileResolver = async (
   _: Record<string, unknown>,
   {
     editProfileInput,
@@ -26,7 +26,7 @@ export let editProfileResolver = async (
   { client }: { client: Apollo },
 ) => {
   if (newUsername) {
-    let { data: usernameData } = await client.mutate<
+    const { data: usernameData } = await client.mutate<
       ChangeUsernameType,
       ChangeUsernameMutationVariables
     >({
@@ -56,7 +56,7 @@ export let editProfileResolver = async (
   }
 
   if (editProfileInput) {
-    let { data } = await client.mutate<
+    const { data } = await client.mutate<
       ChangeProfileType,
       ChangeProfileMutationVariables
     >({
@@ -66,12 +66,12 @@ export let editProfileResolver = async (
         username,
       },
     });
-    let user = data?.changeProfile.user;
+    const user = data?.changeProfile.user;
 
     return user;
   }
 
-  let { data: profileData } = await client.query<
+  const { data: profileData } = await client.query<
     ProfileType,
     ProfileQueryVariables
   >({

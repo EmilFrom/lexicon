@@ -9,8 +9,8 @@ type Props = {
   url: string;
 };
 
-export let Link = ({ url }: Props) => {
-  let styles = useStyles();
+export const Link = ({ url }: Props) => {
+  const styles = useStyles();
   return (
     <Text
       onPress={() => {
@@ -23,7 +23,7 @@ export let Link = ({ url }: Props) => {
   );
 };
 
-let useStyles = makeStyles(({ colors }) => ({
+const useStyles = makeStyles(({ colors }) => ({
   link: {
     color: colors.activeTab,
   },

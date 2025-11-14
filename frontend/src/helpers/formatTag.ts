@@ -1,5 +1,5 @@
 export function formatTag(text: string, maxLength?: number): string {
-  let words = text.match(/[a-z0-9]+/gi);
+  const words = text.match(/[a-z0-9]+/gi);
 
   if (!words) {
     return '';

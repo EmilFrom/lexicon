@@ -45,7 +45,7 @@ export default function ChangePassword() {
 
   useEffect(() => {
     if (userData) {
-      // eslint-disable-next-line no-underscore-dangle
+       
       userData.profile.user.__typename === 'UserDetail' &&
         setUser(userData.profile.user);
     }

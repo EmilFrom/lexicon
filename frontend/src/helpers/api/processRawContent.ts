@@ -31,7 +31,7 @@ function handleRegexResult(
   );
 
   if (regex === srcSetRegex) {
-    let optimizedUrl: Array<string> = [];
+    const optimizedUrl: Array<string> = [];
     result.forEach((item) => {
       const url = item.match(imageUrlRegex);
       if (url) {
@@ -82,7 +82,7 @@ export function getCompleteImageVideoUrls(
   host: string = discourseHost,
 ): Array<string | undefined> | undefined {
   // Get all image tags in content
-  let imageVideoTags = content.match(imageVideoTagRegex);
+  const imageVideoTags = content.match(imageVideoTagRegex);
   // Get complete url from each image tag
   return imageVideoTags?.map((imageVideoTag) =>
     getPostImageUrl(imageVideoTag, host),
@@ -133,9 +133,9 @@ type EmojiResult = { emojiUrl: string; emojiTitle: string };
 export function getEmojiImageUrls(
   content: string,
 ): Array<EmojiResult | undefined> {
-  let emojiTags = content.match(emojiImageTagRegex);
+  const emojiTags = content.match(emojiImageTagRegex);
 
-  let maybeEmojiResults =
+  const maybeEmojiResults =
     emojiTags?.map((item) => {
       let emojiUrl =
         item.match(imageUrlRegex)?.[0] || item.match(emojiUrlWithoutHttps)?.[1];
@@ -148,7 +148,7 @@ export function getEmojiImageUrls(
       if (!emojiUrl || !emojiTitle) {
         return undefined;
       }
-      let valueEmojiTitle = emojiTitle.split('=')[1];
+      const valueEmojiTitle = emojiTitle.split('=')[1];
       const replaceValueEmojiTitle = valueEmojiTitle
         ? valueEmojiTitle.replace(/"/g, '')
         : undefined;
@@ -158,7 +158,7 @@ export function getEmojiImageUrls(
       };
     }) ?? [];
 
-  let emojiResults = maybeEmojiResults?.filter(Boolean);
+  const emojiResults = maybeEmojiResults?.filter(Boolean);
 
   return emojiResults;
 }
@@ -171,7 +171,7 @@ export function generateMarkdownContent(raw: string, cooked: string) {
   if (emojiBBcode?.length) {
     const emojiUrls = getEmojiImageUrls(cooked);
     raw = raw.replace(emojiBBCodeRegex, (name: string) => {
-      let url = emojiUrls.find((value) => value?.emojiTitle.includes(name));
+      const url = emojiUrls.find((value) => value?.emojiTitle.includes(name));
       return url?.emojiUrl ? `![emoji-${name}](${url.emojiUrl})` : name;
     });
   }
@@ -206,7 +206,7 @@ export function getMention(
   content: string,
   host: string = discourseHost,
 ): Array<string> | undefined {
-  let result = content.match(mentionRegex) ?? undefined;
+  const result = content.match(mentionRegex) ?? undefined;
   if (result) {
     return handleRegexResult(result, host, mentionRegex);
   }

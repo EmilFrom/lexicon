@@ -50,7 +50,7 @@ export function checkDraftAlert(input: PostReplyDraftAlertInput) {
     focusedPostNumber,
   } = input;
 
-  let draftData = checkPostDraft.draft;
+  const draftData = checkPostDraft.draft;
 
   const channelId =
     draftData && 'categoryId' in draftData && draftData.categoryId

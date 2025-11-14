@@ -1,6 +1,6 @@
 import { MessageParticipants, User } from '../types';
 
-export let defaultUser: User = {
+export const defaultUser: User = {
   id: -404, // in try.discourse, the bot will have negative value id.
   username: 'User',
   avatar: '',
@@ -14,7 +14,7 @@ export function getParticipants(
   lastPosterUsername: string,
 ): MessageParticipants {
   // Get users based on given ids.
-  let participants = users.filter(({ id }) => ids.includes(id));
+  const participants = users.filter(({ id }) => ids.includes(id));
   let participantsToShow: Array<User>;
 
   // if the id is not found or no participant is provided, then it will add default user to participants
@@ -32,7 +32,7 @@ export function getParticipants(
     // If the last poster is not the current user and his/her username is found,
     // then it will return the last poster and another poster.
     if (lastPosterUsername !== myUsername) {
-      let lastPosterIdx = participants.findIndex(
+      const lastPosterIdx = participants.findIndex(
         ({ username }) => username === lastPosterUsername,
       );
 

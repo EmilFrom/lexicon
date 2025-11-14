@@ -77,7 +77,7 @@ function BasePostDetailHeaderItem(props: Props) {
   const cachedTopic = cacheTopicResult.data;
   const cachedFirstPost = cacheFirstPostResult.data;
   const username = storage.getItem('user')?.username ?? '';
-  let channels = storage.getItem('channels') ?? [];
+  const channels = storage.getItem('channels') ?? [];
 
   const resolvedPostItemPropsResult = resolvePostItemProps({
     postDetailContent,
@@ -91,7 +91,7 @@ function BasePostDetailHeaderItem(props: Props) {
     throw new Error('Post not found');
   }
 
-  let { postItemProps, postItemFooterProps } = resolvedPostItemPropsResult;
+  const { postItemProps, postItemFooterProps } = resolvedPostItemPropsResult;
   return (
     <PostItem
       topicId={topicId}
@@ -159,7 +159,7 @@ const resolvePostItemProps = ({
   if (postDetailContent) {
     let { topic, firstPost } = postDetailContent;
     if (!firstPost && cachedFirstPost?.id) {
-      let freqPosters = cachedTopic?.posters
+      const freqPosters = cachedTopic?.posters
         ? cachedTopic.posters.map(({ user }) => ({
             id: user.id,
             username: user.username,
@@ -228,6 +228,6 @@ const useStyles = makeStyles(({ spacing }) => ({
     paddingTop: spacing.m,
   },
 }));
-let PostDetailHeaderItem = React.memo(BasePostDetailHeaderItem);
+const PostDetailHeaderItem = React.memo(BasePostDetailHeaderItem);
 
 export { PostDetailHeaderItem, Props as PostDetailHeaderItemProps };

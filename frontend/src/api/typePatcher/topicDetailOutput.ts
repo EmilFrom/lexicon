@@ -14,7 +14,7 @@ export const topicDetailOutputPatcher: RestLink.FunctionalTypePatcher = (
   context,
 ) => {
   const { includeFirstPost } = context.resolverParams.args;
-  let formattedPosts = data.postStream.posts.map((post: Post) => {
+  const formattedPosts = data.postStream.posts.map((post: Post) => {
     return generatePostPatcher(post);
   });
   data.postStream.posts = formattedPosts;
@@ -32,7 +32,7 @@ export const topicDetailOutputPatcher: RestLink.FunctionalTypePatcher = (
 
   const firstPostOfData = data.postStream.posts[0];
   if (firstPostOfData) {
-    let isLiked = !!firstPostOfData.actionsSummary.find(
+    const isLiked = !!firstPostOfData.actionsSummary.find(
       ({ id }: { id: number }) => {
         return id === LIKE_ACTION_ID;
       },

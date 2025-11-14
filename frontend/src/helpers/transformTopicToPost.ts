@@ -15,7 +15,7 @@ type Params = Topic & { channels?: Array<Channel> };
  * Transforming topic type from our graphql response
  * to a Post type that we usually based our component props on
  */
-let transformTopicToPost = ({
+const transformTopicToPost = ({
   posters,
   id,
   title,

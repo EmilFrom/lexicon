@@ -82,7 +82,7 @@ export function getTextBasedCursorPosition({
  */
 
 export function isLastLineBulletOrNumbering(text: string) {
-  let lastLine = text.match(/(?:^|)(\d+\.|-)([^\n]+)$/);
+  const lastLine = text.match(/(?:^|)(\d+\.|-)([^\n]+)$/);
   let typeSymbol: 'Numbering' | 'Bullet' | undefined;
   let nextNumber;
   const isBulletOrNumbering = !!lastLine && lastLine.length > 0;
@@ -118,7 +118,7 @@ export function isEmptyBulletAndNumbering(text: string) {
  */
 
 export function deleteLastLineEmptyBulletOrNumberingList(text: string) {
-  let lines = text.split('\n');
+  const lines = text.split('\n');
   let newText = text;
   let isEmptyList = false;
   if (isEmptyBulletAndNumbering(lines[lines.length - 1])) {

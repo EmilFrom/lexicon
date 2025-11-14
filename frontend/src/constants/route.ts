@@ -67,7 +67,7 @@ export const onSubscribe = (listener: (url: string) => void) => {
   // Listen to expo push notifications
   const subscription = Notifications.addNotificationResponseReceivedListener(
     (response) => {
-      let url = handleUrl(response);
+      const url = handleUrl(response);
 
       // Let React Navigation handle the URL
       listener(url);

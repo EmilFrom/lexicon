@@ -40,7 +40,7 @@ export function updateImagesArray(
   token: number,
   setImagesArray: (imagesArray: Array<Image>) => void,
 ) {
-  let newArray = imagesArray;
+  const newArray = imagesArray;
   newArray[token] = { link: imageUrl, done: true };
   setImagesArray(newArray);
 }

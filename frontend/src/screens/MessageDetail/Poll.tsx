@@ -18,7 +18,7 @@ export default function Poll() {
 
   const navigation = useNavigation<RootStackNavProp<'Poll'>>();
   const { goBack, navigate } = navigation;
-  let { params } = useRoute<RootStackRouteProp<'Poll'>>();
+  const { params } = useRoute<RootStackRouteProp<'Poll'>>();
   const { poll, pollVotes, isCreator, postId, topicId, author, createdAt } =
     params;
   const ios = Platform.OS === 'ios';

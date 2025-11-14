@@ -19,7 +19,7 @@ export function topicsDetailPathBuilder({ args }: RestLink.PathBuilderProps) {
     return '';
   }
 
-  let postPath = getTopicPostPath(postIds ?? postNumber ?? undefined);
+  const postPath = getTopicPostPath(postIds ?? postNumber ?? undefined);
 
   const queryParams = new URLSearchParams();
 

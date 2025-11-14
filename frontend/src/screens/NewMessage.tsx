@@ -89,7 +89,7 @@ export default function NewMessage() {
   const navigation = useNavigation<RootStackNavProp<'NewMessage'>>();
   const { navigate, goBack, dispatch } = navigation;
 
-  let { params } = useRoute<RootStackRouteProp<'NewMessage'>>();
+  const { params } = useRoute<RootStackRouteProp<'NewMessage'>>();
 
   const {
     control,
@@ -131,7 +131,7 @@ export default function NewMessage() {
   const debounced = useDebouncedCallback(
     ({ value, token }: { value: string; token: number }) => {
       if (imagesArray[token - 1]) {
-        let newText = getReplacedImageUploadStatus(
+        const newText = getReplacedImageUploadStatus(
           value,
           token,
           imagesArray[token - 1].link,
@@ -147,7 +147,7 @@ export default function NewMessage() {
 
   const navToMessages = () => {
     dispatch((state) => {
-      let newRoutesFilter = state.routes.filter(
+      const newRoutesFilter = state.routes.filter(
         ({ name }) => name !== 'NewMessage',
       );
 
@@ -263,7 +263,7 @@ export default function NewMessage() {
     }
 
     const { raw } = getValues();
-    let result = insertImageUploadStatus(
+    const result = insertImageUploadStatus(
       raw,
       cursorPosition.start,
       imagesArray.length + 1,
@@ -322,14 +322,14 @@ export default function NewMessage() {
   const { length } = selectedUsers;
 
   if (hyperlinkUrl) {
-    let { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
+    const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
     hyperlinkUrl = newUrl;
     hyperlinkTitle = newTitle;
   }
 
   useEffect(() => {
-    let messageObject = getValues();
-    let result = insertHyperlink(
+    const messageObject = getValues();
+    const result = insertHyperlink(
       messageObject.raw,
       hyperlinkTitle,
       hyperlinkUrl,

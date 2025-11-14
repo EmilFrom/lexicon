@@ -109,7 +109,7 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
     {
       variables: { username },
       onCompleted: ({ profile }) => {
-        // eslint-disable-next-line no-underscore-dangle
+         
         if (profile.user.__typename === 'UserDetail') {
           setUser(profile.user);
           setSplittedBio(profile.user.bioRaw?.split(/\r\n|\r|\n/));

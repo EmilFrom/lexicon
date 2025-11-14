@@ -53,7 +53,7 @@ export function ActionSheet(props: Props) {
 
   const slideAnimation = useRef(new Animated.Value(0)).current;
 
-  let slideIn = useCallback(() => {
+  const slideIn = useCallback(() => {
     Animated.timing(slideAnimation, {
       toValue: 1,
       duration: ANIMATION_DURATION.s,
@@ -61,7 +61,7 @@ export function ActionSheet(props: Props) {
     }).start();
   }, [slideAnimation]);
 
-  let slideOut = useCallback(() => {
+  const slideOut = useCallback(() => {
     Animated.timing(slideAnimation, {
       toValue: 0,
       duration: ANIMATION_DURATION.s,
@@ -77,7 +77,7 @@ export function ActionSheet(props: Props) {
     }
   }, [visible, slideIn]);
 
-  let renderOptions = () => (
+  const renderOptions = () => (
     <>
       {options.map(({ label, disabled }, index) => (
         <ActionSheetItem

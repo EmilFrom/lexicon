@@ -5,7 +5,7 @@ import { extractPollOptionIds } from '../../helpers/api';
 export function votePollBodyBuilder({ args }: RestLink.RestLinkHelperProps) {
   const { pollName, postId, options } = args;
 
-  let strippedOptions = extractPollOptionIds(options);
+  const strippedOptions = extractPollOptionIds(options);
 
   return {
     post_id: postId,

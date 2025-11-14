@@ -208,7 +208,7 @@ export default function PostPreview() {
 
   const postToServer = () => {
     setModal(false);
-    let polls: Array<PollFormContextValues> = getValues('polls');
+    const polls: Array<PollFormContextValues> = getValues('polls');
 
     const updatedContentWithPoll = combineContentWithPollContent({
       content,

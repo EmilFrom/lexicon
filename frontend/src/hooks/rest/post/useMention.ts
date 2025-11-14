@@ -23,7 +23,7 @@ export function useMention(
   >(SearchUserDocument, {
     variables: { search: mentionKeyword },
     onCompleted: () => {
-      let formattedMember = searchData?.searchUser.users.map(
+      const formattedMember = searchData?.searchUser.users.map(
         ({ name, username, avatar }) => {
           return {
             name: name ?? null,

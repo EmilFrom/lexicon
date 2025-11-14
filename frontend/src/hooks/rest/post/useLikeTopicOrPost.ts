@@ -144,7 +144,7 @@ export function useLikeTopicOrPost() {
     topicIdRef.current = data.likeTopicOrPost.topicId;
 
     // Liking post from Post Detail Scene
-    // eslint-disable-next-line no-underscore-dangle
+     
     if (data.likeTopicOrPost.__typename !== 'LikedTopic') {
       const { actionsSummary, topicId, postNumber } = data.likeTopicOrPost;
       const { liked } = getLikeActionSummary(actionsSummary);

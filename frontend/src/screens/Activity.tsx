@@ -36,7 +36,7 @@ export default function Activity() {
   const onRefresh = () => refetch();
 
   if (error) {
-    let errorMessage = error ? errorHandler(error, true) : undefined;
+    const errorMessage = error ? errorHandler(error, true) : undefined;
     return <LoadingOrError message={errorMessage} />;
   }
 

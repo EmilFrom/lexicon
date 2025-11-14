@@ -62,12 +62,12 @@ export function getDiscourseEndpoint(
   }`;
 }
 
-export let discourseHost = getDiscourseEndpoint(
+export const discourseHost = getDiscourseEndpoint(
   Config.discourseUrl,
   'inferDevelopmentHost' in Config ? Config.inferDevelopmentHost : undefined,
 );
 
-export let currentScreenVar = makeVar<{
+export const currentScreenVar = makeVar<{
   screen: RootStackRouteName;
   params: RootStackParamList[RootStackRouteName];
 }>({ screen: 'ProfileScreen', params: undefined });

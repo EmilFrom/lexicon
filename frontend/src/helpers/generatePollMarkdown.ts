@@ -17,7 +17,7 @@ type Params = {
 };
 
 export function generatePollMarkdown(params: Params): string {
-  let {
+  const {
     type,
     options,
     results,
@@ -31,16 +31,16 @@ export function generatePollMarkdown(params: Params): string {
     closeDateTime,
     index,
   } = params;
-  let pollOptions = options
+  const pollOptions = options
     .map(
       (option) => `\n- ${typeof option === 'string' ? option : option.option}`,
     )
     .join('');
 
-  let pollTitle = title ? `\n# ${title}` : '';
-  let multipleChoiceSetting =
+  const pollTitle = title ? `\n# ${title}` : '';
+  const multipleChoiceSetting =
     type === 'multiple' ? ` min=${minChoice} max=${maxChoice}` : '';
-  let numberRatingSetting =
+  const numberRatingSetting =
     type === 'number' ? ` min=${minChoice} max=${maxChoice} step=${step}` : '';
 
   let advancedSettings = '';
@@ -62,7 +62,7 @@ export function generatePollMarkdown(params: Params): string {
    * where in discourse it will use index poll2, poll3
    */
 
-  let pollMarkdown =
+  const pollMarkdown =
     `[poll name=poll${index} type=${type} results=${results}` +
     multipleChoiceSetting +
     numberRatingSetting +

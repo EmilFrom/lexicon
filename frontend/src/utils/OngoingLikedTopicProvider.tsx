@@ -44,7 +44,7 @@ export function OngoingLikedTopicProvider({ children }: Props) {
 }
 
 export function useOngoingLikedTopic() {
-  let context = useContext(Context);
+  const context = useContext(Context);
   if (!context) {
     throw new Error(
       'useOngoingLikedTopic must be used within a OngoingLikedTopicProvider',

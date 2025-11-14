@@ -9,7 +9,7 @@ import { generatePostPatcher } from './helper/Post';
 export const privateMessageDetailOutputPatcher: RestLink.FunctionalTypePatcher =
   (data) => {
     if (data.postStream) {
-      let formattedPosts = data.postStream.posts.map((post: Post) => {
+      const formattedPosts = data.postStream.posts.map((post: Post) => {
         return generatePostPatcher(post);
       });
       data.postStream.posts = formattedPosts;

@@ -29,9 +29,9 @@ export function useStatefulUpload(
 ) {
   const [completedToken, setCompletedToken] = useState(1);
   const [tempArray, setTempArray] = useState<Array<Image>>(imagesArray);
-  let newArray = imagesArray;
+  const newArray = imagesArray;
 
-  let [upload] = useMutation<UploadType, UploadMutationVariables>(
+  const [upload] = useMutation<UploadType, UploadMutationVariables>(
     UploadDocument,
     {
       ...options,

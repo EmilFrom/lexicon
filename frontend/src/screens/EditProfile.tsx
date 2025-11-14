@@ -110,7 +110,7 @@ export default function EditProfile(props: ProfileProps) {
   const websiteInputRef = useRef<TextInputType>(null);
   const locationInputRef = useRef<TextInputType>(null);
 
-  let setForm = useCallback(
+  const setForm = useCallback(
     (user: ProfileForm & { avatar: string }) => {
       setUserImage(getImage(user.avatar, 'xl'));
       setOldUsername(user.username);
@@ -143,7 +143,7 @@ export default function EditProfile(props: ProfileProps) {
 
   useEffect(() => {
     if (selectedUser) {
-      let { avatar, username } = selectedUser;
+      const { avatar, username } = selectedUser;
       setUserImage(getImage(avatar, 'xl'));
       setOldUsername(username);
     }
@@ -274,17 +274,17 @@ export default function EditProfile(props: ProfileProps) {
   };
 
   const pickImage = async () => {
-    let stringifyExtensions = normalizedExtensions.toString();
-    let user = storage.getItem('user');
+    const stringifyExtensions = normalizedExtensions.toString();
+    const user = storage.getItem('user');
     if (user) {
-      let result = await ImagePicker.launchImageLibraryAsync({
+      const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1,
       });
       if (!result.canceled && result.assets.length) {
-        let format = getFormat(result.assets[0].uri);
+        const format = getFormat(result.assets[0].uri);
         if (normalizedExtensions.includes(format)) {
           const reactNativeFile = createReactNativeFile(result.assets[0].uri);
 
@@ -320,13 +320,13 @@ export default function EditProfile(props: ProfileProps) {
   };
 
   const onPressRight = handleSubmit(() => {
-    let dateOfBirth = new Date(getValues('dateOfBirth'));
+    const dateOfBirth = new Date(getValues('dateOfBirth'));
     dateOfBirth.setDate(dateOfBirth.getDate() + 1);
-    let newUsername = getValues('username');
-    let newName = getValues('name');
-    let newWebsite = getValues('website');
-    let newBio = getValues('bio');
-    let newLocation = getValues('location');
+    const newUsername = getValues('username');
+    const newName = getValues('name');
+    const newWebsite = getValues('website');
+    const newBio = getValues('bio');
+    const newLocation = getValues('location');
 
     editProfile({
       variables: {

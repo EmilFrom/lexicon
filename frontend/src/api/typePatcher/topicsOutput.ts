@@ -10,10 +10,10 @@ export const topicsOutputPatcher: RestLink.FunctionalTypePatcher = (
   _,
   __,
 ) => {
-  let { users }: { users: Array<UserIcon> } = data;
+  const { users }: { users: Array<UserIcon> } = data;
   data.topicList.topics = data.topicList.topics.map((topic: Topic) => {
     const { posters } = topic;
-    let postersWithUser = posters.map((poster) => {
+    const postersWithUser = posters.map((poster) => {
       let user =
         poster.user ??
         ('userId' in poster && users.find(({ id }) => id === poster.userId));

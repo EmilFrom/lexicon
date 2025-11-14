@@ -47,7 +47,7 @@ const cache = new InMemoryCache({
   // data using field 'draft_key', to fix issue with cache not properly merge
   // because ListPostDraftsResult doesn't return an id.
   dataIdFromObject(responseObject) {
-    // eslint-disable-next-line no-underscore-dangle
+     
     switch (responseObject.__typename) {
       case 'ListPostDraftsResult':
         return `ListPostDraftsResult:${responseObject.draftKey}`;
@@ -99,7 +99,7 @@ const cache = new InMemoryCache({
               return '';
             }
 
-            let { categoryId, sort } = context.variables;
+            const { categoryId, sort } = context.variables;
             return `${categoryId ?? NO_CHANNEL_FILTER.id}-${sort}`;
           },
           merge: (existing, incoming, { variables }) => {
@@ -141,7 +141,7 @@ const cache = new InMemoryCache({
               return '';
             }
 
-            let { filter, status } = context.variables;
+            const { filter, status } = context.variables;
             return `${filter ?? ''}-${status}`;
           },
           merge: (existing, incoming, { variables }) => {
@@ -183,7 +183,7 @@ const cache = new InMemoryCache({
               return '';
             }
 
-            let { channelId } = context.variables;
+            const { channelId } = context.variables;
             return `channel-${channelId}`;
           },
           merge: (existing, incoming) => {
@@ -196,8 +196,8 @@ const cache = new InMemoryCache({
             }
 
             const reversedIncoming = [...incoming].reverse();
-            let lastExisting = getLatestApolloId(existing);
-            let lastIncoming = getLatestApolloId(reversedIncoming);
+            const lastExisting = getLatestApolloId(existing);
+            const lastIncoming = getLatestApolloId(reversedIncoming);
 
             if (!lastExisting || !lastIncoming) {
               return existing;
@@ -218,7 +218,7 @@ const cache = new InMemoryCache({
               return '';
             }
 
-            let { channelId } = context.variables;
+            const { channelId } = context.variables;
             return `channel-${channelId}`;
           },
           merge: (existing, incoming, { variables }) => {
@@ -235,7 +235,7 @@ const cache = new InMemoryCache({
             return '';
           }
 
-          let { threadId, channelId } = context.variables;
+          const { threadId, channelId } = context.variables;
           return `${channelId}-${threadId}`;
         }, true),
       },
@@ -345,7 +345,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
      */
 
     if ('error_type' in networkError.result) {
-      let invalidAccess =
+      const invalidAccess =
         operation.operationName !== 'GetTopicDetail' &&
         operation.operationName !== 'GetMessageDetail' &&
         operation.operationName !== 'Site' &&

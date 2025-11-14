@@ -2,7 +2,7 @@ export function getHyperlink(url: string, title: string) {
   const newTitle = title || url;
 
   let protocol = 'https://';
-  let subDomain = 'www.';
+  const subDomain = 'www.';
 
   if (url.match(/^http:\/\//)) {
     protocol = 'http://';

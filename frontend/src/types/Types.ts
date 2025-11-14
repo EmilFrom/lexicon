@@ -12,7 +12,7 @@ import {
 import { Poll, PollsVotes, User } from './Post';
 import { ChatMessageUpload, Thread } from './api';
 
-let ChannelRecord = runtypes.Record({
+const ChannelRecord = runtypes.Record({
   id: runtypes.Number,
   name: runtypes.String,
   description: runtypes.String.Or(runtypes.Null),
@@ -21,7 +21,7 @@ let ChannelRecord = runtypes.Record({
 
 export type ErrorAlertOptionType = 'HIDE_ALERT' | 'SHOW_ALERT';
 
-export let ChannelList = runtypes.Array(ChannelRecord);
+export const ChannelList = runtypes.Array(ChannelRecord);
 
 export type Channel = runtypes.Static<typeof ChannelRecord>;
 

@@ -98,7 +98,7 @@ export function useAutoSavePostDraft({
     } else {
       // Post reply or message reply
       const isMessageReply = type === PostDraftType.PrivateMessageReply;
-      let updatedContent = isMessageReply
+      const updatedContent = isMessageReply
         ? combineDataMarkdownPollAndImageList({
             content,
             polls,

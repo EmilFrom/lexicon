@@ -12,10 +12,10 @@ type Props = {
 export type NetworkStatus = 'Online' | 'NoConnection' | 'DiscourseUnreachable';
 export type WithRequestFailed<T extends string> = T | 'REQUEST_FAILED';
 
-export let networkStatusVar = makeVar<NetworkStatus>('Online');
-export let requestFailedVar = makeVar<boolean>(false);
+export const networkStatusVar = makeVar<NetworkStatus>('Online');
+export const requestFailedVar = makeVar<boolean>(false);
 
-let toastContents: Record<WithRequestFailed<NetworkStatus>, ToastShowParams> = {
+const toastContents: Record<WithRequestFailed<NetworkStatus>, ToastShowParams> = {
   NoConnection: {
     type: 'noConnectionToast',
     text1: 'No internet connection',
@@ -41,10 +41,10 @@ let networkCheckIntervalId: NodeJS.Timer | undefined;
 let shouldShowNetworkOnline = false;
 
 export function RequestError(props: Props) {
-  let { children } = props;
+  const { children } = props;
 
-  let networkStatus = useReactiveVar(networkStatusVar);
-  let requestFailed = useReactiveVar(requestFailedVar);
+  const networkStatus = useReactiveVar(networkStatusVar);
+  const requestFailed = useReactiveVar(requestFailedVar);
 
   // check network status on no connection periodically
   useEffect(() => {
@@ -53,7 +53,7 @@ export function RequestError(props: Props) {
     }
     if (networkStatus === 'NoConnection' && !networkCheckIntervalId) {
       networkCheckIntervalId = setInterval(async () => {
-        let { isInternetReachable } = await getNetworkStateAsync();
+        const { isInternetReachable } = await getNetworkStateAsync();
         if (isInternetReachable) {
           clearInterval(networkCheckIntervalId);
           networkCheckIntervalId = undefined;
@@ -77,7 +77,7 @@ export function RequestError(props: Props) {
     if (networkStatus !== 'Online') {
       shouldShowNetworkOnline = true;
       // Copy the current value of `networkStatus` since it could change before the user taps "More Info".
-      let currentNetworkStatus = networkStatus;
+      const currentNetworkStatus = networkStatus;
       return Toast.show({
         ...toastContents[networkStatus],
         props: {

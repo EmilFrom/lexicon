@@ -37,18 +37,18 @@ export function createCachedStorage<
 >(schema: Schema, prefix = '') {
   const Context = createContext<DataStore<Data> | undefined>(undefined);
 
-  let StorageProvider = (props: { children: ReactElement }) => {
-    let [isLoading, setLoading] = useState(true);
-    let dataRef = useRef<Partial<Data>>({});
+  const StorageProvider = (props: { children: ReactElement }) => {
+    const [isLoading, setLoading] = useState(true);
+    const dataRef = useRef<Partial<Data>>({});
 
     useEffect(() => {
-      let data = dataRef.current;
-      let load = async () => {
-        for (let [key, reviver] of Object.entries(schema)) {
-          let value = await AsyncStorage.getItem(prefix + String(key));
+      const data = dataRef.current;
+      const load = async () => {
+        for (const [key, reviver] of Object.entries(schema)) {
+          const value = await AsyncStorage.getItem(prefix + String(key));
           if (value != null) {
             try {
-              let keySchema: keyof Schema = key;
+              const keySchema: keyof Schema = key;
               // This will throw if the string does not parse or if the parsed
               // value cannot be revived successfully.
               data[keySchema] = reviver(JSON.parse(value));
@@ -62,8 +62,8 @@ export function createCachedStorage<
       load();
     }, []);
 
-    let context = useMemo(() => {
-      let data = dataRef.current;
+    const context = useMemo(() => {
+      const data = dataRef.current;
 
       return {
         getItem: <Key extends keyof Data>(key: Key) => data[key] ?? null,
@@ -88,7 +88,7 @@ export function createCachedStorage<
     );
   };
 
-  let useStorage = () => {
+  const useStorage = () => {
     const context = useContext(Context);
 
     if (context === undefined) {
