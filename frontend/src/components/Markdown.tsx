@@ -41,8 +41,7 @@ export function Markdown(props: MarkdownProps) {
   const { fontColor, mentionColor, style, nonClickable, ...otherProps } =
     restProps;
 
-  const filteredContent =
-    filterMarkdownContentPoll(content).filteredMarkdown;
+  const filteredContent = filterMarkdownContentPoll(content).filteredMarkdown;
 
   const styles = fontColor
     ? { ...baseStyles, body: { ...baseStyles.body, color: fontColor } }

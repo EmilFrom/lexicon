@@ -86,7 +86,7 @@ export default function PostPreview() {
       setTimeout(() => {
         navigation.pop(2); // Now we can use the more powerful pop(2)
         resetForm(FORM_DEFAULT_VALUES);
-    }, 0);
+      }, 0);
     },
     refetchQueries,
   });
@@ -96,7 +96,7 @@ export default function PostPreview() {
       setTimeout(() => {
         navigation.pop(2); // Now we can use the more powerful pop(2)
         resetForm(FORM_DEFAULT_VALUES);
-    }, 0);
+      }, 0);
     },
     onError: (error) => {
       errorHandlerAlert(error);
@@ -121,7 +121,7 @@ export default function PostPreview() {
       setTimeout(() => {
         navigation.pop(2); // Now we can use the more powerful pop(2)
         resetForm(FORM_DEFAULT_VALUES);
-    }, 0);
+      }, 0);
     },
     onError: (error) => {
       errorHandlerAlert(error);
@@ -138,16 +138,15 @@ export default function PostPreview() {
     }
   }, [getImageUrls, shortUrls.length]);
 
-
-    useEffect(
-      () =>
-        navigation.addListener('beforeRemove', (e) => {
-          if (loading) {
-            e.preventDefault();
-          }
-        }),
-      [loading, navigation],
-    );
+  useEffect(
+    () =>
+      navigation.addListener('beforeRemove', (e) => {
+        if (loading) {
+          e.preventDefault();
+        }
+      }),
+    [loading, navigation],
+  );
 
   const postToServer = () => {
     setModal(false);

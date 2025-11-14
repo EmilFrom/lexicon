@@ -1,13 +1,7 @@
 import { EventArg, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import {
-  Alert,
-  Dimensions,
-  Platform,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, Dimensions, Platform, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 

@@ -17,9 +17,7 @@ import { useDevice } from '../utils';
 
 const screen = Dimensions.get('screen');
 
-type TextAreaFocusEvent = Parameters<
-  NonNullable<TextInputProps['onFocus']>
->[0];
+type TextAreaFocusEvent = Parameters<NonNullable<TextInputProps['onFocus']>>[0];
 
 type Props = Omit<ViewProps, 'onFocus' | 'onBlur'> & {
   value: string;

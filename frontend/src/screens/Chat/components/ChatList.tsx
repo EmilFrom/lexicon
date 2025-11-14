@@ -13,11 +13,7 @@ type Props<T> = VirtualizedListProps<T> & {
 };
 
 function BaseChatList<T>(props: Props<T>, ref: RefObject<VirtualizedList<T>>) {
-  const {
-    textInputFocused,
-    screen,
-    ...virtualizeProps
-  } = props;
+  const { textInputFocused, screen, ...virtualizeProps } = props;
 
   const { isTabletLandscape, isTablet } = useDevice();
 

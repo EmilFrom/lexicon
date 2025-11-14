@@ -70,7 +70,6 @@ export function MessageCard(props: Props) {
 
       if (
         checkPostDraft.draft &&
-         
         checkPostDraft.draft.__typename === 'PrivateMessageReplyDraft'
       ) {
         const draftData = checkPostDraft.draft;

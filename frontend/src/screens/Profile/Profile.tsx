@@ -206,14 +206,14 @@ export default function Profile() {
                   }
                   testID="Profile:Button:EditProfile"
                 />
-            <Button
-              content={t('Edit Profile')}
-              disabled={!data}
-              onPress={() =>
-                navigateInProfile('EditProfile', { user: profileUser })
-              }
-              testID="Profile:Button:EditProfile"
-            />
+                <Button
+                  content={t('Edit Profile')}
+                  disabled={!data}
+                  onPress={() =>
+                    navigateInProfile('EditProfile', { user: profileUser })
+                  }
+                  testID="Profile:Button:EditProfile"
+                />
               </View>
             </View>
           ) : (

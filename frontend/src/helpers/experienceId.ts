@@ -17,7 +17,6 @@ export function getExperienceId(): ExperienceIdResult {
 
   if (expoConfigKey) {
     if (!isValidExperienceId(expoConfigKey)) {
-       
       console.warn('experience id in current full name is not valid');
     } else {
       return {

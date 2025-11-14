@@ -103,9 +103,7 @@ export default function EditProfile(props: ProfileProps) {
   const [userImage, setUserImage] = useState(() =>
     selectedUser ? getImage(selectedUser.avatar, 'xl') : '',
   );
-  const [oldUsername, setOldUsername] = useState(
-    selectedUser?.username ?? '',
-  );
+  const [oldUsername, setOldUsername] = useState(selectedUser?.username ?? '');
   const [avatarId, setAvatarId] = useState(0);
   const [noChanges, setNoChanges] = useState(true);
 

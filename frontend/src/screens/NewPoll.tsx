@@ -58,12 +58,7 @@ type PollHeaderProps = {
   canSubmit: boolean;
 };
 
-const PollHeader = ({
-  ios,
-  onCancel,
-  onSubmit,
-  canSubmit,
-}: PollHeaderProps) =>
+const PollHeader = ({ ios, onCancel, onSubmit, canSubmit }: PollHeaderProps) =>
   ios ? (
     <ModalHeader
       title={t('Poll')}
@@ -155,8 +150,7 @@ export default function NewPoll() {
     const { pollChoiceType, pollOptions, chartType, ...data } = prefilledPoll;
     resetPollValues({
       ...data,
-      pollOptions:
-        pollChoiceType === 'number' ? [{ option: '' }] : pollOptions,
+      pollOptions: pollChoiceType === 'number' ? [{ option: '' }] : pollOptions,
       chartType: chartType || 0,
       step: data.step || DEFAULT_NUMBER_RATING_STEP,
       minChoice: data.minChoice || DEFAULT_MIN_CHOICE,
@@ -239,7 +233,8 @@ export default function NewPoll() {
 
   const addPoll = handleSubmit(() => {
     // `filteredPollOptions()` provides the latest list, so we avoid destructuring the unused pollOptions array.
-    const { results, chartType, groups, closeDate, ...values } = getPollValues();
+    const { results, chartType, groups, closeDate, ...values } =
+      getPollValues();
     const { polls } = getValues();
     const pollCount = polls?.length ?? 0;
 

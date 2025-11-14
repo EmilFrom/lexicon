@@ -243,12 +243,12 @@ export default function Home() {
     [allTopicCount, storage],
   );
 
-const {
-  getTopicList,
-  error: topicsError,
-  refetch: refetchTopics,
-  fetchMore: fetchMoreTopics,
-} = useLazyTopicList({
+  const {
+    getTopicList,
+    error: topicsError,
+    refetch: refetchTopics,
+    fetchMore: fetchMoreTopics,
+  } = useLazyTopicList({
     variables: isNoChannelFilter(selectedChannelId)
       ? { sort: sortState, page, username }
       : { sort: sortState, categoryId: selectedChannelId, page, username },
@@ -256,12 +256,12 @@ const {
       setRefreshing(false);
       setLoading(false);
     },
-  onCompleted: (data) => {
-    setLoading(false);
-    if (data) {
-      setData(data);
-    }
-  },
+    onCompleted: (data) => {
+      setLoading(false);
+      if (data) {
+        setData(data);
+      }
+    },
   });
 
   const { deletePostDraft } = useDeletePostDraft();
@@ -485,7 +485,6 @@ const {
 
         if (
           checkPostDraft.draft &&
-           
           checkPostDraft.draft.__typename === 'PostReplyDraft'
         ) {
           return checkDraftAlert({

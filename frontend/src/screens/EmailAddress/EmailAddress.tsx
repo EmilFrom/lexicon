@@ -30,7 +30,6 @@ export default function EmailAddress() {
   const { loading: userLoading, refetch } = useProfile({
     variables: { username },
     onCompleted: ({ profile: result }) => {
-       
       if (result.user.__typename === 'UserDetail') {
         const { email, secondaryEmails, unconfirmedEmails } = result.user;
         const temp: Array<EmailAddressType> = [];

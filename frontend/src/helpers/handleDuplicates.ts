@@ -1,4 +1,3 @@
- 
 import { Reference } from '@apollo/client';
 
 export function handleDuplicateRef<T extends Reference>(

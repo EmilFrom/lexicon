@@ -18,9 +18,7 @@ type KASVRef = JSX.Element & {
   };
 };
 
-type TextAreaFocusEvent = Parameters<
-  NonNullable<TextInputProps['onFocus']>
->[0];
+type TextAreaFocusEvent = Parameters<NonNullable<TextInputProps['onFocus']>>[0];
 type TextAreaFocusHandler = (event: TextAreaFocusEvent) => void;
 type FindNodeHandleTarget = Parameters<typeof findNodeHandle>[0];
 
@@ -88,7 +86,8 @@ export function useKASVWorkaround() {
       return;
     }
 
-    const fallbackTarget = event.target as unknown as FindNodeHandleTarget | null;
+    const fallbackTarget =
+      event.target as unknown as FindNodeHandleTarget | null;
     if (fallbackTarget == null) {
       return;
     }

@@ -534,7 +534,6 @@ export default function PostDetail() {
 
         if (
           checkPostDraft.draft &&
-           
           checkPostDraft.draft.__typename === 'PostReplyDraft'
         ) {
           return checkDraftAlert({

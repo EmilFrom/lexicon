@@ -62,7 +62,9 @@ export default function Search() {
             likeCount,
             topicId,
           }) => {
-            const tempTopicData = topicsData.find((item) => item.id === topicId);
+            const tempTopicData = topicsData.find(
+              (item) => item.id === topicId,
+            );
 
             const channel = channels?.find(
               (channel) => channel.id === tempTopicData?.categoryId,

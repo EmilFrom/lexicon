@@ -35,7 +35,10 @@ export function getFetchMorePostIds(params: Params) {
     );
   }
 
-  const postIds = stream.slice(nextFirstLoadedPostIndex, nextLastLoadedPostIndex);
+  const postIds = stream.slice(
+    nextFirstLoadedPostIndex,
+    nextLastLoadedPostIndex,
+  );
   /**
    * The last index is not included in Array.slice(), so
    * we need to substract 1 from nextLastLoadedPostIndex

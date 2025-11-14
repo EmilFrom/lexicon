@@ -1,5 +1,11 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Keyboard, Platform, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -79,7 +85,7 @@ export default function PostReply() {
   const [persistedParams, setPersistedParams] =
     useState<RootStackParamList['PostReply']>(params);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // This effect safely merges new incoming params into our persistent state
     // without violating the rules of hooks.
@@ -557,7 +563,6 @@ export default function PostReply() {
                 });
 
                 debounceSaveDraft();
-
               }}
               onFocus={(event) => {
                 setKeyboardShow(true);

@@ -109,7 +109,6 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
     {
       variables: { username },
       onCompleted: ({ profile }) => {
-         
         if (profile.user.__typename === 'UserDetail') {
           setUser(profile.user);
           setSplittedBio(profile.user.bioRaw?.split(/\r\n|\r|\n/));

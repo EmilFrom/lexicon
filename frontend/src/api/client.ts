@@ -47,7 +47,6 @@ const cache = new InMemoryCache({
   // data using field 'draft_key', to fix issue with cache not properly merge
   // because ListPostDraftsResult doesn't return an id.
   dataIdFromObject(responseObject) {
-     
     switch (responseObject.__typename) {
       case 'ListPostDraftsResult':
         return `ListPostDraftsResult:${responseObject.draftKey}`;

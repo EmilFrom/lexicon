@@ -14,7 +14,10 @@ export const privateMessageListQueryResolver = async (
 ) => {
   const messagePath = messagePathBuilder;
 
-  const { data: inbox } = await client.query<MessageQuery, MessageListVariables>({
+  const { data: inbox } = await client.query<
+    MessageQuery,
+    MessageListVariables
+  >({
     query: MessageDocument,
     variables: {
       username,
@@ -25,16 +28,18 @@ export const privateMessageListQueryResolver = async (
     fetchPolicy: 'network-only',
   });
 
-  const { data: sent } = await client.query<MessageQuery, MessageListVariables>({
-    query: MessageDocument,
-    variables: {
-      username,
-      page,
-      messageType: 'sent',
-      messagePath,
+  const { data: sent } = await client.query<MessageQuery, MessageListVariables>(
+    {
+      query: MessageDocument,
+      variables: {
+        username,
+        page,
+        messageType: 'sent',
+        messagePath,
+      },
+      fetchPolicy: 'network-only',
     },
-    fetchPolicy: 'network-only',
-  });
+  );
 
   return privateMessagesMerger(
     inbox.privateMessageQuery,

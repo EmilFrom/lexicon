@@ -15,7 +15,10 @@ export type WithRequestFailed<T extends string> = T | 'REQUEST_FAILED';
 export const networkStatusVar = makeVar<NetworkStatus>('Online');
 export const requestFailedVar = makeVar<boolean>(false);
 
-const toastContents: Record<WithRequestFailed<NetworkStatus>, ToastShowParams> = {
+const toastContents: Record<
+  WithRequestFailed<NetworkStatus>,
+  ToastShowParams
+> = {
   NoConnection: {
     type: 'noConnectionToast',
     text1: 'No internet connection',
