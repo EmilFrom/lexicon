@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const UserActionSchema = z.object({
+export const UserActionSchema = z.object({
   actionType: z.number().int(),
   avatarTemplate: z.string(),
   categoryId: z.number().int().nullable(),

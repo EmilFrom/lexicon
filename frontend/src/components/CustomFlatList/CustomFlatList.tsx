@@ -81,7 +81,7 @@ function BaseCustomFlatList<ItemType>(
     windowSize,
     renderItem,
     onEndReached,
-    onScroll,
+    onScroll: flatListOnScroll,
     onRefresh,
     refreshing = false,
     refreshControlTintColor,
@@ -187,17 +187,20 @@ function BaseCustomFlatList<ItemType>(
     }, 500);
     // SetTimeout below needed because even after last item onLayout the scrollToIndex still using old calculation
     setTimeout(() => {
-      scrollToIndexParam.current &&
+      if (scrollToIndexParam.current) {
         baseFlatListRef.current?.scrollToIndex(scrollToIndexParam.current);
+      }
     });
   };
 
   const internalOnRefresh = () => {
-    if (propsItemData && startIndex) {
+    if (propsItemData && startIndex !== undefined) {
       const newStartIndex = Math.max(startIndex - paginationSize, 0);
       setStartIndex(newStartIndex);
     } else {
-      onRefresh && onRefresh();
+      if (onRefresh) {
+        onRefresh();
+      }
       // removing internal window on true refresh to just pass all data
       setStartIndex(undefined);
       setLastIndex(undefined);
@@ -241,6 +244,7 @@ function BaseCustomFlatList<ItemType>(
           setLastIndex(undefined);
         }
       }}
+      onScroll={flatListOnScroll}
       {...flatListProps}
     />
   );

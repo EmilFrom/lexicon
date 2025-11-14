@@ -26,7 +26,7 @@ export function OngoingLikedTopicProvider({ children }: Props) {
   };
   const removeOngoingLikedTopic = (key: number) => {
     setData((data) => {
-      const { [key]: _, ...updatedData } = data;
+      const { [key]: _removedTopic, ...updatedData } = data;
       return updatedData;
     });
   };

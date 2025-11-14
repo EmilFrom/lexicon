@@ -38,7 +38,8 @@ export const firstLikeActivitySummary: ActionSummary = {
 };
 
 export function getUpdatedSummaryOnToggleLike(params: UpdateSummaryParams) {
-  let { cachedActionsSummary, previousCount, liked } = params;
+  const { cachedActionsSummary, liked } = params;
+  let previousCount = params.previousCount;
 
   if (!cachedActionsSummary) {
     return [firstLikeActivitySummary];

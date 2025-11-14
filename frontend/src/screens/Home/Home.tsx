@@ -243,13 +243,12 @@ export default function Home() {
     [allTopicCount, storage],
   );
 
-  const {
-    getTopicList,
-    error: topicsError,
-    refetch: refetchTopics,
-    fetchMore: fetchMoreTopics,
-    data: topicDataList,
-  } = useLazyTopicList({
+const {
+  getTopicList,
+  error: topicsError,
+  refetch: refetchTopics,
+  fetchMore: fetchMoreTopics,
+} = useLazyTopicList({
     variables: isNoChannelFilter(selectedChannelId)
       ? { sort: sortState, page, username }
       : { sort: sortState, categoryId: selectedChannelId, page, username },
@@ -257,9 +256,12 @@ export default function Home() {
       setRefreshing(false);
       setLoading(false);
     },
-    onCompleted: () => {
-      setLoading(false);
-    },
+  onCompleted: (data) => {
+    setLoading(false);
+    if (data) {
+      setData(data);
+    }
+  },
   });
 
   const { deletePostDraft } = useDeletePostDraft();
@@ -271,22 +273,6 @@ export default function Home() {
     },
     [getTopicList],
   );
-
-  useEffect(() => {
-    /**
-     * This useEffect is used to set data if there are changes in the result query.
-     * If the topics list is cached, it will show the result in `topicDataList`.
-     * But if the topics list is not in the cache, it will show `undefined` until it finishes getting data from the query.
-     *
-     */
-
-    if (topicDataList) {
-      setData(topicDataList);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, [setData, topicDataList]);
 
   useLayoutEffect(() => {
     postListRef.current?.scrollToIndex({
@@ -391,12 +377,17 @@ export default function Home() {
 
   const drawerRef = useRef<DrawerLayout>(null);
   const postListRef = useRef<PostListRef<PostWithoutId>>(null);
-  if (routeParams) {
+
+  useEffect(() => {
+    if (!routeParams) {
+      return;
+    }
+
     postListRef.current?.scrollToIndex({
       index: 0,
       viewOffset: headerViewHeight,
     });
-  }
+  }, [routeParams, headerViewHeight]);
 
   const onPressTitle = () => {
     navigate('Channels', { prevScreen: 'Home' });

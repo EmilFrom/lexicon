@@ -68,8 +68,6 @@ function BaseNestedComment(props: Props) {
     canEdit,
     content: contentFromGetTopicDetail,
     hidden,
-    replyToPostNumber,
-    hideAuthor,
     hasMetrics = true,
     style,
     showOptions,
@@ -106,7 +104,9 @@ function BaseNestedComment(props: Props) {
    */
 
   useEffect(() => {
-    onLayout && onLayout();
+    if (onLayout) {
+      onLayout();
+    }
   }, [id, onLayout]);
 
   const onPressViewIgnoredContent = () => {

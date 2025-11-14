@@ -9,6 +9,22 @@ import { usePushNotificationsContext } from '../../utils';
 
 import SettingsSwitch from './components/SettingsSwitch';
 
+type PreferencesHeaderProps = {
+  ios: boolean;
+  title: string;
+  onGoBack: () => void;
+};
+
+const PreferencesHeader = ({ ios, title, onGoBack }: PreferencesHeaderProps) =>
+  ios ? (
+    <ModalHeader
+      title={title}
+      left={<HeaderItem label={t('Back')} left onPressItem={onGoBack} />}
+    />
+  ) : (
+    <CustomHeader title={title} />
+  );
+
 export default function PushNotifications() {
   const { pushNotificationsPreferences, setPnPreferences } =
     usePushNotificationsContext();
@@ -32,19 +48,13 @@ export default function PushNotifications() {
 
   const ios = Platform.OS === 'ios';
 
-  const Header = () =>
-    ios ? (
-      <ModalHeader
-        title={t('Push Notifications')}
-        left={<HeaderItem label={t('Back')} left onPressItem={goBack} />}
-      />
-    ) : (
-      <CustomHeader title={t('Push Notifications')} />
-    );
-
   return (
     <View style={styles.container}>
-      <Header />
+      <PreferencesHeader
+        ios={ios}
+        title={t('Push Notifications')}
+        onGoBack={goBack}
+      />
       <ScrollView>
         <View style={styles.bodyContainer}>
           <View style={styles.menuContainer}>

@@ -49,7 +49,7 @@ export const logoutMutationResolver: Resolver = async (
       },
     });
     return 'success';
-  } catch (error) {
+  } catch {
     return 'failed';
   }
 };

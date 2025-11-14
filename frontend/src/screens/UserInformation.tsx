@@ -18,6 +18,107 @@ import { useActivity, useProfile } from '../hooks';
 import { makeStyles } from '../theme';
 import { NewPostForm, StackNavProp, StackRouteProp } from '../types';
 
+const useStyles = makeStyles(({ colors, spacing }) => ({
+  container: {
+    flex: 1,
+  },
+  headerContainer: {
+    alignItems: 'center',
+    backgroundColor: colors.background,
+  },
+  usernameText: {
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.s,
+  },
+  bioContainer: {
+    paddingHorizontal: spacing.xxl,
+  },
+  statusContainer: {
+    marginTop: spacing.m,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginVertical: spacing.xl,
+    marginTop: spacing.m,
+  },
+  activityText: {
+    paddingLeft: spacing.xl,
+    paddingVertical: spacing.xl,
+  },
+  fill: {
+    width: '100%',
+    flexGrow: 1,
+  },
+  noActivity: {
+    width: '100%',
+  },
+  noActivityText: {
+    alignSelf: 'center',
+  },
+}));
+
+type UserInformationStyles = ReturnType<typeof useStyles>;
+
+type UserInformationHeaderProps = {
+  styles: UserInformationStyles;
+  username: string;
+  userImage: string;
+  bioPreview: string;
+  statusUser?: {
+    emoji?: string | null;
+    description?: string | null;
+  } | null;
+  currentUser?: string;
+  onPressAvatar: () => void;
+  onPressNewMessage: () => void;
+};
+
+function UserInformationHeader({
+  styles,
+  username,
+  userImage,
+  bioPreview,
+  statusUser,
+  currentUser,
+  onPressAvatar,
+  onPressNewMessage,
+}: UserInformationHeaderProps) {
+  return (
+    <>
+      <View style={styles.headerContainer}>
+        <CustomHeader title="" noShadow />
+        <Avatar
+          src={userImage}
+          size="l"
+          label={username[0]}
+          onPress={onPressAvatar}
+        />
+        <View style={styles.usernameText}>
+          <Text variant="semiBold" size="l">
+            {username}
+          </Text>
+        </View>
+        <Markdown content={bioPreview} style={styles.bioContainer} />
+        {statusUser && (
+          <UserStatus
+            emojiCode={statusUser.emoji}
+            status={statusUser.description}
+            styleContainer={styles.statusContainer}
+          />
+        )}
+        <View style={styles.buttonContainer}>
+          {currentUser !== username && (
+            <Button content={t('Message')} onPress={onPressNewMessage} />
+          )}
+        </View>
+      </View>
+      <Text variant={'semiBold'} style={styles.activityText}>
+        {t('Activity')}
+      </Text>
+    </>
+  );
+}
+
 export default function UserInformation() {
   const styles = useStyles();
 
@@ -98,71 +199,32 @@ export default function UserInformation() {
     return <LoadingOrError loading />;
   }
 
-  const Header = () => {
-    return (
-      <>
-        <View style={styles.headerContainer}>
-          <CustomHeader title="" noShadow />
-          <Avatar
-            src={userImage}
-            size="l"
-            label={username[0]}
-            onPress={() => {
-              setShow(true);
-            }}
-          />
-          <View style={styles.usernameText}>
-            <Text variant="semiBold" size="l">
-              {username}
-            </Text>
-          </View>
-          <Markdown
-            content={
-              splittedBio
-                ? splittedBio.length > 3
-                  ? `${splittedBio.slice(0, 3).join('\n')}...`
-                  : bio
-                  ? bio
-                  : ''
-                : ''
-            }
-            style={styles.bioContainer}
-          />
-          {statusUser && (
-            <UserStatus
-              emojiCode={statusUser.emoji}
-              status={statusUser.description}
-              styleContainer={styles.statusContainer}
-            />
-          )}
-          <View style={styles.buttonContainer}>
-            {currentUser !== username && (
-              <Button content={t('Message')} onPress={onPressNewMessage} />
-            )}
-            {
-              // TODO: This LoC is meant for the next phase
-              /* <View style={styles.buttonDivider} />
-        <Button
-          content={t('Badges')}
-          style={styles.whiteButton}
-          textColor="textNormal"
-          disabled
-        /> */
-            }
-          </View>
-        </View>
-        <Text variant={'semiBold'} style={styles.activityText}>
-          {t('Activity')}
-        </Text>
-      </>
-    );
-  };
+  const bioPreview = splittedBio
+    ? splittedBio.length > 3
+      ? `${splittedBio.slice(0, 3).join('\n')}...`
+      : bio
+      ? bio
+      : ''
+    : '';
+
+  const headerNode = (
+    <UserInformationHeader
+      styles={styles}
+      username={username}
+      userImage={userImage}
+      bioPreview={bioPreview}
+      statusUser={statusUser}
+      currentUser={currentUser}
+      onPressAvatar={() => setShow(true)}
+      onPressNewMessage={onPressNewMessage}
+    />
+  );
 
   let content;
   if (activities.length !== 0) {
     content = (
       <PostList
-        ListHeaderComponent={<Header />}
+        ListHeaderComponent={headerNode}
         data={activities}
         onRefresh={onRefresh}
         refreshing={networkStatus === 4 || refreshing}
@@ -187,7 +249,7 @@ export default function UserInformation() {
   } else {
     content = (
       <View style={styles.noActivity}>
-        <Header />
+        {headerNode}
         <Text style={styles.noActivityText}>
           {t("This user doesn't have any activity")}
         </Text>
@@ -206,51 +268,3 @@ export default function UserInformation() {
     </View>
   );
 }
-
-const useStyles = makeStyles(({ colors, spacing }) => ({
-  container: {
-    flex: 1,
-  },
-  headerContainer: {
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  usernameText: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.s,
-  },
-  bioContainer: {
-    paddingHorizontal: spacing.xxl,
-  },
-  statusContainer: {
-    marginTop: spacing.m,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    marginVertical: spacing.xl,
-    marginTop: spacing.m,
-  },
-  // TODO: This LoC is meant for the next phase
-  // buttonDivider: {
-  //   paddingRight: spacing.l,
-  // },
-  // whiteButton: {
-  //   backgroundColor: colors.background,
-  //   borderWidth: 1,
-  //   borderColor: colors.border,
-  // },
-  activityText: {
-    paddingLeft: spacing.xl,
-    paddingVertical: spacing.xl,
-  },
-  fill: {
-    width: '100%',
-    flexGrow: 1,
-  },
-  noActivity: {
-    width: '100%',
-  },
-  noActivityText: {
-    alignSelf: 'center',
-  },
-}));

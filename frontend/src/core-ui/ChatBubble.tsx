@@ -22,7 +22,7 @@ const ChatBubble = memo((props: Props) => {
     message,
     bgColor = 'background',
     noBorder = false,
-    fontStyle,
+    fontStyle: _fontStyle,
     mentions,
     nonClickable,
     style,
@@ -49,6 +49,8 @@ const ChatBubble = memo((props: Props) => {
     </View>
   );
 });
+
+ChatBubble.displayName = 'ChatBubble';
 
 export { ChatBubble };
 

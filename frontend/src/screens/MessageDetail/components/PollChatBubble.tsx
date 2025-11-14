@@ -89,6 +89,8 @@ const PollChatBubble = memo((props: Props) => {
   );
 });
 
+PollChatBubble.displayName = 'PollChatBubble';
+
 export { PollChatBubble };
 
 const useStyles = makeStyles(({ colors, spacing }) => ({

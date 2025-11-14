@@ -13,6 +13,22 @@ import { makeStyles } from '../../theme';
 import { RootStackNavProp, RootStackRouteProp } from '../../types';
 import { formatRelativeTime, getPollChoiceLabel } from '../../helpers';
 
+type PollHeaderProps = {
+  ios: boolean;
+  title: string;
+  onGoBack: () => void;
+};
+
+const PollHeader = ({ ios, title, onGoBack }: PollHeaderProps) =>
+  ios ? (
+    <ModalHeader
+      title={title}
+      left={<HeaderItem label={t('Close')} left onPressItem={onGoBack} />}
+    />
+  ) : (
+    <CustomHeader title={title} noShadow />
+  );
+
 export default function Poll() {
   const styles = useStyles();
 
@@ -30,24 +46,14 @@ export default function Poll() {
     navigate('UserInformation', { username });
   };
 
-  const Header = () => {
-    const title = getPollChoiceLabel({
-      title: poll.title ?? undefined,
-      pollType: poll.type,
-    });
-    return ios ? (
-      <ModalHeader
-        title={title}
-        left={<HeaderItem label={t('Close')} left onPressItem={goBack} />}
-      />
-    ) : (
-      <CustomHeader title={title} noShadow />
-    );
-  };
+  const headerTitle = getPollChoiceLabel({
+    title: poll.title ?? undefined,
+    pollType: poll.type,
+  });
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      <PollHeader ios={ios} title={headerTitle} onGoBack={goBack} />
       {author && (
         <Author
           image={author.avatar}

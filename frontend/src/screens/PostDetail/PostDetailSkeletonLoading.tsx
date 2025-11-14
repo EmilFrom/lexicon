@@ -7,7 +7,7 @@ import { makeStyles, useTheme } from '../../theme';
 type Props = {
   isLoading: boolean;
 };
-export default function (props: Props) {
+export default function PostDetailSkeletonLoading(props: Props) {
   const { isLoading } = props;
   const styles = useStyles();
   const { colors } = useTheme();

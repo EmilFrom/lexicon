@@ -20,6 +20,28 @@ import {
 import { Divider, Icon, Text } from '../../core-ui';
 import { deletePoll, getPollChoiceLabel } from '../../helpers';
 
+type EditPollsListHeaderProps = {
+  ios: boolean;
+  pollCount: number;
+  onGoBack: () => void;
+};
+
+const EditPollsListHeader = ({
+  ios,
+  pollCount,
+  onGoBack,
+}: EditPollsListHeaderProps) => {
+  const title = `Polls (${pollCount})`;
+  return ios ? (
+    <ModalHeader
+      title={title}
+      left={<HeaderItem label={t('Close')} left onPressItem={onGoBack} />}
+    />
+  ) : (
+    <CustomHeader title={title} noShadow />
+  );
+};
+
 export default function EditPollsList() {
   const ios = Platform.OS === 'ios';
 
@@ -34,18 +56,7 @@ export default function EditPollsList() {
   const { getValues, setValue } = useFormContext<NewPostForm>();
 
   const { polls } = getValues();
-
-  const Header = () => {
-    const title = `Polls (${polls?.length ?? 0})`;
-    return ios ? (
-      <ModalHeader
-        title={title}
-        left={<HeaderItem label={t('Close')} left onPressItem={goBack} />}
-      />
-    ) : (
-      <CustomHeader title={title} noShadow />
-    );
-  };
+  const pollCount = polls?.length ?? 0;
 
   const renderItem = ({
     item,
@@ -96,7 +107,7 @@ export default function EditPollsList() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      <EditPollsListHeader ios={ios} pollCount={pollCount} onGoBack={goBack} />
       <View style={styles.contentContainer}>
         <FlatList
           data={polls}

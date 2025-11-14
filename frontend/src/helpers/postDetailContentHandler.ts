@@ -58,8 +58,7 @@ export function postDetailContentHandler({
     (channel) => channel.id === topicDetailData.categoryId,
   );
 
-  let freqPosters: Array<User>;
-  freqPosters =
+  const freqPosters: Array<User> =
     topicDetailData.details && !topicDetailData.deletedAt
       ? topicDetailData.details.participants.map(
           ({ id, username, avatar, name }) => ({

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const UserActionSchema = z.object({
+export const UserActionSchema = z.object({
   actingAvatarTemplate: z.string(),
   actingName: z.string(),
   actingUserId: z.number(),

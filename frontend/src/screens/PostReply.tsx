@@ -78,11 +78,17 @@ export default function PostReply() {
    * we need to save initial params because after image upload
    * the navigation done from the preview will empty all other params
    */
-  const savedNavigationParams = useRef<RootStackParamList['PostReply']>(params);
-  const mergedNavigationParams = {
-    ...savedNavigationParams.current,
-    ...params,
-  };
+  const [persistedParams, setPersistedParams] = useState<
+    RootStackParamList['PostReply']
+  >(params);
+
+  useEffect(() => {
+    setPersistedParams((previous) => ({
+      ...previous,
+      ...params,
+    }));
+  }, [params]);
+
   const {
     title,
     topicId,
@@ -91,9 +97,9 @@ export default function PostReply() {
     editPostId,
     oldContent = '',
     editedUser,
-    imageUri = '',
-  } = mergedNavigationParams;
-  let { hyperlinkTitle = '', hyperlinkUrl } = mergedNavigationParams;
+  } = persistedParams;
+  const imageUri = persistedParams.imageUri ?? '';
+  let { hyperlinkTitle = '', hyperlinkUrl } = persistedParams;
   const replyingTo = client.readFragment<PostFragment>({
     id: `Post:${replyToPostId}`,
     fragment: PostFragmentDoc,

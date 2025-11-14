@@ -43,7 +43,9 @@ export function PollOptionItem(props: PollOptionItemProps) {
     <RadioButton
       selected={selected}
       onPress={() => {
-        onSelect && onSelect();
+        if (onSelect) {
+          onSelect();
+        }
       }}
       disabled={disabled}
       style={[styles.radioButton, style]}
@@ -82,7 +84,9 @@ export function PollOptionItem(props: PollOptionItemProps) {
               avatars={usersVoters.map(({ avatar }) => avatar)}
               style={styles.stackedAvatars}
               onPress={() => {
-                onPressStackAvatar && onPressStackAvatar();
+                if (onPressStackAvatar) {
+                  onPressStackAvatar();
+                }
               }}
             />
           )}

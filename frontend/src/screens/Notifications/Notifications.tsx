@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActionSheetIOS,
   Modal,
@@ -78,7 +78,6 @@ export default function Notifications() {
   };
 
   const [page, setPage] = useState<number>(1);
-  const [isLoadMore, setIsLoadMore] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [showMore, setShowMore] = useState<boolean>(false);
   const [loadMorePolicy, setLoadMorePolicy] = useState<boolean>(false);
@@ -138,16 +137,9 @@ export default function Notifications() {
     navToThread,
   );
 
-  useEffect(() => {
-    if (
-      data?.notificationQuery.totalRowsNotifications ===
-      handledNotifications.length
-    ) {
-      setIsLoadMore(false);
-    } else {
-      setIsLoadMore(true);
-    }
-  }, [data, handledNotifications]);
+  const totalRows = data?.notificationQuery.totalRowsNotifications ?? 0;
+  // Expose load-more UI only when the backend reports additional records.
+  const canLoadMore = totalRows !== handledNotifications.length;
 
   if (error) {
     return <LoadingOrError message={errorMsg} />;
@@ -206,7 +198,7 @@ export default function Notifications() {
 
   const loadMore = () => {
     setLoadMorePolicy(true);
-    if (!isLoadMore || loading) {
+    if (!canLoadMore || loading) {
       return;
     }
     const nextPage = page + 1;
@@ -284,7 +276,7 @@ export default function Notifications() {
           onEndReachedThreshold={0.1}
           onEndReached={loadMore}
           ListFooterComponent={
-            <FooterLoadingIndicator isHidden={!isLoadMore} />
+            <FooterLoadingIndicator isHidden={!canLoadMore} />
           }
           style={styles.notificationContainer}
         />

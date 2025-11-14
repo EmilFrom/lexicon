@@ -23,13 +23,12 @@ export function useStatelessUpload(
 }
 
 export function useStatefulUpload(
-  imagesArray: Array<Image>,
+  initialImages: Array<Image>,
   currentToken: number,
   options?: MutationHookOptions<UploadType, UploadMutationVariables>,
 ) {
   const [completedToken, setCompletedToken] = useState(1);
-  const [tempArray, setTempArray] = useState<Array<Image>>(imagesArray);
-  const newArray = imagesArray;
+  const [tempArray, setTempArray] = useState<Array<Image>>(initialImages);
 
   const [upload] = useMutation<UploadType, UploadMutationVariables>(
     UploadDocument,
@@ -43,20 +42,29 @@ export function useStatefulUpload(
           shortUrl: url,
           token,
         } = result;
-        if (token) {
-          const imageUrl = formatImageLink(name, width, height, url);
-          newArray[token - 1] = { link: imageUrl, done: true };
-          setTempArray(newArray);
-          setCompletedToken(token);
+        if (!token) {
+          return;
         }
+
+        const imageUrl = formatImageLink(name, width, height, url);
+        // Clone the existing array instead of mutating it so React can detect the change.
+        setTempArray((prev) => {
+          const updatedArray = [...prev];
+          updatedArray[token - 1] = { link: imageUrl, done: true };
+          return updatedArray;
+        });
+        setCompletedToken(token);
       },
       onError: (error) => {
-        newArray[currentToken - 2] = { link: '', done: true };
-        setTempArray(newArray);
+        setTempArray((prev) => {
+          const updatedArray = [...prev];
+          updatedArray[currentToken - 2] = { link: '', done: true };
+          return updatedArray;
+        });
         errorHandlerAlert(error);
       },
     },
   );
 
-  return { upload, tempArray, completedToken };
+  return { upload, tempArray, setTempArray, completedToken };
 }

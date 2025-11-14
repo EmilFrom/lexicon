@@ -9,6 +9,22 @@ import { StackNavProp } from '../../types';
 
 import SettingsItem from './components/SettingsItem';
 
+type PreferencesHeaderProps = {
+  ios: boolean;
+  title: string;
+  onGoBack: () => void;
+};
+
+const PreferencesHeader = ({ ios, title, onGoBack }: PreferencesHeaderProps) =>
+  ios ? (
+    <ModalHeader
+      title={title}
+      left={<HeaderItem label={t('Back')} left onPressItem={onGoBack} />}
+    />
+  ) : (
+    <CustomHeader title={title} />
+  );
+
 export default function DarkMode() {
   const { setColorScheme } = useColorScheme();
   const styles = useStyles();
@@ -22,16 +38,6 @@ export default function DarkMode() {
 
   const ios = Platform.OS === 'ios';
 
-  const Header = () =>
-    ios ? (
-      <ModalHeader
-        title={t('Dark Mode')}
-        left={<HeaderItem label={t('Back')} left onPressItem={goBack} />}
-      />
-    ) : (
-      <CustomHeader title={t('Dark Mode')} />
-    );
-
   const changeColorScheme = (colorScheme: ColorScheme) => {
     setColorScheme(colorScheme);
     setCachedColorScheme(colorScheme);
@@ -39,7 +45,7 @@ export default function DarkMode() {
 
   return (
     <View style={styles.container}>
-      <Header />
+      <PreferencesHeader ios={ios} title={t('Dark Mode')} onGoBack={goBack} />
       <ScrollView>
         <View style={styles.bodyContainer}>
           <View style={styles.menuContainer}>

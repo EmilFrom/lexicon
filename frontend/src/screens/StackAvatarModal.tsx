@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Platform, SafeAreaView, FlatList } from 'react-native';
+import {
+  View,
+  Platform,
+  SafeAreaView,
+  FlatList,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { CustomHeader, HeaderItem, ModalHeader } from '../components';
@@ -8,6 +15,29 @@ import { Avatar, Divider, Text } from '../core-ui';
 import { RootStackNavProp, StackAvatarUser, StackRouteProp } from '../types';
 import { isMultipleVoters } from '../helpers';
 
+type StackAvatarHeaderProps = {
+  ios: boolean;
+  title: string;
+  onDone: () => void;
+  style: StyleProp<ViewStyle>;
+};
+
+const StackAvatarHeader = ({
+  ios,
+  title,
+  onDone,
+  style,
+}: StackAvatarHeaderProps) =>
+  ios ? (
+    <ModalHeader
+      title={title}
+      right={<HeaderItem label={t('Done')} onPressItem={onDone} />}
+      style={style}
+    />
+  ) : (
+    <CustomHeader title={title} noShadow />
+  );
+
 export default function StackAvatarModal() {
   const ios = Platform.OS === 'ios';
   const styles = useStyles();
@@ -15,22 +45,6 @@ export default function StackAvatarModal() {
   const {
     params: { option, users, amountVote },
   } = useRoute<StackRouteProp<'StackAvatar'>>();
-
-  const Header = () =>
-    ios ? (
-      <ModalHeader
-        title={option}
-        right={
-          <HeaderItem
-            label={t('Done')}
-            onPressItem={() => navigation.goBack()}
-          />
-        }
-        style={styles.modalHeader}
-      />
-    ) : (
-      <CustomHeader title={option} noShadow />
-    );
 
   const renderItem = ({ item }: { item: StackAvatarUser }) => {
     return (
@@ -57,7 +71,12 @@ export default function StackAvatarModal() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Header />
+        <StackAvatarHeader
+          ios={ios}
+          title={option}
+          onDone={navigation.goBack}
+          style={styles.modalHeader}
+        />
         <Text size="s" color="lightTextDarker">
           {isMultipleVoters(amountVote)
             ? t(`{number} voters`, { number: amountVote })

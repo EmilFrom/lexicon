@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import {
@@ -21,6 +21,27 @@ import { useAuth } from '../../utils/AuthProvider';
 
 import MenuItem from './components/MenuItem';
 
+const EMPTY_PROFILE_USER: UserDetail = {
+  __typename: 'UserDetail',
+  avatar: '',
+  bioRaw: '',
+  dateOfBirth: '',
+  location: '',
+  name: '',
+  username: '',
+  websiteName: '',
+  email: '',
+  secondaryEmails: [],
+  unconfirmedEmails: [],
+  canEditUsername: true,
+  admin: true,
+  status: {
+    emoji: '',
+    description: '',
+    endsAt: '',
+  },
+};
+
 export default function Profile() {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -31,30 +52,7 @@ export default function Profile() {
   const storage = useStorage();
   const username = storage.getItem('user')?.username || '';
 
-  const [user, setUser] = useState<UserDetail>({
-    __typename: 'UserDetail',
-    avatar: '',
-    bioRaw: '',
-    dateOfBirth: '',
-    location: '',
-    name: '',
-    username: '',
-    websiteName: '',
-    email: '',
-    secondaryEmails: [],
-    unconfirmedEmails: [],
-    canEditUsername: true,
-    admin: true,
-    status: {
-      emoji: '',
-      description: '',
-      endsAt: '',
-    },
-  });
-
-  const [haveNotification, setHaveNotification] = useState(false);
   const [show, setShow] = useState(false);
-  const [splittedBio, setSplittedBio] = useState<Array<string>>();
 
   const { getProfile, data } = useLazyProfile(
     {
@@ -66,6 +64,14 @@ export default function Profile() {
   const { allowUserStatus, enableLexiconPushNotifications } = useSiteSettings({
     fetchPolicy: 'network-only',
   });
+
+  const profileUser = data?.profile.user ?? EMPTY_PROFILE_USER;
+  const splittedBio = useMemo(
+    () => profileUser.bioRaw?.split(/\r\n|\r|\n/) ?? [],
+    [profileUser.bioRaw],
+  );
+  const haveNotification =
+    data?.profile.unreadNotification.isThereUnreadNotifications ?? false;
 
   useEffect(() => {
     // NOTE: We use the 'state' listener for tablets because,
@@ -107,7 +113,7 @@ export default function Profile() {
     },
   });
 
-  const userImage = getImage(data?.profile.user.avatar || '', 'xl');
+  const userImage = getImage(profileUser.avatar || '', 'xl');
   const useAuthResults = useAuth();
 
   const onLogout = async () => {
@@ -115,16 +121,6 @@ export default function Profile() {
       enableLexiconPushNotifications: enableLexiconPushNotifications || false,
     });
   };
-
-  useEffect(() => {
-    if (data) {
-      data.profile.user && setUser(data.profile.user);
-      setSplittedBio(data.profile.user.bioRaw?.split(/\r\n|\r|\n/));
-      setHaveNotification(
-        data?.profile.unreadNotification.isThereUnreadNotifications,
-      );
-    }
-  }, [data, setUser]);
 
   const onPressCancel = () => {
     setShow(false);
@@ -169,10 +165,11 @@ export default function Profile() {
                     color="lightTextDarker"
                     numberOfLines={1}
                   >
-                    {user.email}
+                    {profileUser.email}
                   </Text>
                   {allowUserStatus &&
-                    (!user.status?.description && !user.status?.emoji ? (
+                    (!profileUser.status?.description &&
+                    !profileUser.status?.emoji ? (
                       <IconWithLabel
                         label={t('Set Status')}
                         icon="Edit"
@@ -183,14 +180,14 @@ export default function Profile() {
                       />
                     ) : (
                       <UserStatus
-                        emojiCode={user.status.emoji}
-                        status={user.status.description}
+                        emojiCode={profileUser.status.emoji}
+                        status={profileUser.status.description}
                         showEditIcon
                         onPress={() => {
                           navigateInProfile('EditUserStatus', {
-                            emojiCode: user.status?.emoji,
-                            status: user.status?.description,
-                            endDate: user.status?.endsAt || '',
+                            emojiCode: profileUser.status?.emoji,
+                            status: profileUser.status?.description,
+                            endDate: profileUser.status?.endsAt || '',
                           });
                         }}
                         testID="Profile:UserStatus"
@@ -204,9 +201,19 @@ export default function Profile() {
                 <Button
                   content={t('Edit Profile')}
                   disabled={!data}
-                  onPress={() => navigateInProfile('EditProfile', { user })}
+                  onPress={() =>
+                    navigateInProfile('EditProfile', { user: profileUser })
+                  }
                   testID="Profile:Button:EditProfile"
                 />
+            <Button
+              content={t('Edit Profile')}
+              disabled={!data}
+              onPress={() =>
+                navigateInProfile('EditProfile', { user: profileUser })
+              }
+              testID="Profile:Button:EditProfile"
+            />
               </View>
             </View>
           ) : (
@@ -226,19 +233,20 @@ export default function Profile() {
               </View>
               <View style={styles.email}>
                 <Text variant="normal" size="m" color="lightTextDarker">
-                  {user.email}
+                  {profileUser.email}
                 </Text>
               </View>
               <Markdown
                 content={
                   (splittedBio && splittedBio.length > 3
                     ? `${splittedBio.slice(0, 3).join('\n')}...`
-                    : user.bioRaw) || ''
+                    : profileUser.bioRaw) || ''
                 }
                 style={styles.bioContainer}
               />
               {allowUserStatus &&
-                (!user.status?.description && !user.status?.emoji ? (
+                (!profileUser.status?.description &&
+                !profileUser.status?.emoji ? (
                   <IconWithLabel
                     label={t('Set Status')}
                     icon="Edit"
@@ -249,14 +257,14 @@ export default function Profile() {
                   />
                 ) : (
                   <UserStatus
-                    emojiCode={user.status.emoji}
-                    status={user.status.description}
+                    emojiCode={profileUser.status.emoji}
+                    status={profileUser.status.description}
                     showEditIcon
                     onPress={() => {
                       navigateInProfile('EditUserStatus', {
-                        emojiCode: user.status?.emoji,
-                        status: user.status?.description,
-                        endDate: user.status?.endsAt || '',
+                        emojiCode: profileUser.status?.emoji,
+                        status: profileUser.status?.description,
+                        endDate: profileUser.status?.endsAt || '',
                       });
                     }}
                     testID="Profile:UserStatus"
@@ -266,7 +274,9 @@ export default function Profile() {
                 content={t('Edit Profile')}
                 style={styles.button}
                 disabled={!data}
-                onPress={() => navigateInProfile('EditProfile', { user })}
+                onPress={() =>
+                  navigateInProfile('EditProfile', { user: profileUser })
+                }
                 testID="Profile:Button:EditProfile"
               />
             </View>

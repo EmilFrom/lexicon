@@ -99,8 +99,13 @@ export default function EditProfile(props: ProfileProps) {
 
   const [show, setShow] = useState(false);
   const [currentUserData, setCurrentUserData] = useState(selectedUser);
-  const [userImage, setUserImage] = useState('');
-  const [oldUsername, setOldUsername] = useState('');
+  // Initialize avatar/username directly from the selected user to avoid extra effects.
+  const [userImage, setUserImage] = useState(() =>
+    selectedUser ? getImage(selectedUser.avatar, 'xl') : '',
+  );
+  const [oldUsername, setOldUsername] = useState(
+    selectedUser?.username ?? '',
+  );
   const [avatarId, setAvatarId] = useState(0);
   const [noChanges, setNoChanges] = useState(true);
 
@@ -140,14 +145,6 @@ export default function EditProfile(props: ProfileProps) {
       mounted.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    if (selectedUser) {
-      const { avatar, username } = selectedUser;
-      setUserImage(getImage(avatar, 'xl'));
-      setOldUsername(username);
-    }
-  }, [selectedUser, setOldUsername, setUserImage]);
 
   const { getProfile } = useLazyProfile(
     {

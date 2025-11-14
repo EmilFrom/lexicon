@@ -22,6 +22,46 @@ import UserItem from './components/UserItem';
 
 const screen = Dimensions.get('screen');
 
+type SelectUserHeaderProps = {
+  ios: boolean;
+  count: number;
+  onCancel: () => void;
+  onDone: () => void;
+  isLoading: boolean;
+  isDoneDisabled: boolean;
+};
+
+const SelectUserHeader = ({
+  ios,
+  count,
+  onCancel,
+  onDone,
+  isLoading,
+  isDoneDisabled,
+}: SelectUserHeaderProps) => {
+  const headerTitle =
+    count > 0 ? t('{count} Selected', { count }) : t('Select Users');
+
+  if (ios) {
+    return (
+      <ModalHeader
+        title={headerTitle}
+        left={<HeaderItem label={t('Cancel')} onPressItem={onCancel} left />}
+        right={
+          <HeaderItem
+            label={t('Done')}
+            onPressItem={onDone}
+            loading={isLoading}
+            disabled={isDoneDisabled}
+          />
+        }
+      />
+    );
+  }
+
+  return <CustomHeader title={headerTitle} noShadow />;
+};
+
 export default function SelectUser() {
   const styles = useStyles();
   const { colors, navHeader, navNoShadow, spacing } = useTheme();
@@ -127,31 +167,16 @@ export default function SelectUser() {
     navigate('NewMessage');
   };
 
-  const Header = () => {
-    const headerTitle =
-      count > 0 ? t('{count} Selected', { count }) : t('Select Users');
-
-    return ios ? (
-      <ModalHeader
-        title={count > 0 ? count + t(' Selected') : t('Select Users')}
-        left={<HeaderItem label={t('Cancel')} onPressItem={goBack} left />}
-        right={
-          <HeaderItem
-            label={t('Done')}
-            onPressItem={doneSelectingUser}
-            loading={searchValue.length > 0 && loading}
-            disabled={selectedUsers.length === 0}
-          />
-        }
-      />
-    ) : (
-      <CustomHeader title={headerTitle} noShadow />
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container} testID="SelectUser:SafeAreaView">
-      <Header />
+      <SelectUserHeader
+        ios={ios}
+        count={count}
+        onCancel={goBack}
+        onDone={doneSelectingUser}
+        isLoading={searchValue.length > 0 && loading}
+        isDoneDisabled={selectedUsers.length === 0}
+      />
       <View style={styles.searchContainer}>
         <Icon name="Search" color={colors.textLighter} />
         <TextInput

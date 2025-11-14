@@ -46,18 +46,23 @@ export function Metrics(props: Props) {
   });
   const isFromHomeScene = likePerformedFrom === 'home-scene';
 
-  const performDebouncedLike = useDebouncedCallback((liked: boolean) => {
-    if (liked === isLiked) {
-      return;
-    }
-    like({
-      variables: {
-        unlike: isLiked,
-        ...(isFromHomeScene ? { topicId } : { postId }),
-        likeCount: likeCountProps,
-      },
-    });
-  }, DEBOUNCE_WAIT_TIME);
+  const [like] = useLikeTopicOrPost();
+
+  const performDebouncedLike = useDebouncedCallback(
+    (liked: boolean, previousLikeCount: number) => {
+      if (liked === isLiked) {
+        return;
+      }
+      like({
+        variables: {
+          unlike: isLiked,
+          ...(isFromHomeScene ? { topicId } : { postId }),
+          likeCount: previousLikeCount,
+        },
+      });
+    },
+    DEBOUNCE_WAIT_TIME,
+  );
 
   /**
    * Update like count and liked value for topic replies
@@ -135,8 +140,6 @@ export function Metrics(props: Props) {
   }, [performDebouncedLike]);
 
   // TODO: Add navigation #800
-  const [like] = useLikeTopicOrPost();
-
   const onPressLike = useCallback(() => {
     setLikeData(({ liked: prevLiked, likeCount: previousCount }) => {
       const liked = !prevLiked;
@@ -144,7 +147,7 @@ export function Metrics(props: Props) {
         liked,
         previousCount,
       });
-      performDebouncedLike(liked);
+      performDebouncedLike(liked, previousCount);
       return { liked, likeCount };
     });
   }, [performDebouncedLike]);

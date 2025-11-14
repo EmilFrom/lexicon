@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import PieChart from 'react-native-pie-chart';
 import { useDebouncedCallback } from 'use-debounce';
@@ -69,15 +69,11 @@ export function PollPreview(props: Props) {
     : true;
 
   const [poll, setPoll] = useState<Poll>(pollData);
-  const [votes, setVotes] = useState<Array<string>>(pollVotes || []);
+  // Keep the optimistic selection local, defaulting to the initial server payload.
+  const [votes, setVotes] = useState<Array<string>>(() => pollVotes || []);
   const [canUndoVote, setCanUndoVote] = useState<boolean>(
-    pollVotes ? pollVotes.length !== 0 : false,
+    () => !!pollVotes?.length,
   );
-
-  useEffect(() => {
-    setVotes(pollVotes || []);
-    setCanUndoVote(pollVotes ? pollVotes.length !== 0 : false);
-  }, [pollVotes]);
 
   const {
     name,

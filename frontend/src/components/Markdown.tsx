@@ -1,4 +1,3 @@
-/* eslint-disable styles/style-maker-no-unused */
 import { useNavigation } from '@react-navigation/core';
 import * as Linking from 'expo-linking';
 import mentionFlowDock from 'markdown-it-flowdock';
@@ -36,23 +35,24 @@ const ios = Platform.OS === 'ios';
 
 export function Markdown(props: MarkdownProps) {
   const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
-  let styles = useStyles();
+  const baseStyles = useStyles();
 
-  let { content, ...restProps } = props;
+  const { content, ...restProps } = props;
   const {
     fontColor,
     mentionColor,
     style,
-    mentions,
+    mentions: _mentions,
     nonClickable,
     ...otherProps
   } = restProps;
 
-  content = filterMarkdownContentPoll(content).filteredMarkdown;
+  const filteredContent =
+    filterMarkdownContentPoll(content).filteredMarkdown;
 
-  styles = fontColor
-    ? { ...styles, ...{ body: { ...styles.body, color: fontColor } } }
-    : styles;
+  const styles = fontColor
+    ? { ...baseStyles, body: { ...baseStyles.body, color: fontColor } }
+    : baseStyles;
 
   const markdownItInstance = MarkdownIt({ typographer: true }).use(
     mentionFlowDock,
@@ -82,7 +82,9 @@ export function Markdown(props: MarkdownProps) {
       variant="bold"
       style={mentionColor === 'primary' ? styles.mentionByMe : styles.mention}
       onPress={() => {
-        !nonClickable && onPressMention(content);
+        if (!nonClickable) {
+          onPressMention(content);
+        }
       }}
     >
       {`@${content}`}
@@ -147,7 +149,7 @@ export function Markdown(props: MarkdownProps) {
         style={styles}
         {...otherProps}
       >
-        {content}
+        {filteredContent}
       </BaseMarkdown>
     </View>
   );

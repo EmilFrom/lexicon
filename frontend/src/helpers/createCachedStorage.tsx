@@ -52,8 +52,8 @@ export function createCachedStorage<
               // This will throw if the string does not parse or if the parsed
               // value cannot be revived successfully.
               data[keySchema] = reviver(JSON.parse(value));
-            } catch (e) {
-              //empty
+            } catch {
+              // Ignore parse errors when reviving cached data
             }
           }
         }

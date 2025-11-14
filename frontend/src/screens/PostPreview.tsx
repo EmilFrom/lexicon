@@ -1,10 +1,5 @@
-import {
-  CommonActions,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-// CORRECTED: Add useRef to the import
-import React, { useEffect, useRef, useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Platform, SafeAreaView } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -48,23 +43,6 @@ import { useModal } from '../utils';
 
 const ios = Platform.OS === 'ios';
 
-// This is the robust navigation function you already have. We will now use it.
-const goBackAndResetStack = (navigation: RootStackNavProp<'PostPreview'>) => {
-  navigation.dispatch((state) => {
-    const newRoutes = state.routes.filter(
-      (route) =>
-        route.name !== 'NewPost' &&
-        route.name !== 'PostPreview' &&
-        route.name !== 'PostReply',
-    );
-    return CommonActions.reset({
-      ...state,
-      routes: newRoutes,
-      index: newRoutes.length - 1,
-    });
-  });
-};
-
 export default function PostPreview() {
   const { setModal } = useModal();
   const styles = useStyles();
@@ -73,22 +51,10 @@ export default function PostPreview() {
   const navigation = useNavigation<RootStackNavProp<'PostPreview'>>();
   const { goBack } = navigation;
 
-  //Manual lock for listener effect
-  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
-
-
-  // CORRECTED: Add the hasPostedRef lock here
-  const hasPostedRef = useRef(false);
+  // Manual lock for listener effect – no extra state/ref needed anymore.
 
   const {
-    params: {
-      reply,
-      postData,
-      focusedPostNumber,
-      editPostId,
-      editTopicId,
-      editedUser,
-    },
+    params: { reply, postData, editPostId, editTopicId, editedUser },
   } = useRoute<RootStackRouteProp<'PostPreview'>>();
 
   const storage = useStorage();
@@ -115,13 +81,7 @@ export default function PostPreview() {
   // --- ALL onCompleted HANDLERS ARE NOW CORRECTED ---
 
   const { newTopic, loading: newTopicLoading } = useNewTopic({
-    onCompleted: ({ newTopic: result }) => {
-      // 1. Tell the listener that we are about to navigate on purpose.
-      setIsNavigatingAway(true);
-
-      // 2. Use a short timeout to ensure the state update has time to process
-      //    before the navigation action is dispatched. This is a robust way
-      //    to solve this specific race condition.
+    onCompleted: () => {
       setTimeout(() => {
         navigation.pop(2); // Now we can use the more powerful pop(2)
         resetForm(FORM_DEFAULT_VALUES);
@@ -131,13 +91,7 @@ export default function PostPreview() {
   });
 
   const { reply: replyTopic, loading: replyLoading } = useReplyTopic({
-    onCompleted: ({ replyPost: { postNumber } }) => {
-      // 1. Tell the listener that we are about to navigate on purpose.
-      setIsNavigatingAway(true);
-
-      // 2. Use a short timeout to ensure the state update has time to process
-      //    before the navigation action is dispatched. This is a robust way
-      //    to solve this specific race condition.
+    onCompleted: () => {
       setTimeout(() => {
         navigation.pop(2); // Now we can use the more powerful pop(2)
         resetForm(FORM_DEFAULT_VALUES);
@@ -151,12 +105,6 @@ export default function PostPreview() {
 
   const { editPost, loading: editPostLoading } = useEditPost({
     onCompleted: () => {
-      // 1. Tell the listener that we are about to navigate on purpose.
-      setIsNavigatingAway(true);
-
-      // 2. Use a short timeout to ensure the state update has time to process
-      //    before the navigation action is dispatched. This is a robust way
-      //    to solve this specific race condition.
       setTimeout(() => {
         navigation.pop(2); // Now we can use the more powerful pop(2)
         resetForm(FORM_DEFAULT_VALUES);
@@ -169,12 +117,6 @@ export default function PostPreview() {
 
   const { editTopic, loading: editTopicLoading } = useEditTopic({
     onCompleted: () => {
-      // 1. Tell the listener that we are about to navigate on purpose.
-      setIsNavigatingAway(true);
-
-      // 2. Use a short timeout to ensure the state update has time to process
-      //    before the navigation action is dispatched. This is a robust way
-      //    to solve this specific race condition.
       setTimeout(() => {
         navigation.pop(2); // Now we can use the more powerful pop(2)
         resetForm(FORM_DEFAULT_VALUES);

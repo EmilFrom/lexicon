@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   Modal,
   ModalProps,
@@ -42,16 +42,41 @@ export function ActionSheet(props: Props) {
     ...otherProps
   } = props;
 
-  //reorder cancel item
-  const cancelOption =
-    cancelButtonIndex != null && options.splice(cancelButtonIndex, 1);
-  cancelOption && options.push(cancelOption[0]);
+  const { orderedOptions, hasCancelOption } = useMemo(() => {
+    const clonedOptions = [...options];
+    let cancelItem: (typeof options)[number] | undefined;
+
+    if (
+      cancelButtonIndex != null &&
+      cancelButtonIndex >= 0 &&
+      cancelButtonIndex < clonedOptions.length
+    ) {
+      [cancelItem] = clonedOptions.splice(cancelButtonIndex, 1);
+    }
+
+    if (cancelItem) {
+      clonedOptions.push(cancelItem);
+    }
+
+    return { orderedOptions: clonedOptions, hasCancelOption: !!cancelItem };
+  }, [options, cancelButtonIndex]);
 
   const firstItemIndex = 0;
-  const lastItemNoCancelIndex = options.length - (!cancelOption ? 1 : 2);
-  const lastItemIndex = cancelOption ? options.length - 1 : -1;
+  const lastItemNoCancelIndex =
+    orderedOptions.length > 0
+      ? orderedOptions.length - (hasCancelOption ? 2 : 1)
+      : -1;
+  const lastItemIndex = hasCancelOption ? orderedOptions.length - 1 : -1;
 
   const slideAnimation = useRef(new Animated.Value(0)).current;
+  const translateY = useMemo(
+    () =>
+      slideAnimation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [200, 0],
+      }),
+    [slideAnimation],
+  );
 
   const slideIn = useCallback(() => {
     Animated.timing(slideAnimation, {
@@ -79,7 +104,7 @@ export function ActionSheet(props: Props) {
 
   const renderOptions = () => (
     <>
-      {options.map(({ label, disabled }, index) => (
+      {orderedOptions.map(({ label, disabled }, index) => (
         <ActionSheetItem
           key={`actionItem-${index}`}
           label={label}
@@ -109,14 +134,7 @@ export function ActionSheet(props: Props) {
             <Animated.View
               style={{
                 width: '100%',
-                transform: [
-                  {
-                    translateY: slideAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [200, 0],
-                    }),
-                  },
-                ],
+                transform: [{ translateY }],
               }}
             >
               {renderOptions()}

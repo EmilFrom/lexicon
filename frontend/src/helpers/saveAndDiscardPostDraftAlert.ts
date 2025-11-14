@@ -1,7 +1,6 @@
 import { EventArg, NavigationAction } from '@react-navigation/native';
 import { UseFormGetValues, UseFormReset } from 'react-hook-form';
 import { Alert } from 'react-native';
-import { useDebouncedCallback } from 'use-debounce';
 
 import {
   draftSaveManager,

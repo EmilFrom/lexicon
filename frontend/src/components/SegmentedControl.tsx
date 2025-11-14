@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo } from 'react';
 import {
   Animated,
   Easing,
@@ -34,7 +34,7 @@ export function SegmentedControl<T>(props: Props<T>) {
     valuePaddingScene,
   } = props;
 
-  const positionValue = useRef(new Animated.Value(0)).current;
+  const positionValue = useMemo(() => new Animated.Value(0), []);
 
   const onSegmentSelected = (value: T, index: number) => {
     onItemPress(value, index);
@@ -55,6 +55,15 @@ export function SegmentedControl<T>(props: Props<T>) {
     (width - ((valuePaddingScene || spacing.xxl) * 2 + spacing.s)) /
     values.length;
 
+  const lastIndex = Math.max(values.length - 1, 0);
+  const translateX = useMemo(() => {
+    return positionValue.interpolate({
+      inputRange: [0, lastIndex],
+      // 4 is coming from initial padding of the container
+      outputRange: [4, lastIndex * IOS_SEGMENT_WIDTH],
+    });
+  }, [IOS_SEGMENT_WIDTH, lastIndex, positionValue]);
+
   return (
     <View style={styles.container}>
       {ios && (
@@ -63,11 +72,7 @@ export function SegmentedControl<T>(props: Props<T>) {
             {
               transform: [
                 {
-                  translateX: positionValue.interpolate({
-                    inputRange: [0, values.length - 1],
-                    // 4 is coming from initial padding of the container
-                    outputRange: [4, (values.length - 1) * IOS_SEGMENT_WIDTH],
-                  }),
+                  translateX,
                 },
               ],
             },

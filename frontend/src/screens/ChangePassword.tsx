@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Platform, View } from 'react-native';
 
 import { CustomHeader } from '../components';
@@ -9,6 +9,22 @@ import { useChangePassword, useProfile } from '../hooks';
 import { makeStyles } from '../theme';
 import { StackNavProp, UserDetail } from '../types';
 import { useDevice } from '../utils';
+
+const EMPTY_USER: UserDetail = {
+  __typename: 'UserDetail',
+  avatar: '',
+  bioRaw: '',
+  dateOfBirth: '',
+  location: '',
+  name: '',
+  username: '',
+  websiteName: '',
+  email: '',
+  secondaryEmails: [],
+  unconfirmedEmails: [],
+  canEditUsername: true,
+  admin: true,
+};
 
 export default function ChangePassword() {
   const storage = useStorage();
@@ -25,31 +41,14 @@ export default function ChangePassword() {
   );
 
   const [errorMessage, setError] = useState(false);
-  const [user, setUser] = useState<UserDetail>({
-    __typename: 'UserDetail',
-    avatar: '',
-    bioRaw: '',
-    dateOfBirth: '',
-    location: '',
-    name: '',
-    username: '',
-    websiteName: '',
-    email: '',
-    secondaryEmails: [],
-    unconfirmedEmails: [],
-    canEditUsername: true,
-    admin: true,
-  });
 
   const ios = Platform.OS === 'ios';
 
-  useEffect(() => {
-    if (userData) {
-       
-      userData.profile.user.__typename === 'UserDetail' &&
-        setUser(userData.profile.user);
-    }
-  }, [userData, setUser]);
+  // Derive the profile payload directly from the query to avoid redundant state transitions.
+  const user =
+    userData?.profile.user.__typename === 'UserDetail'
+      ? userData.profile.user
+      : EMPTY_USER;
 
   const { changeNewPassword, loading, error } = useChangePassword({
     onCompleted: () => {

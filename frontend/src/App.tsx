@@ -22,8 +22,8 @@ import {
 import { AuthProvider } from './utils/AuthProvider';
 
 if (__DEV__) {
-  require('react-native-console-time-polyfill');
-  require('../reactotronConfig');
+  void import('react-native-console-time-polyfill');
+  void import('../reactotronConfig');
   // Based on react-native-reanimated documentation about warning https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device
   LogBox.ignoreLogs([
     '[Reanimated] Reduced motion setting is enabled on this device.',

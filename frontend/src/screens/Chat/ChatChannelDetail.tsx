@@ -88,6 +88,8 @@ export default function ChatChannelDetail() {
   const [hasUnread, setHasUnread] = useState(false);
   const [isFetchMore, setIsFetchMore] = useState(false);
   const [loadingMessageId, setLoadingMessageId] = useState<number | null>(null);
+  const [shouldMaintainVisiblePosition, setShouldMaintainVisiblePosition] =
+    useState(false);
 
   const {
     getChatChannelDetail,
@@ -134,6 +136,7 @@ export default function ChatChannelDetail() {
         }
 
         nextTargetMessageId.current = canLoadMoreFuture ? messages[0].id : 0;
+        setShouldMaintainVisiblePosition(canLoadMoreFuture);
       },
     },
     'HIDE_ALERT',
@@ -466,7 +469,7 @@ export default function ChatChannelDetail() {
             />
           }
           maintainVisibleContentPosition={
-            nextTargetMessageId.current > 0
+            shouldMaintainVisiblePosition
               ? { minIndexForVisible: 1 }
               : undefined
           }

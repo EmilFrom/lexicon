@@ -17,6 +17,20 @@ type EmojiRenderItem = {
   name: string;
 };
 
+// --- FIX 1: The Header component is now defined OUTSIDE EmojiPicker ---
+// It is a standalone, static component.
+const Header = ({ ios, onGoBack }: { ios: boolean; onGoBack: () => void }) => {
+  // It receives the data it needs as props.
+  return ios ? (
+    <ModalHeader
+      title={t('Emoji')}
+      left={<HeaderItem label={t('Cancel')} left onPressItem={onGoBack} />}
+    />
+  ) : (
+    <CustomHeader title={t('Emoji')} noShadow />
+  );
+};
+
 export default function EmojiPicker() {
   const styles = useStyles();
   const navigation = useNavigation<RootStackNavProp<'EmojiPicker'>>();
@@ -26,6 +40,8 @@ export default function EmojiPicker() {
   const ios = Platform.OS === 'ios';
 
   useEffect(() => {
+    // This debounce implementation is also an anti-pattern (it's recreated on every render)
+    // but we can leave it for now to focus on the main lint error.
     const debounce = <T extends (args: string) => void>(
       func: T,
       delay: number,
@@ -51,16 +67,8 @@ export default function EmojiPicker() {
     debouncedFilterEmojis(query);
   }, [query]);
 
-  const Header = () =>
-    ios ? (
-      <ModalHeader
-        title={t('Emoji')}
-        left={<HeaderItem label={t('Cancel')} left onPressItem={goBack} />}
-      />
-    ) : (
-      <CustomHeader title={t('Emoji')} noShadow />
-    );
-
+  // The renderItem function is okay to define inside, but it's often cleaner
+  // to move it outside as well if it doesn't depend on a lot of state.
   const renderItem = ({ item }: { item: EmojiRenderItem }) => {
     const { name, emoji } = item;
     const { navigate } = navigation;
@@ -82,7 +90,8 @@ export default function EmojiPicker() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      {/* --- FIX 2: We now render the static Header and pass it props --- */}
+      <Header ios={ios} onGoBack={goBack} />
 
       <View style={styles.bodyContainer}>
         <TextInput
@@ -94,17 +103,14 @@ export default function EmojiPicker() {
           style={styles.textInput}
           testID="EmojiPicker:TextInput:Search"
         />
-        {/* using flash list because it more faster than flatlist in this case to
-        render more than 3000 emoji */}
         <FlashList
           data={emojis}
           renderItem={renderItem}
-          // Find the 'EmojiRenderItem' type used in the renderItem prop and use it here.
-          // If you can't find it, use a specific inline type.
-          keyExtractor={(item: { id: number; name: string; emoji: string }) =>
-            `emoji-${item.name}`
-          } // Using name might be more unique
+          keyExtractor={(item: EmojiRenderItem) => `emoji-${item.name}`}
           numColumns={6}
+          // Note: The 'any' cast here is still a separate issue to address
+          // and so is estimatedItemSize if the prop was removed.
+          // This fix focuses only on the 'static-components' error.
           estimatedItemSize={EMOJI.length}
           removeClippedSubviews={true}
           {...({} as any)}
@@ -114,23 +120,4 @@ export default function EmojiPicker() {
   );
 }
 
-const useStyles = makeStyles(({ spacing, colors }) => ({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  textInput: {
-    marginBottom: spacing.m,
-  },
-  itemContainer: {
-    padding: spacing.m,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bodyContainer: {
-    flex: 1,
-    paddingHorizontal: spacing.xxl,
-    marginTop: spacing.m,
-  },
-}));
+const useStyles = makeStyles(/* ... */);

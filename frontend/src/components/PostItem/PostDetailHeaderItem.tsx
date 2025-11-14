@@ -208,7 +208,7 @@ const resolvePostItemProps = ({
     }
   }
   if (cachedTopic) {
-    const { topicId, ...post } = transformTopicToPost({
+    const { topicId: _topicId, ...post } = transformTopicToPost({
       ...cachedTopic,
       channels,
     });

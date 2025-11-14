@@ -89,12 +89,15 @@ export function CustomHeader(props: Props) {
         ]}
         disabled={isLoading}
         onPress={() => {
-          prevScreen
-            ? // TODO: Fix this type error more properly when there's time
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              navigation.navigate(prevScreen, { backToTop: false })
-            : navigation.goBack();
+          if (prevScreen) {
+            // TODO: Fix this type error more properly when there's time
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            navigation.navigate(prevScreen, { backToTop: false });
+            return;
+          }
+
+          navigation.goBack();
         }}
         testID="HeaderBackButton"
       />

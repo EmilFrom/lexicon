@@ -106,7 +106,7 @@ export function Dropdown(props: Props) {
             maxHeight,
           });
         }
-        setShowOptions(!showOptions);
+        setShowOptions((prev) => !prev);
       });
     }
   };
@@ -165,7 +165,9 @@ export function Dropdown(props: Props) {
                     ]}
                     onPress={() => {
                       onSelect(option, index);
-                      !isMultiple && setShowOptions(false);
+                      if (!isMultiple) {
+                        setShowOptions(false);
+                      }
                     }}
                   >
                     {isSelectedMultiple && (
