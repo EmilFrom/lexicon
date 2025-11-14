@@ -31,5 +31,8 @@
 export const joinLeaveChannelOutputResponseTransform = (data: {
   membership: { chat_channel_id: number };
 }) => {
+  if (!data || !data.membership) {
+    return null;
+  }
   return data.membership;
 };

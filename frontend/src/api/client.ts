@@ -392,6 +392,8 @@ const restLink: RestLink = new RestLink({
   fieldNameDenormalizer: (key) => changeCase.snakeCase(key),
 
   responseTransformer: async (response, typeName) => {
+  console.log(`[RT] Processing: ${typeName}`);
+  
   if (!response) {
     throw new Error(`Network request failed for ${typeName}: Received null response.`);
   }
@@ -421,8 +423,11 @@ const restLink: RestLink = new RestLink({
     const dataJson = JSON.parse(rawResponseText);
     const transformer = responseTransformers[typeName];
     if (transformer) {
-      return transformer(dataJson, typeName, client);
+      const result = await transformer(dataJson, typeName, client);
+      console.log(`[RT] Success: ${typeName}`);
+      return result;
     }
+    console.log(`[RT] No transformer for: ${typeName}`);
     return dataJson;
   } catch (error) {
     console.error('=== ResponseTransformer Error ===');

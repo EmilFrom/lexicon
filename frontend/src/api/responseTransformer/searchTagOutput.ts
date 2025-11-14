@@ -29,5 +29,8 @@ import { Tag } from '../../generatedAPI/server';
 export const searchTagOutputResponseTransform = (data: {
   results: Array<Tag>;
 }) => {
+  if (!data || !data.results) {
+    return [];
+  }
   return data.results;
 };

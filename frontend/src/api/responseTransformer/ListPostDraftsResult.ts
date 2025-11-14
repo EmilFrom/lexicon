@@ -33,7 +33,7 @@ export const listPostDraftsResultResponseTransformer = async (
   _: string,
   client: Apollo,
 ) => {
-  if (!data.drafts || !Array.isArray(data.drafts)) {
+  if (!data || !data.drafts || !Array.isArray(data.drafts)) {
     return [];
   }
 

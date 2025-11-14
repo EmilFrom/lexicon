@@ -29,7 +29,11 @@ export const checkPostDraftResultResponseTransformer = async (
   _: string,
   client: Apollo,
 ) => {
-  // If there is no draft data, return an empty draft response.
+  // If there is no data or no draft data, return an empty draft response.
+  if (!data) {
+    return { draft: null, sequence: 0 };
+  }
+  
   if (!data.draft) {
     return { draft: null, sequence: data.draft_sequence };
   }
