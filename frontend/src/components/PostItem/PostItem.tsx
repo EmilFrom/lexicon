@@ -52,7 +52,7 @@ type Props = ViewProps & {
 
 function BasePostItem(props: Props) {
 
-  console.log('--- Props received by BasePostItem ---', props);
+  //console.log('--- Props received by BasePostItem ---', props);
 
   const { navigate } = useNavigation<StackNavProp<'TabNav'>>();
   const storage = useStorage();

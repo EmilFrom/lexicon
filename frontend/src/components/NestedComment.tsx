@@ -110,10 +110,10 @@ function BaseNestedComment(props: Props) {
   }, [id, onLayout]);
 
   const onPressViewIgnoredContent = () => {
-    // --- THIS IS THE LOG WE NEED ---
+   /*  // --- THIS IS THE LOG WE NEED ---
     console.log(`--- onPressViewIgnoredContent called for post ID: ${id} ---`);
     console.log(`Current content is empty: ${content === ''}`);
-    // --- END OF LOG ---
+    // --- END OF LOG --- */
 
 
     if (content === '') {

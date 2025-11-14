@@ -25,6 +25,10 @@ export function generatePollFormFromMarkdown(
     pollChoiceType: PollType.Regular,
   };
 
+  if (!markdown) {
+    return pollObject;
+  }
+
   const pollRegex = /\[poll(.*?)\]/;
   const match = markdown.match(pollRegex);
 

@@ -1,4 +1,8 @@
 export function getHyperlink(url: string, title: string) {
+  if (!url) {
+    return { newUrl: '', newTitle: title || '' };
+  }
+  
   const newTitle = title || url;
 
   let protocol = 'https://';

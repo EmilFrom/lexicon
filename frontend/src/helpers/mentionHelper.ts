@@ -9,6 +9,12 @@ export function mentionHelper(
   setMentionLoading: (value: SetStateAction<boolean>) => void,
   setMentionKeyword: (value: SetStateAction<string>) => void,
 ) {
+  if (!text) {
+    setShowUserList(false);
+    setMentionKeyword('');
+    return;
+  }
+  
   if (text.charAt(cursorPosition.end - 2) === '@') {
     setShowUserList(true);
   }

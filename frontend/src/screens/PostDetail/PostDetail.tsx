@@ -584,7 +584,7 @@ export default function PostDetail() {
     { isItemLoading, onLayout }: RenderItemCustomOption,
   ) => {
 
-    console.log('--- Post object FROM POSTDETAIL ---', JSON.stringify(item, null, 2));
+    //console.log('--- Post object FROM POSTDETAIL ---', JSON.stringify(item, null, 2));
 
     const { replyToPostNumber, canEdit, canFlag, hidden, id } = item;
 
@@ -643,13 +643,13 @@ export default function PostDetail() {
     );
   }
 
-  // --- THIS IS THE FINAL SET OF LOGS YOU NEED ---
+ /*  // --- THIS IS THE FINAL SET OF LOGS YOU NEED ---
   console.log('--- PostDetail Component State Before Render ---');
   console.log('Is loading:', loading); // The loading state from your query
   console.log('Error object:', JSON.stringify(error, null, 2)); // The error from your query
   console.log('Data from Query:', JSON.stringify(data, null, 2)); // The raw data from your query
   console.log('postComments variable:', JSON.stringify(postComments, null, 2)); // The variable you pass to the list
-  // --- END OF LOGS ---
+  // --- END OF LOGS --- */
   return isLoading ? (
     <PostDetailSkeletonLoading isLoading={isLoading} />
   ) : (

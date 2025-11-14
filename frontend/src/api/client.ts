@@ -425,7 +425,13 @@ const restLink: RestLink = new RestLink({
     }
     return dataJson;
   } catch (error) {
-    console.warn(`[responseTransformer] Error parsing JSON for typeName "${typeName}":`, error);
+    console.error('=== ResponseTransformer Error ===');
+    console.error('TypeName:', typeName);
+    console.error('Error Message:', error?.message);
+    console.error('Error Name:', error?.name);
+    console.error('Stack Trace:', error?.stack);
+    console.error('Has Transformer:', !!responseTransformers[typeName]);
+    console.error('=================================');
     throw error;
   }
 },

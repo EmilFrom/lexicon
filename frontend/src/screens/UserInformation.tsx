@@ -102,7 +102,7 @@ export default function UserInformation() {
   const [show, setShow] = useState<boolean>();
   const [refreshing, setRefreshing] = useState(false);
 
-  // --- START OF DIAGNOSTIC LOGS ---
+  /* // --- START OF DIAGNOSTIC LOGS ---
   console.log(`--- UserInformation Render for username: ${username} ---`);
 
   const {
@@ -128,7 +128,7 @@ export default function UserInformation() {
   console.log('Activity Loading:', loading);
   console.log('Activity Error:', JSON.stringify(error, null, 2));
   console.log('Activity Data:', JSON.stringify(data, null, 2));
-  // --- END OF DIAGNOSTIC LOGS ---
+  // --- END OF DIAGNOSTIC LOGS --- */
 
   const onEndReached = (distanceFromEnd: number) => {
     if (distanceFromEnd === 0) {
