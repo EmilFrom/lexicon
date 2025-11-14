@@ -20,4 +20,4 @@ api/lib
 .yarn
 frontend/old_patches
 
-*/backup_files
+backup_files/

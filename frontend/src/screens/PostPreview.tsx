@@ -73,6 +73,10 @@ export default function PostPreview() {
   const navigation = useNavigation<RootStackNavProp<'PostPreview'>>();
   const { goBack } = navigation;
 
+  //Manual lock for listener effect
+  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
+
+
   // CORRECTED: Add the hasPostedRef lock here
   const hasPostedRef = useRef(false);
 
@@ -112,22 +116,32 @@ export default function PostPreview() {
 
   const { newTopic, loading: newTopicLoading } = useNewTopic({
     onCompleted: ({ newTopic: result }) => {
-      if (hasPostedRef.current) return;
-      hasPostedRef.current = true;
-      console.log('--- Post Success (Attempting goBack) ---');
-      navigation.goBack(); // <-- The simplest dismissal action
-      //resetForm(FORM_DEFAULT_VALUES);
+      // 1. Tell the listener that we are about to navigate on purpose.
+      setIsNavigatingAway(true);
+
+      // 2. Use a short timeout to ensure the state update has time to process
+      //    before the navigation action is dispatched. This is a robust way
+      //    to solve this specific race condition.
+      setTimeout(() => {
+        navigation.pop(2); // Now we can use the more powerful pop(2)
+        resetForm(FORM_DEFAULT_VALUES);
+    }, 0);
     },
     refetchQueries,
   });
 
   const { reply: replyTopic, loading: replyLoading } = useReplyTopic({
     onCompleted: ({ replyPost: { postNumber } }) => {
-      if (hasPostedRef.current) return;
-      hasPostedRef.current = true;
-      console.log('--- Post Success (Attempting goBack) ---');
-      navigation.goBack(); // <-- The simplest dismissal action
-      //resetForm(FORM_DEFAULT_VALUES);
+      // 1. Tell the listener that we are about to navigate on purpose.
+      setIsNavigatingAway(true);
+
+      // 2. Use a short timeout to ensure the state update has time to process
+      //    before the navigation action is dispatched. This is a robust way
+      //    to solve this specific race condition.
+      setTimeout(() => {
+        navigation.pop(2); // Now we can use the more powerful pop(2)
+        resetForm(FORM_DEFAULT_VALUES);
+    }, 0);
     },
     onError: (error) => {
       errorHandlerAlert(error);
@@ -137,11 +151,16 @@ export default function PostPreview() {
 
   const { editPost, loading: editPostLoading } = useEditPost({
     onCompleted: () => {
-      if (hasPostedRef.current) return;
-      hasPostedRef.current = true;
-      console.log('--- Post Success (Attempting goBack) ---');
-      navigation.goBack(); // <-- The simplest dismissal action
-      //resetForm(FORM_DEFAULT_VALUES);
+      // 1. Tell the listener that we are about to navigate on purpose.
+      setIsNavigatingAway(true);
+
+      // 2. Use a short timeout to ensure the state update has time to process
+      //    before the navigation action is dispatched. This is a robust way
+      //    to solve this specific race condition.
+      setTimeout(() => {
+        navigation.pop(2); // Now we can use the more powerful pop(2)
+        resetForm(FORM_DEFAULT_VALUES);
+      }, 0);
     },
     onError: (error) => {
       errorHandlerAlert(error);
@@ -150,11 +169,16 @@ export default function PostPreview() {
 
   const { editTopic, loading: editTopicLoading } = useEditTopic({
     onCompleted: () => {
-      if (hasPostedRef.current) return;
-      hasPostedRef.current = true;
-      console.log('--- Post Success (Attempting goBack) ---');
-      navigation.goBack(); // <-- The simplest dismissal action
-      //resetForm(FORM_DEFAULT_VALUES);
+      // 1. Tell the listener that we are about to navigate on purpose.
+      setIsNavigatingAway(true);
+
+      // 2. Use a short timeout to ensure the state update has time to process
+      //    before the navigation action is dispatched. This is a robust way
+      //    to solve this specific race condition.
+      setTimeout(() => {
+        navigation.pop(2); // Now we can use the more powerful pop(2)
+        resetForm(FORM_DEFAULT_VALUES);
+    }, 0);
     },
     onError: (error) => {
       errorHandlerAlert(error);
@@ -172,8 +196,7 @@ export default function PostPreview() {
   }, [getImageUrls, shortUrls.length]);
 
 
-  // Commented out listener to test goBack functionality
-  /*   useEffect(
+    useEffect(
       () =>
         navigation.addListener('beforeRemove', (e) => {
           if (loading) {
@@ -181,7 +204,7 @@ export default function PostPreview() {
           }
         }),
       [loading, navigation],
-    ); */
+    );
 
   const postToServer = () => {
     setModal(false);
