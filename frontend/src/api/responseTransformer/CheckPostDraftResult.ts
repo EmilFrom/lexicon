@@ -33,7 +33,7 @@ export const checkPostDraftResultResponseTransformer = async (
   if (!data) {
     return { draft: null, sequence: 0 };
   }
-  
+
   if (!data.draft) {
     return { draft: null, sequence: data.draft_sequence };
   }

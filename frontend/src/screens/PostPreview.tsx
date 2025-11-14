@@ -106,7 +106,7 @@ export default function PostPreview() {
         client.cache.evict({ fieldName: 'topicDetail' });
         client.cache.gc(); // Garbage collect to clean up orphaned references
       }
-      
+
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);

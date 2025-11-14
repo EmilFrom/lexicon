@@ -392,72 +392,76 @@ const restLink: RestLink = new RestLink({
   fieldNameDenormalizer: (key) => changeCase.snakeCase(key),
 
   responseTransformer: async (response, typeName) => {
-  if (!response) {
-    throw new Error(`Network request failed for ${typeName}: Received null response.`);
-  }
+    if (!response) {
+      throw new Error(
+        `Network request failed for ${typeName}: Received null response.`,
+      );
+    }
 
-  if (typeName === 'PostRaw') {
-    // For this specific type, we expect plain text, not JSON.
-    const rawText = await response.text();
-    // Wrap it in the expected object structure.
-    return { raw: rawText };
-  }
+    if (typeName === 'PostRaw') {
+      // For this specific type, we expect plain text, not JSON.
+      const rawText = await response.text();
+      // Wrap it in the expected object structure.
+      return { raw: rawText };
+    }
 
-  if (typeName === 'String') {
-    // String type responses may not be JSON, handle them specially
+    if (typeName === 'String') {
+      // String type responses may not be JSON, handle them specially
+      try {
+        const text = await response.text();
+        // Try to parse as JSON first
+        const parsed = JSON.parse(text);
+        const transformer = responseTransformers[typeName];
+        if (transformer) {
+          return await transformer(parsed, typeName, client);
+        }
+        return parsed;
+      } catch {
+        // If JSON parsing fails, just return 'success'
+        return 'success';
+      }
+    }
+
+    // --- THIS IS THE NEW FIX ---
+    // Check the Content-Type header before doing anything else.
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.warn(
+        `[responseTransformer] Received non-JSON response for ${typeName}. Content-Type: ${contentType}`,
+      );
+      // If it's not JSON, we can't process it. Throw an error.
+      throw new Error(`Server returned non-JSON response for ${typeName}`);
+    }
+    // --- END OF NEW FIX ---
+
     try {
-      const text = await response.text();
-      // Try to parse as JSON first
-      const parsed = JSON.parse(text);
+      const rawResponseText = await response.text();
+      if (!rawResponseText) {
+        return null;
+      }
+      const dataJson = JSON.parse(rawResponseText);
       const transformer = responseTransformers[typeName];
       if (transformer) {
-        return await transformer(parsed, typeName, client);
+        return await transformer(dataJson, typeName, client);
       }
-      return parsed;
+      return dataJson;
     } catch (error) {
-      // If JSON parsing fails, just return 'success'
-      return 'success';
+      console.error('=== ResponseTransformer Error ===');
+      console.error('TypeName:', typeName);
+      console.error('Error Message:', (error as Error)?.message);
+      console.error('Error Name:', (error as Error)?.name);
+      console.error('Stack Trace:', (error as Error)?.stack);
+      console.error('Has Transformer:', !!responseTransformers[typeName]);
+      console.error('=================================');
+      throw error;
     }
-  }
+  },
 
-  // --- THIS IS THE NEW FIX ---
-  // Check the Content-Type header before doing anything else.
-  const contentType = response.headers.get('content-type');
-  if (!contentType || !contentType.includes('application/json')) {
-    console.warn(`[responseTransformer] Received non-JSON response for ${typeName}. Content-Type: ${contentType}`);
-    // If it's not JSON, we can't process it. Throw an error.
-    throw new Error(`Server returned non-JSON response for ${typeName}`);
-  }
-  // --- END OF NEW FIX ---
-
-  try {
-    const rawResponseText = await response.text();
-    if (!rawResponseText) {
-      return null;
-    }
-    const dataJson = JSON.parse(rawResponseText);
-    const transformer = responseTransformers[typeName];
-    if (transformer) {
-      return await transformer(dataJson, typeName, client);
-    }
-    return dataJson;
-  } catch (error) {
-    console.error('=== ResponseTransformer Error ===');
-    console.error('TypeName:', typeName);
-    console.error('Error Message:', (error as Error)?.message);
-    console.error('Error Name:', (error as Error)?.name);
-    console.error('Stack Trace:', (error as Error)?.stack);
-    console.error('Has Transformer:', !!responseTransformers[typeName]);
-    console.error('=================================');
-    throw error;
-  }
-},
-
-    /**
-     * For file upload implementation based on https://github.com/apollographql/apollo-link-rest/issues/200#issuecomment-509287597
-     */
-    bodySerializers,
-  });
+  /**
+   * For file upload implementation based on https://github.com/apollographql/apollo-link-rest/issues/200#issuecomment-509287597
+   */
+  bodySerializers,
+});
 
 export const client = new ApolloClient({
   link: ApolloLink.from([errorLink, authLink, restLink]),

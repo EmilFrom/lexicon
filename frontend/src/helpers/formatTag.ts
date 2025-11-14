@@ -2,7 +2,7 @@ export function formatTag(text: string, maxLength?: number): string {
   if (!text) {
     return '';
   }
-  
+
   const words = text.match(/[a-z0-9]+/gi);
 
   if (!words) {

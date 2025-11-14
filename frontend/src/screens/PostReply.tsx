@@ -85,10 +85,10 @@ export default function PostReply() {
   const [persistedParams, setPersistedParams] =
     useState<RootStackParamList['PostReply']>(params);
 
-   
   useEffect(() => {
     // This effect safely merges new incoming params into our persistent state
     // without violating the rules of hooks.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPersistedParams((prevParams) => ({ ...prevParams, ...params }));
   }, [params]);
 
@@ -271,12 +271,13 @@ export default function PostReply() {
   );
 
   const processedImageUriRef = useRef<string | null>(null);
-   
+
   useEffect(() => {
     if (!imageUri || processedImageUriRef.current === imageUri) {
       return;
     }
     processedImageUriRef.current = imageUri;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     enqueueImageUpload(imageUri);
   }, [enqueueImageUpload, imageUri]);
 

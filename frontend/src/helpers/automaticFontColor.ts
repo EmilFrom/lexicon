@@ -7,7 +7,7 @@ export function hexToRgb(color: string): HexToRgbResult {
   if (!color) {
     return { isSuccess: false, rgb: [-1] };
   }
-  
+
   const isHex = color.startsWith('#');
   const hex = color.slice(1);
 

@@ -14,7 +14,7 @@ export function mentionHelper(
     setMentionKeyword('');
     return;
   }
-  
+
   if (text.charAt(cursorPosition.end - 2) === '@') {
     setShowUserList(true);
   }

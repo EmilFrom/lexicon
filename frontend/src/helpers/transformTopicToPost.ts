@@ -29,7 +29,6 @@ const transformTopicToPost = ({
   channels,
   imageUrl,
 }: Params): PostWithoutId => {
-
   // --- THIS IS THE DEFINITIVE FIX ---
   // The primary method for finding the author should be by their description,
   // as the `authorUserId` can be null.
@@ -43,10 +42,10 @@ const transformTopicToPost = ({
       (poster) => poster.userId != null && poster.userId === authorUserId,
     );
   }
-  
+
   // As a final fallback, just take the first poster in the list.
   if (!author && posters && posters.length > 0) {
-      author = posters[0];
+    author = posters[0];
   }
 
   const authorUser = author?.user;

@@ -67,11 +67,11 @@ type MarkdownWithImage = {
 
 export function anchorToMarkdown(rawContent: string): MarkdownWithImage {
   //used in activity scene, all images and url are rendered in anchor tag, while emojis are rendered in image tags
-  
+
   if (!rawContent) {
     return { content: '', imageUrl: undefined, mentionedUsers: [] };
   }
-  
+
   //image
   const imgRegex =
     /<a[^>]*? href="([^>]+(?:jpe?g|png|gif|heic|heif))".*?>(.*?)<\/a>/g;

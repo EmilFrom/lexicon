@@ -199,8 +199,6 @@ export default function UserInformation() {
   const splittedBio = bio ? bio.split(/\r\n|\r|\n/) : [''];
   const statusUser = profileData && profileData.profile?.user.status;
 
-  
-
   const bioPreview = splittedBio
     ? splittedBio.length > 3
       ? `${splittedBio.slice(0, 3).join('\n')}...`

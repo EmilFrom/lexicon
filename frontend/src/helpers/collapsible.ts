@@ -111,7 +111,7 @@ export function extractCollapsibleContent(collapsible: string) {
   if (!collapsible) {
     return { title: '', details: '' };
   }
-  
+
   const title =
     collapsible
       .match(/^\[details="(.*?)"\]/)
@@ -130,7 +130,7 @@ export function isCollapsible(content: string) {
   if (!content) {
     return false;
   }
-  
+
   const regex = /^\[details="[^[\]]+"\].*\[\/details\]$/s;
   return regex.test(content);
 }
@@ -139,7 +139,7 @@ export function separateCollapsibleInContent(content: string) {
   if (!content) {
     return [''];
   }
-  
+
   const collapsibles = extractCollapsible(content);
 
   if (!collapsibles.length) {

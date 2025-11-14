@@ -95,7 +95,7 @@ export function postDetailContentHandler({
   };
 
   const postComments: Array<Post> = [];
-  
+
   // Guard against null postStream before destructuring
   if (!postStream) {
     return {
@@ -107,7 +107,7 @@ export function postDetailContentHandler({
       lastLoadedCommentIndex: null,
     };
   }
-  
+
   const {
     stream,
     posts: basePostComments,
@@ -116,11 +116,11 @@ export function postDetailContentHandler({
 
   // Guard against null basePostComments
   if (basePostComments) {
-  basePostComments.forEach((params) => {
-    postComments.push(
-      transformPostsToFrontendPost({ post: params, channel, freqPosters }),
-    );
-  });
+    basePostComments.forEach((params) => {
+      postComments.push(
+        transformPostsToFrontendPost({ post: params, channel, freqPosters }),
+      );
+    });
   }
 
   let firstPost;

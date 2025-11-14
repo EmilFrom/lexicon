@@ -179,7 +179,7 @@ export function generateMarkdownContent(raw: string, cooked: string) {
   if (!raw || !cooked) {
     return raw || '';
   }
-  
+
   const imageUrls = getCompleteImageVideoUrls(cooked) ?? [];
 
   const emojiBBcode = raw.match(emojiBBCodeRegex);
