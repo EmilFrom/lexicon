@@ -105,13 +105,15 @@ export default function NewMessage() {
   const polls: Array<PollFormContextValues> | undefined = watch('polls');
   const { isDraft, draftKey } = getValues();
 
-  let { hyperlinkUrl, hyperlinkTitle, imageUri } = useMemo(() => {
+  const memoizedLinkParams = useMemo(() => {
     return {
       hyperlinkUrl: params?.hyperlinkUrl || '',
       hyperlinkTitle: params?.hyperlinkTitle || '',
       imageUri: params?.imageUri || '',
     };
   }, [params]);
+  let { hyperlinkUrl, hyperlinkTitle } = memoizedLinkParams;
+  const { imageUri } = memoizedLinkParams;
 
   const kasv = useKASVWorkaround();
 

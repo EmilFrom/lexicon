@@ -126,18 +126,7 @@ export default function NewPost() {
   } = useFormContext<NewPostForm>();
 
   const { params } = useRoute<RootStackRouteProp<'NewPost'>>();
-  let {
-    editPostId,
-    editTopicId,
-    oldContent,
-    oldTitle,
-    editedUser,
-    hyperlinkUrl,
-    hyperlinkTitle,
-    imageUri,
-    sequence,
-    isDraft,
-  } = useMemo(() => {
+  const memoizedFormParams = useMemo(() => {
     const values = getValues();
 
     return {
@@ -153,6 +142,17 @@ export default function NewPost() {
       isDraft: values.isDraft ?? false,
     };
   }, [params, getValues]);
+  const {
+    editPostId,
+    editTopicId,
+    oldContent,
+    oldTitle,
+    editedUser,
+    imageUri,
+    sequence,
+    isDraft,
+  } = memoizedFormParams;
+  let { hyperlinkUrl, hyperlinkTitle } = memoizedFormParams;
 
   /**
    * Using the watch function to update the values of the channel and tags fields when changes occur in the form.

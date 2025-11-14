@@ -157,7 +157,8 @@ const resolvePostItemProps = ({
   }
 
   if (postDetailContent) {
-    let { topic, firstPost } = postDetailContent;
+    const { topic } = postDetailContent;
+    let { firstPost } = postDetailContent;
     if (!firstPost && cachedFirstPost?.id) {
       const freqPosters = cachedTopic?.posters
         ? cachedTopic.posters.map(({ user }) => ({

@@ -38,15 +38,15 @@ export function Markdown(props: MarkdownProps) {
   const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
   let styles = useStyles();
 
-  let {
-    content,
+  let { content, ...restProps } = props;
+  const {
     fontColor,
     mentionColor,
     style,
     mentions,
     nonClickable,
     ...otherProps
-  } = props;
+  } = restProps;
 
   content = filterMarkdownContentPoll(content).filteredMarkdown;
 

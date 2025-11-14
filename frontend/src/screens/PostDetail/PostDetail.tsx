@@ -436,14 +436,15 @@ export default function PostDetail() {
 
   const onPressMore = useCallback(
     (params?: PressMoreParams) => {
-      let {
-        id,
+      const mergedParams: PressMoreParams = params ?? {};
+      let { id } = mergedParams;
+      const {
         canFlag = !!(firstPost && firstPost.canFlag),
         canEdit = !!(firstPost && firstPost.canEdit),
         flaggedByCommunity = !!(firstPost && firstPost.hidden),
         fromPost = true,
         author,
-      } = params ?? {};
+      } = mergedParams;
       if (currentUserId && topic) {
         if (!id || typeof id !== 'number') {
           id = topic.firstPostId;

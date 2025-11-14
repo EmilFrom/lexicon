@@ -79,7 +79,11 @@ export default function PostReply() {
    * the navigation done from the preview will empty all other params
    */
   const savedNavigationParams = useRef<RootStackParamList['PostReply']>(params);
-  let {
+  const mergedNavigationParams = {
+    ...savedNavigationParams.current,
+    ...params,
+  };
+  const {
     title,
     topicId,
     replyToPostId,
@@ -87,10 +91,9 @@ export default function PostReply() {
     editPostId,
     oldContent = '',
     editedUser,
-    hyperlinkTitle = '',
-    hyperlinkUrl,
     imageUri = '',
-  } = { ...savedNavigationParams.current, ...params };
+  } = mergedNavigationParams;
+  let { hyperlinkTitle = '', hyperlinkUrl } = mergedNavigationParams;
   const replyingTo = client.readFragment<PostFragment>({
     id: `Post:${replyToPostId}`,
     fragment: PostFragmentDoc,
