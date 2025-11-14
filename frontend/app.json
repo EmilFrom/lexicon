@@ -56,6 +56,9 @@
         "usesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.emilfrom.tt-uturn",
+      "infoPlist": {
+        "CFBundleDisplayName": "Tænketanken U-Turn"
+      },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
           {
