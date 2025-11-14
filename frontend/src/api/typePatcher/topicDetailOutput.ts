@@ -14,6 +14,12 @@ export const topicDetailOutputPatcher: RestLink.FunctionalTypePatcher = (
   context,
 ) => {
   const { includeFirstPost } = context.resolverParams.args;
+  
+  // Guard against null postStream or posts
+  if (!data.postStream || !data.postStream.posts) {
+    return { ...data, __typename: 'TopicDetailOutput' };
+  }
+  
   const formattedPosts = data.postStream.posts.map((post: Post) => {
     return generatePostPatcher(post);
   });
@@ -38,7 +44,6 @@ export const topicDetailOutputPatcher: RestLink.FunctionalTypePatcher = (
       },
     )?.acted;
     data.liked = isLiked;
-  }
 
   if (firstPostOfData.postNumber === FIRST_POST_NUMBER) {
     data.postStream.posts = data.postStream.posts.slice(1);
@@ -46,6 +51,7 @@ export const topicDetailOutputPatcher: RestLink.FunctionalTypePatcher = (
       data.postStream.firstPost = firstPostOfData;
     }
     return { ...data, __typename: 'TopicDetailOutput' };
+    }
   }
 
   return {

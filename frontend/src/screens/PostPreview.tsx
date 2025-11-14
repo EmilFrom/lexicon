@@ -6,6 +6,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import mock from '../__mocks__/mockData';
+import { client } from '../api/client';
 import {
   Author,
   CustomHeader,
@@ -18,7 +19,6 @@ import {
 import { PollPostPreview } from '../components/Poll';
 import { FORM_DEFAULT_VALUES, refetchQueriesPostDraft } from '../constants';
 import { CustomImage, Divider, IconWithLabel, Text } from '../core-ui';
-import { GetTopicDetailDocument } from '../generatedAPI/server';
 import {
   combineContentWithPollContent,
   errorHandlerAlert,
@@ -80,17 +80,6 @@ export default function PostPreview() {
 
   const refetchQueries = isDraft ? refetchQueriesPostDraft : [];
 
-  // Add TopicDetail refetch when replying to ensure the post detail refreshes
-  const replyRefetchQueries = reply && postData?.topicId
-    ? [
-        ...refetchQueries,
-        {
-          query: GetTopicDetailDocument,
-          variables: { topicId: postData.topicId },
-        },
-      ]
-    : refetchQueries;
-
   // --- ALL onCompleted HANDLERS ARE NOW CORRECTED ---
 
   const { newTopic, loading: newTopicLoading } = useNewTopic({
@@ -105,15 +94,27 @@ export default function PostPreview() {
 
   const { reply: replyTopic, loading: replyLoading } = useReplyTopic({
     onCompleted: () => {
+      // Evict the TopicDetailOutput cache to force a complete refresh when the user navigates back
+      if (postData?.topicId) {
+        client.cache.evict({
+          id: client.cache.identify({
+            __typename: 'TopicDetailOutput',
+            id: postData.topicId,
+          }),
+        });
+        // Also evict all Post objects to ensure fresh data
+        client.cache.evict({ fieldName: 'topicDetail' });
+        client.cache.gc(); // Garbage collect to clean up orphaned references
+      }
+      
       setTimeout(() => {
-        navigation.pop(2); // Now we can use the more powerful pop(2)
+        navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
     onError: (error) => {
       errorHandlerAlert(error);
     },
-    refetchQueries: replyRefetchQueries,
   });
 
   const { editPost, loading: editPostLoading } = useEditPost({

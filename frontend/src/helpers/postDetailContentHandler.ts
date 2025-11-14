@@ -95,17 +95,33 @@ export function postDetailContentHandler({
   };
 
   const postComments: Array<Post> = [];
+  
+  // Guard against null postStream before destructuring
+  if (!postStream) {
+    return {
+      stream: null,
+      topic,
+      postComments: [],
+      firstPost: undefined,
+      firstLoadedCommentIndex: null,
+      lastLoadedCommentIndex: null,
+    };
+  }
+  
   const {
     stream,
     posts: basePostComments,
     firstPost: originalFirstPost,
   } = postStream;
 
+  // Guard against null basePostComments
+  if (basePostComments) {
   basePostComments.forEach((params) => {
     postComments.push(
       transformPostsToFrontendPost({ post: params, channel, freqPosters }),
     );
   });
+  }
 
   let firstPost;
   if (originalFirstPost) {

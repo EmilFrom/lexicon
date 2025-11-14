@@ -8,7 +8,7 @@ import { generatePostPatcher } from './helper/Post';
 
 export const privateMessageDetailOutputPatcher: RestLink.FunctionalTypePatcher =
   (data) => {
-    if (data.postStream) {
+    if (data.postStream && data.postStream.posts) {
       const formattedPosts = data.postStream.posts.map((post: Post) => {
         return generatePostPatcher(post);
       });
