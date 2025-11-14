@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   Modal,
   ModalProps,
@@ -68,7 +68,7 @@ export function ActionSheet(props: Props) {
       : -1;
   const lastItemIndex = hasCancelOption ? orderedOptions.length - 1 : -1;
 
-  const slideAnimation = useRef(new Animated.Value(0)).current;
+  const slideAnimation = useMemo(() => new Animated.Value(0), []);
   const translateY = useMemo(
     () =>
       slideAnimation.interpolate({
@@ -110,8 +110,11 @@ export function ActionSheet(props: Props) {
           label={label}
           disabled={disabled}
           onPress={() => {
-            !disabled && actionItemOnPress(index);
-            !disabled && slideOut();
+            if (disabled) {
+              return;
+            }
+            actionItemOnPress(index);
+            slideOut();
           }}
           isTop={index === firstItemIndex}
           isBottom={index === lastItemNoCancelIndex}

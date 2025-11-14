@@ -147,7 +147,6 @@ export default function ChatChannelDetail() {
       errorHandlerAlert(error);
     },
     update: (cache, _, { variables }) => {
-      variables;
       cache.modify({
         id: `ChannelList:${variables?.channelId}`,
         fields: {

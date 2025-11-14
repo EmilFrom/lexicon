@@ -77,7 +77,6 @@ export default function ChannelList(props: Props) {
       errorHandlerAlert(error);
     },
     update: (cache, _, { variables }) => {
-      variables;
       cache.modify({
         id: `ChannelList:${variables?.channelId}`,
         fields: {
@@ -92,7 +91,6 @@ export default function ChannelList(props: Props) {
 
   const { markReadChat } = useMarkReadChat({
     update: (cache, _, { variables }) => {
-      variables;
       cache.modify({
         id: `ChannelList:${variables?.channelId}`,
         fields: {

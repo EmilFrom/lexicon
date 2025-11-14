@@ -105,7 +105,8 @@ export default function ThreadDetails() {
       channelId,
     },
     onCompleted: ({ getThreadMessages }) => {
-      let { messages, meta } = getThreadMessages;
+      const { meta, messages: fetchedMessages } = getThreadMessages;
+      let messages = fetchedMessages;
       if (messages.length) {
         if (messages[0].id === threadFirstMessageId) {
           messages = messages.slice(1);
@@ -200,8 +201,7 @@ export default function ThreadDetails() {
   }, [isListRead, threadFirstMessageId, threadMessages, threadTargetMessageId]);
 
   useEffect(() => {
-    let unsubscribe;
-    unsubscribe = addListener('focus', () => {
+    const unsubscribe = addListener('focus', () => {
       if (targetThreadMessageId.current) {
         getData({
           channelId,

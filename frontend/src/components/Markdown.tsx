@@ -38,14 +38,8 @@ export function Markdown(props: MarkdownProps) {
   const baseStyles = useStyles();
 
   const { content, ...restProps } = props;
-  const {
-    fontColor,
-    mentionColor,
-    style,
-    mentions: _mentions,
-    nonClickable,
-    ...otherProps
-  } = restProps;
+  const { fontColor, mentionColor, style, nonClickable, ...otherProps } =
+    restProps;
 
   const filteredContent =
     filterMarkdownContentPoll(content).filteredMarkdown;

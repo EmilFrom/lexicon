@@ -183,7 +183,7 @@ export default function AuthenticationWebView() {
                   decodeURIComponent(apiKey),
                   privateKey,
                 );
-              } catch (error) {
+              } catch {
                 onErrorAuth();
               }
 
@@ -194,7 +194,7 @@ export default function AuthenticationWebView() {
                 }
 
                 onLoginCompleted(key);
-              } catch (error) {
+              } catch {
                 onErrorAuth();
               }
             })();

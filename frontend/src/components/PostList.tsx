@@ -41,8 +41,6 @@ function PostList<T extends ItemType>(props: Props<T>) {
     return `topic-${item.topicId}`;
   };
 
-  const FlatListWithAnimated = Animated.FlatList as any;
-
   return (
     /**
      * Migrated to animated.flatlist to fix onEndReached not triggered when we still use
@@ -50,7 +48,7 @@ function PostList<T extends ItemType>(props: Props<T>) {
      * https://github.com/kodefox/lexicon/pull/923#issuecomment-1408529189
      * Updated animated.flatlist as any type
      */
-    <FlatListWithAnimated
+    <Animated.FlatList<T>
       ref={postListRef}
       data={data}
       refreshControl={

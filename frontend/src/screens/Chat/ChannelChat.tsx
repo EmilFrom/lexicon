@@ -120,8 +120,7 @@ export default function ChannelChat() {
   };
 
   useEffect(() => {
-    let unsubscribe;
-    unsubscribe = addListener('focus', () => {
+    const unsubscribe = addListener('focus', () => {
       const variables: GetChatChannelsQueryVariables = {
         status: selectedOption.value,
         filter: searchValue,
@@ -188,7 +187,7 @@ export default function ChannelChat() {
         setOffset(nextOffset);
       }
       setLoading(false);
-    } catch (error) {
+    } catch (_error) {
       isFetchingMoreChannels.current = false;
       setLoading(false);
     }

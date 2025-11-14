@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { View, ViewProps } from 'react-native';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -12,7 +12,6 @@ import { useOngoingLikedTopic } from '../../utils';
 import { MetricItem } from './MetricItem';
 
 type Props = {
-  title?: string;
   postNumber?: number;
   likePerformedFrom?: 'home-scene' | 'topic-detail';
 } & MetricViewProps;
@@ -33,17 +32,16 @@ export function Metrics(props: Props) {
     postNumber,
     isLiked,
     isCreator,
-    title,
     likePerformedFrom = 'topic-detail',
     onPressReply,
     onPressView,
     ...otherProps
   } = props;
 
-  const [likeData, setLikeData] = useState({
-    liked: isLiked,
-    likeCount: likeCountProps,
-  });
+  const [optimisticLike, setOptimisticLike] = useState<{
+    liked: boolean;
+    likeCount: number;
+  } | null>(null);
   const isFromHomeScene = likePerformedFrom === 'home-scene';
 
   const [like] = useLikeTopicOrPost();
@@ -64,65 +62,27 @@ export function Metrics(props: Props) {
     DEBOUNCE_WAIT_TIME,
   );
 
-  /**
-   * Update like count and liked value for topic replies
-   * This is separated from the other useEffect to prevent
-   * updating like data for topic replies when ongoing
-   * likedTopics value changes
-   */
-  useEffect(() => {
+  const baseLikeData = useMemo(() => {
     const isFirstPost = postNumber === FIRST_POST_NUMBER;
-    // Skip updating like count and liked value for topic and first post of topics
-    if (isFromHomeScene || isFirstPost) {
-      return;
-    }
-    setLikeData({ likeCount: likeCountProps, liked: isLiked });
-  }, [isFromHomeScene, isLiked, likeCountProps, likePerformedFrom, postNumber]);
 
-  /**
-   * Update like count and liked value for topic and first post of topics
-   * if isFromHomeScene is true, then it's a topic
-   * if isFirstPost is true, then it's the first post of topics
-   */
-  useEffect(() => {
-    const isFirstPost = postNumber === FIRST_POST_NUMBER;
     if (!isFromHomeScene && !isFirstPost) {
-      return;
+      return { liked: isLiked, likeCount: likeCountProps };
     }
 
     const { liked: likedTopic, likeCount: topicLikeCount } =
       likedTopics[topicId] ?? {};
     const liked = likedTopic ?? isLiked;
-    let likeCount = topicLikeCount ?? likeCountProps;
 
     if (!isFirstPost) {
-      setLikeData({ likeCount, liked });
-      return;
+      return { liked, likeCount: topicLikeCount ?? likeCountProps };
     }
 
-    /**
-     * Revert post like count to not use topic like count
-     * Liked value of the topic resembles the liked value of the first post.
-     * However, the like counts are different because topic likeCount
-     * represents the total of likes within that topic, while post
-     * likeCount only represents the number of likes for that post
-     */
+    const likeCount =
+      liked === isLiked
+        ? likeCountProps
+        : getUpdatedLikeCount({ liked, previousCount: likeCountProps });
 
-    likeCount = likeCountProps;
-
-    /**
-     * Update post likeCount if topic liked and post liked values are different
-     * This means there's an ongoing like action related to this post, so
-     * post likeCount should get recalculated
-     */
-    if (liked !== isLiked) {
-      const updatedLikeCount = getUpdatedLikeCount({
-        liked,
-        previousCount: likeCountProps,
-      });
-      likeCount = updatedLikeCount;
-    }
-    setLikeData({ likeCount, liked });
+    return { liked, likeCount };
   }, [
     isFromHomeScene,
     isLiked,
@@ -132,6 +92,16 @@ export function Metrics(props: Props) {
     topicId,
   ]);
 
+  const effectiveOptimistic = useMemo(() => {
+    if (!optimisticLike) {
+      return null;
+    }
+    const matchesBase =
+      optimisticLike.liked === baseLikeData.liked &&
+      optimisticLike.likeCount === baseLikeData.likeCount;
+    return matchesBase ? null : optimisticLike;
+  }, [baseLikeData, optimisticLike]);
+
   // Ensuring debounced callback is called if it hasn't fired when component unmount
   useEffect(() => {
     return () => {
@@ -140,24 +110,27 @@ export function Metrics(props: Props) {
   }, [performDebouncedLike]);
 
   // TODO: Add navigation #800
+  const displayLikeData = effectiveOptimistic ?? baseLikeData;
+
   const onPressLike = useCallback(() => {
-    setLikeData(({ liked: prevLiked, likeCount: previousCount }) => {
-      const liked = !prevLiked;
+    setOptimisticLike((prev) => {
+      const base = prev ?? displayLikeData;
+      const nextLiked = !base.liked;
       const likeCount = getUpdatedLikeCount({
-        liked,
-        previousCount,
+        liked: nextLiked,
+        previousCount: base.likeCount,
       });
-      performDebouncedLike(liked, previousCount);
-      return { liked, likeCount };
+      performDebouncedLike(nextLiked, base.likeCount);
+      return { liked: nextLiked, likeCount };
     });
-  }, [performDebouncedLike]);
+  }, [displayLikeData, performDebouncedLike]);
 
   return (
     <MetricsView
       topicId={topicId}
       postId={postId}
-      isLiked={likeData.liked}
-      likeCount={likeData.likeCount}
+      isLiked={displayLikeData.liked}
+      likeCount={displayLikeData.likeCount}
       replyCount={replyCount}
       viewCount={viewCount}
       isCreator={isCreator}

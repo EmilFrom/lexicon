@@ -78,15 +78,13 @@ export default function PostReply() {
    * we need to save initial params because after image upload
    * the navigation done from the preview will empty all other params
    */
-  const [persistedParams, setPersistedParams] = useState<
-    RootStackParamList['PostReply']
-  >(params);
+  const persistedParamsRef = useRef<RootStackParamList['PostReply']>(params);
 
   useEffect(() => {
-    setPersistedParams((previous) => ({
-      ...previous,
+    persistedParamsRef.current = {
+      ...persistedParamsRef.current,
       ...params,
-    }));
+    };
   }, [params]);
 
   const {
@@ -97,9 +95,9 @@ export default function PostReply() {
     editPostId,
     oldContent = '',
     editedUser,
-  } = persistedParams;
-  const imageUri = persistedParams.imageUri ?? '';
-  let { hyperlinkTitle = '', hyperlinkUrl } = persistedParams;
+  } = persistedParamsRef.current;
+  const imageUri = persistedParamsRef.current.imageUri ?? '';
+  let { hyperlinkTitle = '', hyperlinkUrl } = persistedParamsRef.current;
   const replyingTo = client.readFragment<PostFragment>({
     id: `Post:${replyToPostId}`,
     fragment: PostFragmentDoc,
@@ -141,24 +139,22 @@ export default function PostReply() {
     formState,
   } = useFormContext<NewPostForm>();
   const polls = watch('polls');
+  const rawContent = watch('raw');
 
-  const [imagesArray, setImagesArray] = useState<Array<Image>>([]);
-  const [uri, setUri] = useState('');
-  const [postValidity, setPostValidity] = useState(false);
   const [showUserList, setShowUserList] = useState(false);
   const [currentUploadToken, setCurrentUploadToken] = useState(1);
 
-  const uploadsInProgress = imagesArray.filter((image) => !image.done).length;
+  const uploadsInProgress = tempArray.filter((image) => !image.done).length;
 
   const [isKeyboardShow, setKeyboardShow] = useState(false);
 
   const debounced = useDebouncedCallback(
     ({ value, token }: { value: string; token: number }) => {
-      if (imagesArray[token - 1]) {
+      if (tempArray[token - 1]) {
         const newText = getReplacedImageUploadStatus(
           value,
           token,
-          imagesArray[token - 1].link,
+          tempArray[token - 1].link,
         );
 
         setValue('raw', newText);
@@ -169,9 +165,57 @@ export default function PostReply() {
 
   const postReplyRef = useRef<TextInputType>(null);
 
-  const { upload, tempArray, completedToken } = useStatefulUpload(
-    imagesArray,
+  const { upload, tempArray, setTempArray, completedToken } = useStatefulUpload(
+    [],
     currentUploadToken,
+  );
+  const processedImageUriRef = useRef<string | null>(null);
+
+  const enqueueImageUpload = useCallback(
+    (localUri: string) => {
+      if (!localUri || !user) {
+        return;
+      }
+
+      const placeholderIndex = tempArray.length + 1;
+      setTempArray((prev) => [...prev, { link: '', done: false }]);
+
+      const reactNativeFile = createReactNativeFile(localUri);
+      if (!reactNativeFile) {
+        return;
+      }
+
+      const { raw } = getValues();
+      const result = insertImageUploadStatus(
+        raw,
+        cursorPosition.start,
+        placeholderIndex,
+      );
+      setValue('raw', result);
+      setCurrentUploadToken((prevToken) => {
+        const token = prevToken;
+        upload({
+          variables: {
+            input: {
+              file: reactNativeFile,
+              userId: user.id || 0,
+              type: UploadTypeEnum.Composer,
+              token,
+            },
+          },
+        });
+        return prevToken + 1;
+      });
+    },
+    [
+      cursorPosition.start,
+      getValues,
+      setTempArray,
+      setValue,
+      tempArray.length,
+      upload,
+      user,
+    ],
   );
 
   const { createPostDraft, loading: loadingCreateAndUpdatePostDraft } =
@@ -207,14 +251,12 @@ export default function PostReply() {
   }, [getPost, getValues, replyToPostId]);
 
   useEffect(() => {
-    const { raw } = getValues();
-    if (completedToken) {
-      debounced({ value: raw, token: completedToken });
+    if (!completedToken) {
+      return;
     }
-    setImagesArray(tempArray);
-  }, [getValues, tempArray, debounced, completedToken]);
-
-  useEffect(() => setUri(imageUri), [imageUri]);
+    const { raw } = getValues();
+    debounced({ value: raw, token: completedToken });
+  }, [completedToken, debounced, getValues]);
 
   const { mentionMembers } = useMention(
     mentionKeyword,
@@ -223,44 +265,12 @@ export default function PostReply() {
   );
 
   useEffect(() => {
-    if (!uri || !user) {
+    if (!imageUri || processedImageUriRef.current === imageUri) {
       return;
     }
-    setImagesArray([...imagesArray, { link: '', done: false }]);
-    setCurrentUploadToken(currentUploadToken + 1);
-    const reactNativeFile = createReactNativeFile(uri);
-    if (!reactNativeFile) {
-      return;
-    }
-    const { raw } = getValues();
-    const result = insertImageUploadStatus(
-      raw,
-      cursorPosition.start,
-      imagesArray.length + 1,
-    );
-    setValue('raw', result);
-    upload({
-      variables: {
-        input: {
-          file: reactNativeFile,
-          userId: user.id || 0,
-          type: UploadTypeEnum.Composer,
-          token: currentUploadToken,
-        },
-      },
-    });
-    setUri('');
-  }, [
-    currentUploadToken,
-    cursorPosition.start,
-    imagesArray,
-    getValues,
-    setValue,
-    upload,
-    uploadsInProgress,
-    uri,
-    user,
-  ]);
+    processedImageUriRef.current = imageUri;
+    enqueueImageUpload(imageUri);
+  }, [enqueueImageUpload, imageUri]);
 
   if (hyperlinkUrl) {
     const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
@@ -322,24 +332,26 @@ export default function PostReply() {
         e.preventDefault();
 
         // make sure not show save draft alert when edit post
-        !editPostId
-          ? saveAndDiscardPostDraftAlert({
-              deletePostDraft,
-              createPostDraft,
-              event: e,
-              navigation,
-              getValues,
-              resetForm: reset,
-              draftType: PostDraftType.PostReply,
-              topicId,
-              replyToPostId,
-              debounceSaveDraft,
-            })
-          : goBackWithoutSaveDraftAlert({
-              resetForm: reset,
-              event: e,
-              navigation,
-            });
+        if (!editPostId) {
+          saveAndDiscardPostDraftAlert({
+            deletePostDraft,
+            createPostDraft,
+            event: e,
+            navigation,
+            getValues,
+            resetForm: reset,
+            draftType: PostDraftType.PostReply,
+            topicId,
+            replyToPostId,
+            debounceSaveDraft,
+          });
+        } else {
+          goBackWithoutSaveDraftAlert({
+            resetForm: reset,
+            event: e,
+            navigation,
+          });
+        }
       }),
     [
       postValidity,
@@ -371,41 +383,21 @@ export default function PostReply() {
     });
   });
 
-  useEffect(() => {
-    const { raw: content } = getValues();
-
-    let currentPostValidity; // temp variable to get the value of existingPostIsValid or newPostIsValid helper
-
+  const postValidity = useMemo(() => {
     if (editPostId) {
-      currentPostValidity = existingPostIsValid({
+      const { isValid } = existingPostIsValid({
         uploadsInProgress,
         title,
         oldTitle: title,
-        content,
+        content: rawContent,
         oldContent,
         polls,
       });
-      setPostValidity(currentPostValidity.isValid);
-    } else {
-      currentPostValidity = newPostIsValid(
-        title,
-        content,
-        uploadsInProgress,
-        polls,
-      );
-      setPostValidity(currentPostValidity);
+      return isValid;
     }
-  }, [
-    editPostId,
-    formState,
-    getFieldState,
-    getValues,
-    oldContent,
-    polls,
-    title,
-    uploadsInProgress,
-    hyperlinkUrl,
-  ]);
+
+    return newPostIsValid(title, rawContent, uploadsInProgress, polls);
+  }, [editPostId, uploadsInProgress, oldContent, polls, rawContent, title]);
 
   const setMentionValue = (text: string) => {
     setValue('raw', text);

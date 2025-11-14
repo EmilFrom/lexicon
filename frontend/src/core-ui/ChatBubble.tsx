@@ -28,6 +28,7 @@ const ChatBubble = memo((props: Props) => {
     style,
     ...otherProps
   } = props;
+  void _fontStyle;
 
   return (
     <View

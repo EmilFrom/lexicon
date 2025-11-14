@@ -10,16 +10,12 @@ import { useDevice } from '../../../utils';
 type Props<T> = VirtualizedListProps<T> & {
   textInputFocused: boolean; // Indicates whether a text input is focused. If true, the keyboard is shown (on mobile devices).
   screen: ScaledSize; // The screen size, obtained using Dimensions.get("screen").
-  refreshing?: boolean; // Indicates whether the list is currently refreshing.
-  onRefresh?: () => void; // Callback function triggered during the refresh action.
 };
 
 function BaseChatList<T>(props: Props<T>, ref: RefObject<VirtualizedList<T>>) {
   const {
     textInputFocused,
     screen,
-    refreshing,
-    onRefresh,
     ...virtualizeProps
   } = props;
 
