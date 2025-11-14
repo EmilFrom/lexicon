@@ -27,7 +27,7 @@ if (__DEV__) {
   // Based on react-native-reanimated documentation about warning https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device
   LogBox.ignoreLogs([
     '[Reanimated] Reduced motion setting is enabled on this device.',
-    // 'An error occurred in a responseTransformer:', // TEMPORARILY COMMENTED TO DEBUG
+    'An error occurred in a responseTransformer:',
   ]);
 }
 
