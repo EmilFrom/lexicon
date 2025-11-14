@@ -391,16 +391,42 @@ const restLink: RestLink = new RestLink({
   // matching the expected format for the Discourse API.
   fieldNameDenormalizer: (key) => changeCase.snakeCase(key),
 
-  responseTransformer: async (data, typeName) => {
-    // Search response transfer type based on type name
+  // in client.ts (THE NEW DIAGNOSTIC VERSION)
+  responseTransformer: async (response, typeName) => {
+  // 1. Get the raw response text first. This is crucial for debugging.
+  const rawResponseText = await response.text();
+  console.log(`--- RAW RESPONSE for typeName: ${typeName} ---`, rawResponseText);
+
+  try {
+    // 2. Safely handle empty responses.
+    if (!rawResponseText) {
+      console.warn(`[responseTransformer] Received an empty response for ${typeName}`);
+      return null;
+    }
+
+    // 3. Parse the JSON inside a try...catch block.
+    const dataJson = JSON.parse(rawResponseText);
+
+    // 4. Find the specific transformer.
     const transformer = responseTransformers[typeName];
+
+    // 5. If no transformer exists, return the parsed JSON as is.
     if (!transformer) {
-      const dataJson = await data.json();
       return dataJson;
     }
 
-    return transformer(data, typeName, client);
-  },
+    // 6. If a transformer exists, apply it.
+    console.log(`[responseTransformer] Applying transformer for ${typeName}...`);
+    const transformedData = transformer(dataJson, typeName, client);
+    return transformedData;
+
+  } catch (error) {
+    console.error(`!!!!!!!!!! responseTransformer CRASHED for typeName: ${typeName} !!!!!!!!!!!`);
+    console.error('The specific error was:', error);
+    // Re-throw the error so Apollo still knows the request failed.
+    throw error;
+  }
+},
 
   /**
    * For file upload implementation based on https://github.com/apollographql/apollo-link-rest/issues/200#issuecomment-509287597
