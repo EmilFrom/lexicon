@@ -18,6 +18,7 @@ import {
 import { PollPostPreview } from '../components/Poll';
 import { FORM_DEFAULT_VALUES, refetchQueriesPostDraft } from '../constants';
 import { CustomImage, Divider, IconWithLabel, Text } from '../core-ui';
+import { GetTopicDetailDocument } from '../generatedAPI/server';
 import {
   combineContentWithPollContent,
   errorHandlerAlert,
@@ -79,6 +80,17 @@ export default function PostPreview() {
 
   const refetchQueries = isDraft ? refetchQueriesPostDraft : [];
 
+  // Add TopicDetail refetch when replying to ensure the post detail refreshes
+  const replyRefetchQueries = reply && postData?.topicId
+    ? [
+        ...refetchQueries,
+        {
+          query: GetTopicDetailDocument,
+          variables: { topicId: postData.topicId },
+        },
+      ]
+    : refetchQueries;
+
   // --- ALL onCompleted HANDLERS ARE NOW CORRECTED ---
 
   const { newTopic, loading: newTopicLoading } = useNewTopic({
@@ -101,7 +113,7 @@ export default function PostPreview() {
     onError: (error) => {
       errorHandlerAlert(error);
     },
-    refetchQueries,
+    refetchQueries: replyRefetchQueries,
   });
 
   const { editPost, loading: editPostLoading } = useEditPost({

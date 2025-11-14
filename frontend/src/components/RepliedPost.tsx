@@ -89,8 +89,10 @@ export function RepliedPost(props: RepliedPostProps) {
 
   const { replyingTo } = data;
   
+  // If there's no replyingTo data, it means this post isn't a reply to anything
+  // Just return null instead of showing an error
   if (!replyingTo || !replyingTo.post) {
-    return <RepliedPostLoadingOrError error={true} />;
+    return null;
   }
 
   const { post } = replyingTo;
@@ -108,8 +110,10 @@ export function LocalRepliedPost(props: LocalRepliedPostProps) {
     fragmentName: 'PostFragment',
     id: `Post:${String(props.replyToPostId)}`,
   });
+  
+  // If there's no cached data for the replied-to post, just don't render anything
   if (!replyingTo) {
-    return <RepliedPostLoadingOrError error={true} />;
+    return null;
   }
 
   return <BaseRepliedPost {...replyingTo} hideAuthor={props.hideAuthor} />;
