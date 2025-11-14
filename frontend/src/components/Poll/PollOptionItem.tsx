@@ -77,6 +77,9 @@ export function PollOptionItem(props: PollOptionItemProps) {
               disabled ? colors.lightTextDarkest : colors.primary
             }
             trackColor={colors.lightBorder}
+            onCompletion={() => {
+              // No-op to prevent "onCompletion is not a function" error
+            }}
           />
           {usersVoters && usersVoters.length > 0 && (
             <StackedAvatars
