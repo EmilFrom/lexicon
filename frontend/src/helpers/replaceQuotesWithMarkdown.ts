@@ -3,6 +3,10 @@ import { QUOTE_CLOSE_REGEX, QUOTE_OPEN_REGEX } from '../constants';
 import { extractAttributes } from './extractAttributes';
 
 export function replaceQuotesWithMarkdown(input: string) {
+  // Check if null or undefined
+  if (!input) {
+    return '';
+  }
   // Check whether there is a quote or not
   if (!input.includes('[quote')) {
     return input;
