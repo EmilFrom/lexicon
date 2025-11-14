@@ -396,6 +396,13 @@ const restLink: RestLink = new RestLink({
     throw new Error(`Network request failed for ${typeName}: Received null response.`);
   }
 
+  if (typeName === 'PostRaw') {
+    // For this specific type, we expect plain text, not JSON.
+    const rawText = await response.text();
+    // Wrap it in the expected object structure.
+    return { raw: rawText };
+  }
+
   // --- THIS IS THE NEW FIX ---
   // Check the Content-Type header before doing anything else.
   const contentType = response.headers.get('content-type');

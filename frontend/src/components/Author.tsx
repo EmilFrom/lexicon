@@ -31,8 +31,8 @@ type Props = TouchableOpacityProps &
 
 export function Author(props: Props) {
   // --- START OF DIAGNOSTIC LOGS ---
-  console.log('--- Author Component Render ---');
-  console.log('Props received by Author component:', JSON.stringify(props, null, 2));
+  //console.log('--- Author Component Render ---');
+  //console.log('Props received by Author component:', JSON.stringify(props, null, 2));
   // --- END OF DIAGNOSTIC LOGS ---
 
   const styles = useStyles();
@@ -103,7 +103,7 @@ export function Author(props: Props) {
     <TouchableOpacity
       onPress={() => {
         if (onPressAuthor) {
-          console.log(`--- Author TouchableOpacity pressed. Calling onPressAuthor with title: "${title}" ---`);
+          //console.log(`--- Author TouchableOpacity pressed. Calling onPressAuthor with title: "${title}" ---`);
           onPressAuthor(title);
         }
       }}
