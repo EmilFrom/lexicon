@@ -87,9 +87,13 @@ export function RepliedPost(props: RepliedPostProps) {
     return <RepliedPostLoadingOrError loading={loading} error={!!error} />;
   }
 
-  const {
-    replyingTo: { post },
-  } = data;
+  const { replyingTo } = data;
+  
+  if (!replyingTo || !replyingTo.post) {
+    return <RepliedPostLoadingOrError error={true} />;
+  }
+
+  const { post } = replyingTo;
 
   return <BaseRepliedPost {...post} hideAuthor={hideAuthor} />;
 }

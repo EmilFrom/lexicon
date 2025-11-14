@@ -7,5 +7,8 @@
 export const replyingToOutputResponseTransform = (
   data: Array<{ id: string }>,
 ) => {
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return null;
+  }
   return data[0];
 };

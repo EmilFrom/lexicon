@@ -52,8 +52,19 @@ const createResponseTransformer = <T>(
   ignoreResponse?: boolean,
 ) => {
   return async (data: T, typeName: string, client: Apollo) => {
-    const convertedData = ignoreResponse ? '' : await convertData(data, type);
-    return transformer(convertedData, typeName, client);
+    try {
+      const convertedData = ignoreResponse ? '' : await convertData(data, type);
+      return transformer(convertedData, typeName, client);
+    } catch (error) {
+      console.error('=== Transformer Error ===');
+      console.error('TypeName:', typeName);
+      console.error('Transformer Type:', type);
+      console.error('Error Message:', error?.message);
+      console.error('Error Name:', error?.name);
+      console.error('Stack Trace:', error?.stack);
+      console.error('========================');
+      throw error;
+    }
   };
 };
 
