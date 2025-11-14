@@ -33,6 +33,9 @@ function handleRegexResult(
   if (regex === srcSetRegex) {
     const optimizedUrl: Array<string> = [];
     result.forEach((item) => {
+      if (!item) {
+        return;
+      }
       const url = item.match(imageUrlRegex);
       if (url) {
         optimizedUrl.push(url[url.length - 1]);
@@ -81,6 +84,9 @@ export function getCompleteImageVideoUrls(
   content: string,
   host: string = discourseHost,
 ): Array<string | undefined> | undefined {
+  if (!content) {
+    return undefined;
+  }
   // Get all image tags in content
   const imageVideoTags = content.match(imageVideoTagRegex);
   // Get complete url from each image tag
@@ -93,6 +99,9 @@ export function getPostImageUrl(
   content: string,
   host: string = discourseHost,
 ): string | undefined {
+  if (!content) {
+    return undefined;
+  }
   // Return only the first element of array because only one url is found
 
   let result = content.match(srcSetRegex) ?? undefined;
@@ -133,6 +142,9 @@ type EmojiResult = { emojiUrl: string; emojiTitle: string };
 export function getEmojiImageUrls(
   content: string,
 ): Array<EmojiResult | undefined> {
+  if (!content) {
+    return [];
+  }
   const emojiTags = content.match(emojiImageTagRegex);
 
   const maybeEmojiResults =
@@ -164,6 +176,10 @@ export function getEmojiImageUrls(
 }
 
 export function generateMarkdownContent(raw: string, cooked: string) {
+  if (!raw || !cooked) {
+    return raw || '';
+  }
+  
   const imageUrls = getCompleteImageVideoUrls(cooked) ?? [];
 
   const emojiBBcode = raw.match(emojiBBCodeRegex);
@@ -206,6 +222,9 @@ export function getMention(
   content: string,
   host: string = discourseHost,
 ): Array<string> | undefined {
+  if (!content) {
+    return undefined;
+  }
   const result = content.match(mentionRegex) ?? undefined;
   if (result) {
     return handleRegexResult(result, host, mentionRegex);
@@ -213,6 +232,9 @@ export function getMention(
 }
 
 export function userActivityMarkdownContent(content: string) {
+  if (!content) {
+    return '';
+  }
   const markdown = content.replace(
     userActivityContentRegex,
     (

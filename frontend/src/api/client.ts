@@ -405,6 +405,27 @@ const restLink: RestLink = new RestLink({
     return { raw: rawText };
   }
 
+  if (typeName === 'String') {
+    // String type responses may not be JSON, handle them specially
+    try {
+      const text = await response.text();
+      console.log(`[RT] String response text:`, text);
+      // Try to parse as JSON first
+      const parsed = JSON.parse(text);
+      const transformer = responseTransformers[typeName];
+      if (transformer) {
+        const result = await transformer(parsed, typeName, client);
+        console.log(`[RT] Success: ${typeName}`);
+        return result;
+      }
+      return parsed;
+    } catch (error) {
+      // If JSON parsing fails, just return 'success'
+      console.log(`[RT] String type - not JSON, returning success`);
+      return 'success';
+    }
+  }
+
   // --- THIS IS THE NEW FIX ---
   // Check the Content-Type header before doing anything else.
   const contentType = response.headers.get('content-type');
@@ -432,9 +453,9 @@ const restLink: RestLink = new RestLink({
   } catch (error) {
     console.error('=== ResponseTransformer Error ===');
     console.error('TypeName:', typeName);
-    console.error('Error Message:', error?.message);
-    console.error('Error Name:', error?.name);
-    console.error('Stack Trace:', error?.stack);
+    console.error('Error Message:', (error as Error)?.message);
+    console.error('Error Name:', (error as Error)?.name);
+    console.error('Stack Trace:', (error as Error)?.stack);
     console.error('Has Transformer:', !!responseTransformers[typeName]);
     console.error('=================================');
     throw error;

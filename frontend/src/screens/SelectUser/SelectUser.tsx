@@ -90,7 +90,7 @@ export default function SelectUser() {
     const tempUsers = new Set(currentUsers);
     const tempUserList = new Set(selectedUsers);
     const chosenList = data?.searchUser.users.filter((user) =>
-      user.username.match(username),
+      user.username?.match(username),
     );
 
     if (tempUsers.has(username)) {
