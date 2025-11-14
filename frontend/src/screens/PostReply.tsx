@@ -71,22 +71,22 @@ export default function PostReply() {
   const { colors } = useTheme();
 
   const navigation = useNavigation<RootStackNavProp<'PostReply'>>();
-  const { navigate, goBack } = useNavigation<RootStackNavProp<'PostReply'>>();
+  const { navigate, goBack } = navigation; // Corrected: useNavigation is only called once
 
   const { params } = useRoute<RootStackRouteProp<'PostReply'>>();
-  /**
-   * we need to save initial params because after image upload
-   * the navigation done from the preview will empty all other params
-   */
-  const persistedParamsRef = useRef<RootStackParamList['PostReply']>(params);
 
+  // --- FIX 1: Replace the entire useRef anti-pattern with useState and useEffect ---
+  const [persistedParams, setPersistedParams] =
+    useState<RootStackParamList['PostReply']>(params);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps 
   useEffect(() => {
-    persistedParamsRef.current = {
-      ...persistedParamsRef.current,
-      ...params,
-    };
+    // This effect safely merges new incoming params into our persistent state
+    // without violating the rules of hooks.
+    setPersistedParams((prevParams) => ({ ...prevParams, ...params }));
   }, [params]);
 
+  // --- FIX 2: All variables are now safely derived from state, NOT a ref ---
   const {
     title,
     topicId,
@@ -95,14 +95,20 @@ export default function PostReply() {
     editPostId,
     oldContent = '',
     editedUser,
-  } = persistedParamsRef.current;
-  const imageUri = persistedParamsRef.current.imageUri ?? '';
-  let { hyperlinkTitle = '', hyperlinkUrl } = persistedParamsRef.current;
-  const replyingTo = client.readFragment<PostFragment>({
-    id: `Post:${replyToPostId}`,
-    fragment: PostFragmentDoc,
-    fragmentName: 'PostFragment',
-  });
+    imageUri = '',
+    hyperlinkTitle = '',
+    hyperlinkUrl,
+  } = persistedParams;
+  // --- END OF MAJOR FIX ---
+
+  const replyingTo = useMemo(() => {
+    if (!replyToPostId) return null;
+    return client.readFragment<PostFragment>({
+      id: `Post:${replyToPostId}`,
+      fragment: PostFragmentDoc,
+      fragmentName: 'PostFragment',
+    });
+  }, [replyToPostId]);
 
   const ios = Platform.OS === 'ios';
   const repliedPost = useMemo(() => {
@@ -157,7 +163,6 @@ export default function PostReply() {
           token,
           tempArray[token - 1].link,
         );
-
         setValue('raw', newText);
       }
     },
@@ -165,7 +170,6 @@ export default function PostReply() {
   );
 
   const postReplyRef = useRef<TextInputType>(null);
-  const processedImageUriRef = useRef<string | null>(null);
 
   const enqueueImageUpload = useCallback(
     (localUri: string) => {
@@ -260,6 +264,8 @@ export default function PostReply() {
     setMentionLoading,
   );
 
+  const processedImageUriRef = useRef<string | null>(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!imageUri || processedImageUriRef.current === imageUri) {
       return;
@@ -268,24 +274,17 @@ export default function PostReply() {
     enqueueImageUpload(imageUri);
   }, [enqueueImageUpload, imageUri]);
 
-  if (hyperlinkUrl) {
-    const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
-    hyperlinkUrl = newUrl;
-    hyperlinkTitle = newTitle;
-  }
-
   useEffect(() => {
     setModal(true);
   }, [setModal]);
 
   useEffect(() => {
-    const postReplyObject = getValues();
-    const result = insertHyperlink(
-      postReplyObject.raw,
-      hyperlinkTitle,
-      hyperlinkUrl,
-    );
-    setValue('raw', result);
+    if (hyperlinkUrl) {
+      const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
+      const postReplyObject = getValues();
+      const result = insertHyperlink(postReplyObject.raw, newTitle, newUrl);
+      setValue('raw', result);
+    }
   }, [hyperlinkTitle, hyperlinkUrl, getValues, setValue]);
 
   const onNavigate = (
@@ -327,7 +326,6 @@ export default function PostReply() {
         }
         e.preventDefault();
 
-        // make sure not show save draft alert when edit post
         if (!editPostId) {
           saveAndDiscardPostDraftAlert({
             deletePostDraft,
@@ -390,7 +388,6 @@ export default function PostReply() {
       });
       return isValid;
     }
-
     return newPostIsValid(title, rawContent, uploadsInProgress, polls);
   }, [editPostId, uploadsInProgress, oldContent, polls, rawContent, title]);
 
