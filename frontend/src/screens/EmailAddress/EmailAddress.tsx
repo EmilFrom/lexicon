@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { FlatList, Platform, SafeAreaView } from 'react-native';
+import { FlatList, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomHeader, LoadingOrError } from '../../components';
 import { FloatingButton } from '../../core-ui';

@@ -1,11 +1,6 @@
 import React from 'react';
-import {
-  FlatList,
-  ListRenderItemInfo,
-  Platform,
-  SafeAreaView,
-  View,
-} from 'react-native';
+import { FlatList, ListRenderItemInfo, Platform, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useFormContext } from 'react-hook-form';
 
@@ -95,7 +90,13 @@ export default function EditPollsList() {
               size="l"
               color={colors.textLighter}
               onPress={() => {
-                !!polls?.length && deletePoll({ polls, setValue, index });
+                if (polls?.length) {
+                  /**
+                   * The explicit conditional keeps ESLint happy and documents that
+                   * we only delete when there are still polls left to mutate.
+                   */
+                  deletePoll({ polls, setValue, index });
+                }
               }}
             />
           </View>

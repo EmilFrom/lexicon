@@ -6,9 +6,9 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
-  SafeAreaView,
   VirtualizedList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { client } from '../../api/client';
 import {

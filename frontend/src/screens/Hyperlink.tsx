@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { Platform, SafeAreaView, ScrollView } from 'react-native';
+import { Platform, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Controller, useForm } from 'react-hook-form';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomHeader, HeaderItem, ModalHeader } from '../components';
 import { TextInput, TextInputType } from '../core-ui';

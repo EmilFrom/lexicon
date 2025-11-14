@@ -1,13 +1,8 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import {
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Platform, ScrollView, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
 import {
@@ -411,18 +406,24 @@ export default function NewPost() {
         e.preventDefault();
 
         // make sure not show save draft alert when edit post
-        !editPostId || !editTopicId
-          ? saveAndDiscardPostDraftAlert({
-              deletePostDraft,
-              createPostDraft,
-              event: e,
-              navigation,
-              getValues,
-              resetForm,
-              draftType: PostDraftType.NewTopic,
-              debounceSaveDraft,
-            })
-          : goBackWithoutSaveDraftAlert({ event: e, navigation, resetForm });
+        /**
+         * Use an explicit conditional instead of a ternary expression so the intent
+         * is clear to ESLint and future readers.
+         */
+        if (!editPostId || !editTopicId) {
+          saveAndDiscardPostDraftAlert({
+            deletePostDraft,
+            createPostDraft,
+            event: e,
+            navigation,
+            getValues,
+            resetForm,
+            draftType: PostDraftType.NewTopic,
+            debounceSaveDraft,
+          });
+        } else {
+          goBackWithoutSaveDraftAlert({ event: e, navigation, resetForm });
+        }
       }),
     [
       postValidity,

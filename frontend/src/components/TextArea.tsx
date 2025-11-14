@@ -4,8 +4,8 @@ import {
   NativeSyntheticEvent,
   Platform,
   TextInput,
-  TextInputFocusEventData,
   TextInputKeyPressEventData,
+  TextInputProps,
   View,
   ViewProps,
 } from 'react-native';
@@ -17,14 +17,18 @@ import { useDevice } from '../utils';
 
 const screen = Dimensions.get('screen');
 
-type Props = ViewProps & {
+type TextAreaFocusEvent = Parameters<
+  NonNullable<TextInputProps['onFocus']>
+>[0];
+
+type Props = Omit<ViewProps, 'onFocus' | 'onBlur'> & {
   value: string;
   placeholder?: string;
   large?: boolean;
   onChangeValue: (value: string) => void;
   onKeyPress?: (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
-  onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
-  onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+  onFocus?: (e: TextAreaFocusEvent) => void;
+  onBlur?: (e: TextAreaFocusEvent) => void;
   onSelectedChange: (cursor: CursorPosition) => void;
   inputRef?: RefObject<TextInputType | null>;
   mentionToggled?: boolean;

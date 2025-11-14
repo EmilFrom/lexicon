@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  findNodeHandle,
-  type NativeSyntheticEvent,
-  type TextInputFocusEventData,
-} from 'react-native';
+import { findNodeHandle, type TextInputProps } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 type ScrollToInput = KeyboardAwareScrollView['scrollToFocusedInput'];
@@ -22,9 +18,11 @@ type KASVRef = JSX.Element & {
   };
 };
 
-type TextAreaFocusHandler = (
-  event: NativeSyntheticEvent<TextInputFocusEventData>,
-) => void;
+type TextAreaFocusEvent = Parameters<
+  NonNullable<TextInputProps['onFocus']>
+>[0];
+type TextAreaFocusHandler = (event: TextAreaFocusEvent) => void;
+type FindNodeHandleTarget = Parameters<typeof findNodeHandle>[0];
 
 /**
  * `useKASVWorkaround` (KASV -> KeyboardAwareScrollView) is a reusable hook to
@@ -78,17 +76,29 @@ export function useKASVWorkaround() {
     scrollToInputRef.current = scrollToFocusedInput;
   }
 
-  const scrollToFocusedInput: TextAreaFocusHandler = ({ target }) => {
+  const scrollToFocusedInput: TextAreaFocusHandler = (event) => {
     const { current } = scrollToInputRef;
     if (!current) {
       return;
     }
 
-    if (target == null) {
+    const nativeTarget = event.nativeEvent?.target;
+    if (nativeTarget != null) {
+      current(nativeTarget);
       return;
     }
 
-    const handle = findNodeHandle(target);
+    const fallbackTarget = event.target as unknown as FindNodeHandleTarget | null;
+    if (fallbackTarget == null) {
+      return;
+    }
+
+    if (typeof fallbackTarget === 'number') {
+      current(fallbackTarget);
+      return;
+    }
+
+    const handle = findNodeHandle(fallbackTarget);
     if (handle == null) {
       return;
     }

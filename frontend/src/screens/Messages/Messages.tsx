@@ -1,12 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import {
-  Platform,
-  RefreshControl,
-  SafeAreaView,
-  VirtualizedList,
-} from 'react-native';
+import { Platform, RefreshControl, VirtualizedList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   CustomHeader,

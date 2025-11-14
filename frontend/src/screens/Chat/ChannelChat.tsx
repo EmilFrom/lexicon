@@ -187,7 +187,11 @@ export default function ChannelChat() {
         setOffset(nextOffset);
       }
       setLoading(false);
-    } catch (_error) {
+    } catch {
+      /**
+       * The UI already renders the LoadingOrError component with the network error message,
+       * so this catch branch only needs to reset the guard flags to keep pagination responsive.
+       */
       isFetchingMoreChannels.current = false;
       setLoading(false);
     }

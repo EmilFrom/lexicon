@@ -1,7 +1,8 @@
 import React from 'react';
-import { Platform, SafeAreaView, ScrollView } from 'react-native';
+import { Platform, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useFormContext } from 'react-hook-form';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomHeader, HeaderItem, ModalHeader } from '../../components';
 import {

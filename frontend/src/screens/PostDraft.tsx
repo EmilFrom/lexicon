@@ -7,7 +7,8 @@ import React, {
   useState,
 } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Platform, SafeAreaView, TouchableOpacity, View } from 'react-native';
+import { Platform, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   ActionSheet,
@@ -208,7 +209,9 @@ export default function PostDraft() {
 
   const actionItemOptions = () => {
     const options: ActionSheetProps['options'] = [];
-    ios && options.push({ label: t('Cancel') });
+    if (ios) {
+      options.push({ label: t('Cancel') });
+    }
     options.push({ label: t('Edit Draft') });
     options.push({ label: t('Delete Draft') });
 

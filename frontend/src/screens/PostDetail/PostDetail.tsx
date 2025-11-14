@@ -7,7 +7,8 @@ import React, {
   useState,
 } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Alert, Platform, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Alert, Platform, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   ActionSheet,
@@ -196,10 +197,12 @@ export default function PostDetail() {
 
   const { topic, postComments, firstPost, stream } = postDetailContent ?? {};
 
-  const showOptions =
-    false ||
-    !!(firstPost && firstPost.canEdit) ||
-    (!!firstPost && firstPost.canFlag && !firstPost.hidden);
+  const canEditFirstPost = Boolean(firstPost?.canEdit);
+  const canFlagFirstPost = Boolean(firstPost?.canFlag && !firstPost?.hidden);
+  /**
+   * Explicit booleans keep the intent clear and avoid the constant-truthiness lint warning.
+   */
+  const showOptions = canEditFirstPost || canFlagFirstPost;
 
   useEffect(() => {
     if (!firstPost) {
@@ -467,13 +470,18 @@ export default function PostDetail() {
 
   const actionItemOptions = () => {
     const options: ActionSheetProps['options'] = [];
-    ios && options.push({ label: t('Cancel') });
-    canEditFocusPost && options.push({ label: t('Edit Post') });
-    !flaggedByCommunity &&
+    if (ios) {
+      options.push({ label: t('Cancel') });
+    }
+    if (canEditFocusPost) {
+      options.push({ label: t('Edit Post') });
+    }
+    if (!flaggedByCommunity) {
       options.push({
         label: canFlagFocusPost ? t('Flag') : t('Flagged'),
         disabled: !canFlagFocusPost,
       });
+    }
     return options;
   };
 
@@ -482,9 +490,14 @@ export default function PostDetail() {
       case 0: {
         return canEditFocusPost ? navToPost() : navToFlag();
       }
-      case 1: {
-        return canEditFocusPost && !flaggedByCommunity && navToFlag();
-      }
+      case 1:
+        if (canEditFocusPost && !flaggedByCommunity) {
+          /**
+           * Only admins/mods can reach this branch; return early instead of relying on a short-circuit expression.
+           */
+          return navToFlag();
+        }
+        return;
     }
   };
 
@@ -560,7 +573,9 @@ export default function PostDetail() {
   const onPressReplyProps: PostDetailHeaderItemProps['onPressReply'] = ({
     postId,
   }) => {
-    postId && onPressReply({ replyToPostId: postId });
+    if (postId) {
+      onPressReply({ replyToPostId: postId });
+    }
   };
 
   const keyExtractor = ({ id }: Post) => `post-${id}`;
@@ -600,9 +615,13 @@ export default function PostDetail() {
     );
   };
 
-  const onScrollToIndexFailedHandler = ({ index: _ }: OnScrollInfo) => {
-    // TODO: Add error report here
-    // The setTimeout behavior removed as this will create infinite loop
+  const onScrollToIndexFailedHandler = ({ index }: OnScrollInfo) => {
+    /**
+     * Re-trying the scroll here causes an infinite loop, but we still keep a hook for debugging purposes.
+     */
+    if (__DEV__) {
+      console.warn(`PostDetail: failed to scroll to index ${index}`);
+    }
   };
 
   const isLoading = (loading || replyLoading) && !error;

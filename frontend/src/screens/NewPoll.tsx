@@ -1,18 +1,14 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Controller,
   useFieldArray,
   useForm,
   useFormContext,
+  useWatch,
 } from 'react-hook-form';
-import {
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Platform, ScrollView, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAccessoryView } from 'react-native-keyboard-accessory';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
@@ -48,11 +44,41 @@ import {
 import { useSiteSettings } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
 import {
+  NewPostForm,
   PollFormContextValues,
   PollFormValues,
   RootStackNavProp,
   RootStackRouteProp,
 } from '../types';
+
+type PollHeaderProps = {
+  ios: boolean;
+  onCancel: () => void;
+  onSubmit: () => void;
+  canSubmit: boolean;
+};
+
+const PollHeader = ({
+  ios,
+  onCancel,
+  onSubmit,
+  canSubmit,
+}: PollHeaderProps) =>
+  ios ? (
+    <ModalHeader
+      title={t('Poll')}
+      left={<HeaderItem label={t('Cancel')} left onPressItem={onCancel} />}
+      right={
+        <HeaderItem
+          label={t('Done')}
+          onPressItem={onSubmit}
+          disabled={!canSubmit}
+        />
+      }
+    />
+  ) : (
+    <CustomHeader title={t('Poll')} noShadow />
+  );
 
 export default function NewPoll() {
   const styles = useStyles();
@@ -70,7 +96,6 @@ export default function NewPoll() {
     control,
     getValues: getPollValues,
     setValue: setPollValues,
-    watch: watchPollValues,
     reset: resetPollValues,
     handleSubmit,
     formState: { errors },
@@ -92,13 +117,28 @@ export default function NewPoll() {
     mode: 'onChange',
   });
 
-  const [pollChoiceState, setPollChoice] = useState(POLL_CHOICE_TYPES[0].value);
+  const { setValue, getValues } = useFormContext<NewPostForm>();
+
+  const [prefilledPoll] = useState<PollFormContextValues | undefined>(() => {
+    if (params?.pollIndex === undefined) {
+      return undefined;
+    }
+    const formPolls = getValues('polls');
+    if (formPolls && formPolls.length > params.pollIndex) {
+      return formPolls[params.pollIndex];
+    }
+    return undefined;
+  });
+
+  const [pollChoiceState, setPollChoice] = useState(
+    () => prefilledPoll?.pollChoiceType ?? POLL_CHOICE_TYPES[0].value,
+  );
   const [showAdvancedSetting, setShowAdvancedSetting] = useState(false);
   const [showOptions, setShowOptions] = useState(true);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [neverClosePoll, setNeverClosePoll] = useState(
-    !getPollValues('closeDate'),
+  const [neverClosePoll, setNeverClosePoll] = useState(() =>
+    prefilledPoll ? !prefilledPoll.closeDate : !getPollValues('closeDate'),
   );
 
   const {
@@ -107,36 +147,41 @@ export default function NewPoll() {
     remove,
     replace,
   } = useFieldArray({ control, name: 'pollOptions' });
-  const { setValue, getValues } = useFormContext();
 
   useEffect(() => {
-    const polls: Array<PollFormContextValues> = getValues('polls');
-
-    const findPollByIndex =
-      params && params.pollIndex !== undefined && polls.length > 0
-        ? polls[params.pollIndex]
-        : undefined;
-
-    if (findPollByIndex) {
-      const { pollChoiceType, pollOptions, chartType, ...data } =
-        findPollByIndex;
-      resetPollValues({
-        ...data,
-        pollOptions:
-          pollChoiceType === 'number' ? [{ option: '' }] : pollOptions,
-        chartType: chartType || 0,
-        step: data.step || DEFAULT_NUMBER_RATING_STEP,
-        minChoice: data.minChoice || DEFAULT_MIN_CHOICE,
-      });
-      setPollChoice(pollChoiceType);
-      setNeverClosePoll(!data.closeDate);
+    if (!prefilledPoll) {
+      return;
     }
-  }, [getValues, params, resetPollValues]);
+    const { pollChoiceType, pollOptions, chartType, ...data } = prefilledPoll;
+    resetPollValues({
+      ...data,
+      pollOptions:
+        pollChoiceType === 'number' ? [{ option: '' }] : pollOptions,
+      chartType: chartType || 0,
+      step: data.step || DEFAULT_NUMBER_RATING_STEP,
+      minChoice: data.minChoice || DEFAULT_MIN_CHOICE,
+    });
+  }, [prefilledPoll, resetPollValues]);
 
   const pollTypeNumber = pollChoiceState === PollType.Number;
   const pollTypeMultiple = pollChoiceState === PollType.Multiple;
   const ios = Platform.OS === 'ios';
-  const watchPollOptions = watchPollValues('pollOptions');
+  /**
+   * `useWatch` keeps us in sync with React Hook Form without tripping the React Compiler rule.
+   */
+  const watchedPollOptions = useWatch({
+    control,
+    name: 'pollOptions',
+  });
+  const watchPollOptions = useMemo(
+    () => watchedPollOptions ?? [],
+    [watchedPollOptions],
+  );
+  const chartTypeValue =
+    useWatch({
+      control,
+      name: 'chartType',
+    }) ?? 0;
 
   /**
    * isPollOptionsValid checks the validity of poll options.
@@ -193,9 +238,10 @@ export default function NewPoll() {
   };
 
   const addPoll = handleSubmit(() => {
-    const { pollOptions, results, chartType, groups, closeDate, ...values } =
-      getPollValues();
+    // `filteredPollOptions()` provides the latest list, so we avoid destructuring the unused pollOptions array.
+    const { results, chartType, groups, closeDate, ...values } = getPollValues();
     const { polls } = getValues();
+    const pollCount = polls?.length ?? 0;
 
     if (pollTypeNumber) {
       const newStepNumber = changeListNumberOption(
@@ -231,9 +277,7 @@ export default function NewPoll() {
       groups,
       closeDateTime,
       index:
-        params.pollIndex !== undefined
-          ? params.pollIndex + 1
-          : polls?.length + 1 || 1,
+        params.pollIndex !== undefined ? params.pollIndex + 1 : pollCount + 1,
       ...values,
     });
 
@@ -297,28 +341,14 @@ export default function NewPoll() {
       })
     : [];
 
-  const Header = () =>
-    ios ? (
-      <ModalHeader
-        title={t('Poll')}
-        left={
-          <HeaderItem label={t('Cancel')} left onPressItem={cancelAddPoll} />
-        }
-        right={
-          <HeaderItem
-            label={t('Done')}
-            onPressItem={addPoll}
-            disabled={!isPollValid()}
-          />
-        }
-      />
-    ) : (
-      <CustomHeader title={t('Poll')} noShadow />
-    );
-
   return (
     <SafeAreaView style={styles.container} testID="NewPoll:SafeAreaView">
-      <Header />
+      <PollHeader
+        ios={ios}
+        onCancel={cancelAddPoll}
+        onSubmit={addPoll}
+        canSubmit={isPollValid()}
+      />
       <ScrollView
         style={styles.pollTypesContainer}
         directionalLockEnabled={true}
@@ -765,7 +795,7 @@ export default function NewPoll() {
                   )}
                 />
               )}
-              {watchPollValues('chartType') === 0 && (
+              {chartTypeValue === 0 && (
                 <Controller
                   control={control}
                   name="isPublic"

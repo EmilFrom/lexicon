@@ -26,7 +26,11 @@ export function OngoingLikedTopicProvider({ children }: Props) {
   };
   const removeOngoingLikedTopic = (key: number) => {
     setData((data) => {
-      const { [key]: _removedTopic, ...updatedData } = data;
+      /**
+       * Clone before delete to preserve immutability guarantees and avoid unused rest bindings.
+       */
+      const updatedData = { ...data };
+      delete updatedData[key];
       return updatedData;
     });
   };

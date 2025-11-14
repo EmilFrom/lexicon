@@ -360,19 +360,31 @@ const {
     setPage(currentPage);
     getData(variables);
 
-    isPortrait && setTimeout(() => drawerRef.current?.closeDrawer(), 300);
+    if (isPortrait) {
+      /**
+       * Tablets keep the drawer mounted at all times, so we delay the close action slightly
+       * to match the gesture animation before resetting the selected channel.
+       */
+      setTimeout(() => drawerRef.current?.closeDrawer(), 300);
+    }
   };
 
   const toggleSideBar = () => {
-    isPortrait &&
-      setTimeout(
-        () =>
-          !openSideBar
-            ? drawerRef.current?.openDrawer()
-            : drawerRef.current?.closeDrawer(),
-        200,
-      );
-    setOpenSideBar(!openSideBar);
+    const nextOpenState = !openSideBar;
+    if (isPortrait) {
+      /**
+       * Delay the drawer toggle to keep the animation smooth and avoid
+       * accessing the ref synchronously during render.
+       */
+      setTimeout(() => {
+        if (nextOpenState) {
+          drawerRef.current?.openDrawer();
+          return;
+        }
+        drawerRef.current?.closeDrawer();
+      }, 200);
+    }
+    setOpenSideBar(nextOpenState);
   };
 
   const drawerRef = useRef<DrawerLayout>(null);
@@ -383,11 +395,15 @@ const {
       return;
     }
 
+    /**
+     * `headerViewHeight` is derived from static module-level measurements,
+     * therefore it does not need to live in the dependency array.
+     */
     postListRef.current?.scrollToIndex({
       index: 0,
       viewOffset: headerViewHeight,
     });
-  }, [routeParams, headerViewHeight]);
+  }, [routeParams]);
 
   const onPressTitle = () => {
     navigate('Channels', { prevScreen: 'Home' });
@@ -530,7 +546,11 @@ const {
         setPage(nextPage);
       }
       setLoading(false);
-    } catch (error) {
+    } catch {
+      /**
+       * Any fetch error is rendered through LoadingOrError;
+       * here we simply clear the pagination guards.
+       */
       isFetchingMoreTopics.current = false;
       setLoading(false);
     }

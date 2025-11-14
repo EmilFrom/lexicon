@@ -7,10 +7,10 @@ import {
   Alert,
   ImageBackground,
   Platform,
-  SafeAreaView,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAccessoryView } from 'react-native-keyboard-accessory';
 
 import { DEFAULT_IMAGE } from '../../../assets/images';
@@ -177,8 +177,11 @@ export default function ImagePreview() {
           { text: t('Got it') },
         ]);
       }
-    } catch (error) {
-      //empty
+    } catch {
+      /**
+       * The upload picker already surfaces errors through `Alert`, so we only
+       * need to exit early without introducing an unused variable.
+       */
     }
     return;
   };

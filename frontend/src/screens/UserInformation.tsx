@@ -101,8 +101,8 @@ function UserInformationHeader({
         <Markdown content={bioPreview} style={styles.bioContainer} />
         {statusUser && (
           <UserStatus
-            emojiCode={statusUser.emoji}
-            status={statusUser.description}
+            emojiCode={statusUser.emoji ?? ''}
+            status={statusUser.description ?? ''}
             styleContainer={styles.statusContainer}
           />
         )}

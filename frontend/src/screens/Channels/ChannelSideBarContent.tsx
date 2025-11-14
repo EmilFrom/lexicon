@@ -1,5 +1,6 @@
 import React from 'react';
-import { Platform, SafeAreaView, ScrollView, View } from 'react-native';
+import { Platform, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   isNoChannelFilter,

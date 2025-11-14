@@ -1,7 +1,8 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Keyboard, Platform, SafeAreaView, View } from 'react-native';
+import { Keyboard, Platform, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { client } from '../api/client';
@@ -57,7 +58,6 @@ import {
 import { makeStyles, useTheme } from '../theme';
 import {
   CursorPosition,
-  Image,
   NewPostForm,
   RootStackNavProp,
   RootStackParamList,
@@ -135,7 +135,6 @@ export default function PostReply() {
     getValues,
     watch,
     reset,
-    getFieldState,
     formState,
   } = useFormContext<NewPostForm>();
   const polls = watch('polls');
@@ -143,9 +142,11 @@ export default function PostReply() {
 
   const [showUserList, setShowUserList] = useState(false);
   const [currentUploadToken, setCurrentUploadToken] = useState(1);
-
+  const { upload, tempArray, setTempArray, completedToken } = useStatefulUpload(
+    [],
+    currentUploadToken,
+  );
   const uploadsInProgress = tempArray.filter((image) => !image.done).length;
-
   const [isKeyboardShow, setKeyboardShow] = useState(false);
 
   const debounced = useDebouncedCallback(
@@ -164,11 +165,6 @@ export default function PostReply() {
   );
 
   const postReplyRef = useRef<TextInputType>(null);
-
-  const { upload, tempArray, setTempArray, completedToken } = useStatefulUpload(
-    [],
-    currentUploadToken,
-  );
   const processedImageUriRef = useRef<string | null>(null);
 
   const enqueueImageUpload = useCallback(
@@ -354,7 +350,6 @@ export default function PostReply() {
         }
       }),
     [
-      postValidity,
       modal,
       navigation,
       uploadsInProgress,
@@ -566,25 +561,6 @@ export default function PostReply() {
 
                 debounceSaveDraft();
 
-                let currentPostValidity; // temp variable to get the value of existingPostIsValid or newPostIsValid helper
-
-                if (editPostId) {
-                  currentPostValidity = existingPostIsValid({
-                    uploadsInProgress,
-                    title,
-                    oldTitle: title,
-                    content: text,
-                    oldContent,
-                  });
-                  setPostValidity(currentPostValidity.isValid);
-                } else {
-                  currentPostValidity = newPostIsValid(
-                    title,
-                    text,
-                    uploadsInProgress,
-                  );
-                  setPostValidity(currentPostValidity);
-                }
               }}
               onFocus={(event) => {
                 setKeyboardShow(true);

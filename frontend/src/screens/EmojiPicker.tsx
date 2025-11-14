@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, SafeAreaView, View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text, TextInput } from '../core-ui';
 import { makeStyles } from '../theme';
@@ -103,21 +104,42 @@ export default function EmojiPicker() {
           style={styles.textInput}
           testID="EmojiPicker:TextInput:Search"
         />
+        {/* FlashList props already satisfy the generic contract, so we avoid the previous `any` escape hatch. */}
         <FlashList
           data={emojis}
           renderItem={renderItem}
           keyExtractor={(item: EmojiRenderItem) => `emoji-${item.name}`}
           numColumns={6}
-          // Note: The 'any' cast here is still a separate issue to address
-          // and so is estimatedItemSize if the prop was removed.
-          // This fix focuses only on the 'static-components' error.
-          estimatedItemSize={EMOJI.length}
           removeClippedSubviews={true}
-          {...({} as any)}
         />
       </View>
     </SafeAreaView>
   );
 }
 
-const useStyles = makeStyles(/* ... */);
+const useStyles = makeStyles(({ colors, spacing }) => ({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  bodyContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.l,
+    paddingTop: spacing.l,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: spacing.s,
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.s,
+    color: colors.textNormal,
+    marginBottom: spacing.l,
+  },
+  itemContainer: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.m,
+  },
+}));

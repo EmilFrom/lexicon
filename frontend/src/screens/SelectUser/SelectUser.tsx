@@ -5,10 +5,10 @@ import {
   Alert,
   Dimensions,
   Platform,
-  SafeAreaView,
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { CustomHeader, HeaderItem, ModalHeader } from '../../components';

@@ -34,11 +34,17 @@ export default function UserItem(props: Props) {
         ]}
         variant="semiBold"
         subtitle={username}
-        children={
-          isCheck ? <Icon name="CheckCircle" style={styles.icon} /> : undefined
-        }
         testID="UserItem:Author:SelectUser"
-      />
+      >
+        {isCheck ? (
+          <Icon name="CheckCircle" style={styles.icon} />
+        ) : (
+          /**
+           * React discourages the `children` prop, so we return `null` explicitly here.
+           */
+          null
+        )}
+      </Author>
       <Divider style={styles.divider} />
     </>
   );

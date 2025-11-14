@@ -5,12 +5,12 @@ import {
   Modal,
   Platform,
   RefreshControl,
-  SafeAreaView,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
   VirtualizedList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { client } from '../../api/client';
 import {
@@ -191,7 +191,10 @@ export default function Notifications() {
           },
         },
       });
-    } catch (error) {
+    } catch {
+      /**
+       * Network errors re-trigger the pull-to-refresh flow, so no extra logging is required here.
+       */
       onRefresh();
     }
   };

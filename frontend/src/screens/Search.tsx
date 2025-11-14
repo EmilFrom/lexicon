@@ -129,7 +129,12 @@ export default function Search() {
   const count = posts.length;
 
   const onRefresh = () => {
-    refetch && refetch();
+    if (refetch) {
+      /**
+       * Prefer an explicit conditional over a short-circuit expression for clearer intent.
+       */
+      refetch();
+    }
   };
 
   const loadMore = () => {
@@ -138,8 +143,9 @@ export default function Search() {
     }
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchMore &&
+    if (fetchMore) {
       fetchMore({ variables: { search: searchValue, page: nextPage } });
+    }
   };
 
   const keyboardDismissProp: ScrollViewProps = ios

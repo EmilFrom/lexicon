@@ -1,8 +1,9 @@
 import React from 'react';
-import { ImageBackground, Platform, SafeAreaView, View } from 'react-native';
+import { ImageBackground, Platform, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Icon } from '../core-ui';
 import { makeStyles, useTheme } from '../theme';

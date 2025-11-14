@@ -9,7 +9,6 @@ import {
   NativeSyntheticEvent,
   Platform,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleProp,
   TouchableOpacity,
@@ -17,6 +16,7 @@ import {
   ViewStyle,
   VirtualizedList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAccessoryView } from 'react-native-keyboard-accessory';
 
 import {
@@ -218,14 +218,19 @@ export default function MessageDetail() {
             return;
           }
           const messageMembers = result.details.allowedUsers?.map(
-            ({ avatarTemplate, __typename, ...otherProps }) => ({
+            ({ avatarTemplate, ...otherProps }) => ({
               ...otherProps,
               avatar: getImage(avatarTemplate),
             }),
           );
-          messageMembers && setMembers(messageMembers);
+          if (messageMembers) {
+            /**
+             * Avoid short-circuit expressions so ESLint can verify the setter side-effect.
+             */
+            setMembers(messageMembers);
+          }
           const participants: Array<User> = result.details.participants.map(
-            ({ avatar, __typename, ...otherProps }) => ({
+            ({ avatar, ...otherProps }) => ({
               ...otherProps,
               avatar: getImage(avatar),
             }),

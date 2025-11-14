@@ -1,7 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Platform, SafeAreaView } from 'react-native';
+import { Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAccessoryView } from 'react-native-keyboard-accessory';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
@@ -78,12 +79,17 @@ export default function Tags() {
       } else {
         getTags();
       }
-    } catch (e) {
+    } catch {
       setLoading(true);
       if (tags && tags.length < 1) {
         getTags();
       } else {
-        refetch && refetch();
+        if (refetch) {
+          /**
+           * Retry the network call explicitly instead of relying on a short-circuit expression.
+           */
+          refetch();
+        }
       }
     }
   }, [setTags, searchValue, currentTagsIds, getTags, refetch, tags]);

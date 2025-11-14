@@ -5,13 +5,8 @@ import {
 } from '@react-navigation/native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import {
-  Platform,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Platform, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
 import {

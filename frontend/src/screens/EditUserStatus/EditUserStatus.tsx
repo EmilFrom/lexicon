@@ -1,6 +1,6 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -44,21 +44,9 @@ export default function EditUserStatus() {
   const SelectionList = useMemo(
     () => [
       { id: 1, label: t('Never') },
-      {
-        id: 2,
-        label: t('in 1 hour'),
-        value: addHour({ dateString: Date.now(), hour: 1 }),
-      },
-      {
-        id: 3,
-        label: t('in 2 hours'),
-        value: addHour({ dateString: Date.now(), hour: 2 }),
-      },
-      {
-        id: 4,
-        label: t('Tomorrow'),
-        value: addHour({ dateString: Date.now(), hour: 24 }),
-      },
+      { id: 2, label: t('in 1 hour'), offsetHours: 1 },
+      { id: 3, label: t('in 2 hours'), offsetHours: 2 },
+      { id: 4, label: t('Tomorrow'), offsetHours: 24 },
       { id: 5, label: t('Custom date & time') },
     ],
     [],
@@ -75,7 +63,7 @@ export default function EditUserStatus() {
     },
   } = useRoute<StackRouteProp<'EditUserStatus'>>();
 
-  const { control, handleSubmit, getValues, watch } = useForm<FormValues>({
+  const { control, handleSubmit, getValues, setValue } = useForm<FormValues>({
     mode: 'onChange',
     defaultValues: {
       checked: endDate ? 5 : undefined,
@@ -87,9 +75,34 @@ export default function EditUserStatus() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const selectedCheck = watch('checked');
-  const status = watch('status');
+  /**
+   * We rely on `useWatch` so the React Compiler can safely memoize these dynamic values.
+   */
+  const selectedCheck = useWatch({ control, name: 'checked' });
+  const status = useWatch({ control, name: 'status' });
   const isCustomDate = selectedCheck === 5;
+
+  useEffect(() => {
+    const selectedOption = SelectionList.find(({ id }) => id === selectedCheck);
+    if (!selectedOption) {
+      return;
+    }
+    if (typeof selectedOption.offsetHours === 'number') {
+      const computedDate = addHour({
+        dateString: Date.now(),
+        hour: selectedOption.offsetHours,
+      });
+      setValue(
+        'datePicker',
+        computedDate instanceof Date ? computedDate : undefined,
+        { shouldDirty: true },
+      );
+      return;
+    }
+    if (selectedOption.id === 1) {
+      setValue('datePicker', undefined, { shouldDirty: true });
+    }
+  }, [SelectionList, selectedCheck, setValue]);
 
   const refetchQueries = isTabletLandscape
     ? [
@@ -133,19 +146,9 @@ export default function EditUserStatus() {
     await deleteUserStatus();
   };
   const onDone = handleSubmit(async (data) => {
-    const selectedValue = SelectionList.find(({ id }) => id === data.checked);
+    let endDate: string | undefined;
 
-    let endDate;
-
-    if (selectedValue?.value instanceof Date) {
-      endDate = selectedValue?.value.toISOString() || '';
-    }
-
-    /**
-     * This condition will combine date and time from picker
-     */
-
-    if (isCustomDate && data.datePicker) {
+    if (data.datePicker instanceof Date) {
       endDate = data.datePicker.toISOString();
     }
 

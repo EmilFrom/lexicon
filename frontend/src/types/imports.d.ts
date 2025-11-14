@@ -6,3 +6,5 @@ declare module '*.svg' {
   const Component: React.FC<SvgProps>;
   export default Component;
 }
+
+declare module 'react-native-console-time-polyfill';

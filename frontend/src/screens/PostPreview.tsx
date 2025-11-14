@@ -1,8 +1,9 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Platform, SafeAreaView } from 'react-native';
+import { Platform } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import mock from '../__mocks__/mockData';
 import {

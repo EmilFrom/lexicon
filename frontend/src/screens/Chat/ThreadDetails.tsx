@@ -1,11 +1,7 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Dimensions,
-  RefreshControl,
-  SafeAreaView,
-  VirtualizedList,
-} from 'react-native';
+import { Dimensions, RefreshControl, VirtualizedList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FooterLoadingIndicator, LoadingOrError } from '../../components';
 import { CHAT_CHANNEL_DETAIL_PAGE_SIZE } from '../../constants';

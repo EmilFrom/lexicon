@@ -7,12 +7,16 @@ import { makeStyles, useTheme } from '../theme';
 import { Post, PostWithoutId } from '../types';
 
 // TODO: Avoid prop drilling #775
-type Props<T> = Omit<FlatListProps<T>, 'data' | 'renderItem'> & {
+type Props<T> = Omit<
+  FlatListProps<T>,
+  'data' | 'renderItem' | 'CellRendererComponent'
+> & {
   refreshing: boolean;
   renderItem: ListRenderItem<T>;
   data?: Array<T>;
   onRefresh?: () => void;
   postListRef?: MutableRefObject<PostListRef<T> | null>;
+  CellRendererComponent?: never;
 };
 
 type PostListRef<T> = Animated.FlatList<T>;
