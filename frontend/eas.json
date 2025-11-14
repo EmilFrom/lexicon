@@ -17,7 +17,10 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "corepack": "true",
+      "ios": {
+        "simulator": true
+      }
     },
     "preview": {
       "distribution": "internal",
@@ -32,30 +35,24 @@
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "developmentClient": false,
+      "distribution": "internal",
+      "corepack": "true",
+      "ios": {
+        "simulator": false
+      }
     }
   },
   "submit": {
-    "base": {
+    "production": {
       "ios": {
-        "appleId": "<insert your apple ID>",
-        "ascAppId": "<insert your App Store connect ID>",
-        "appleTeamId": "<insert your apple team ID>"
+        "appleId": "emilfrom@gmail.com",
+        "ascAppId": "6755256395",
+        "appleTeamId": "K2L2XPK739"
       },
       "android": {
         "serviceAccountKeyPath": "./playstore_secret.json"
-      }
-    },
-    "staging": {
-      "extends": "base",
-      "android": {
-        "track": "internal"
-      }
-    },
-    "production": {
-      "extends": "base",
-      "android": {
-        "track": "production"
       }
     }
   }

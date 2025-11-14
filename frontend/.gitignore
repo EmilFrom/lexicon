@@ -15,6 +15,9 @@ playstore_secret.json
 dist/
 bin/
 artifacts/
+backup_files/
+documentation/
+.yarn/
 
 # macOS
 .DS_Store

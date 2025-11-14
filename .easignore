@@ -16,3 +16,8 @@ api/lib
 
 # Ignoring other directories
 /documentation
+
+.yarn
+frontend/old_patches
+
+*/backup_files

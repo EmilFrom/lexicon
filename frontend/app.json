@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "<tt-discourse>",
-    "slug": "tt-discourse",
+    "name": "Tænketanken U-Turn",
+    "slug": "tt-uturn",
     "scheme": "your-scheme-here",
     "version": "1.0.0",
     "orientation": "default",
@@ -46,16 +46,16 @@
     "extra": {
       "experienceId": "@<username>/<slugName>",
       "eas": {
-        "projectId": "189fd7ee-1374-4dac-8101-f84046de3198"
+        "projectId": "deebffed-fb14-4245-963c-0f9e2e69e6a1"
       }
     },
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "1.0.0",
+      "buildNumber": "1.0.1",
       "config": {
         "usesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.kfox.insertyourappname",
+      "bundleIdentifier": "com.emilfrom.tt-uturn",
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
           {
@@ -88,7 +88,7 @@
     "android": {
       "permissions": [],
       "versionCode": 1,
-      "package": "com.kfox.insertyourappname"
+      "package": "com.emilfrom.tt-uturn"
     },
     "web": {
       "favicon": "./assets/favicon.png"
