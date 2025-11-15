@@ -844,6 +844,12 @@ type GetThreadDetailOutput {
   thread: ThreadDetail!
 }
 
+type ChatChannelNotificationsOutput {
+  userId: Int!
+  channelId: Int!
+  pushEnabled: Boolean!
+}
+
 interface BasePostDraft {
   content: String!
   action: String!
@@ -999,6 +1005,7 @@ type Query {
   getThreadDetail(channelId: Int!, threadId: Int!): GetThreadDetailOutput!
   checkPostDraft(draftKey: String!): CheckPostDraftResult!
   listPostDrafts(page: Int!): [ListPostDraftsResult!]!
+  getChatChannelNotifications(channelId: Int!): ChatChannelNotificationsOutput!
 }
 
 input LeaveMessageInput {
@@ -1189,6 +1196,10 @@ type Mutation {
     sequence: Int!
     draftKey: String
   ): CreateAndUpdatePostDraftResultClient
+  updateChatChannelNotifications(
+    channelId: Int!
+    pushEnabled: Boolean!
+  ): ChatChannelNotificationsOutput!
 }
 
 scalar PathBuilder

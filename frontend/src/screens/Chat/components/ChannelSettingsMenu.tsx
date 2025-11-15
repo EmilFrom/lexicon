@@ -1,8 +1,10 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Switch, View } from 'react-native';
 
-import { ActionSheet, Switch, Text } from '../../../core-ui';
+import { ActionSheet } from '../../../components';
+import { Text } from '../../../core-ui';
 import { Icon } from '../../../icons';
+import { t } from '../../../i18n/translate';
 import { makeStyles } from '../../../theme';
 
 type Props = {

@@ -3,7 +3,6 @@ import Search from './Search';
 
 export { ChannelList, Search };
 
-export * from './ChatInput';
 export * from './ChatList';
 export * from './ChannelList';
 export * from './ChannelSettingsMenu';
