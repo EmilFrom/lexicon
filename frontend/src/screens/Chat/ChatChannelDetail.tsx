@@ -150,8 +150,7 @@ export default function ChatChannelDetail() {
     'HIDE_ALERT',
   );
 
-  const { preference, loading: loadingPreference } =
-    useGetChatChannelNotificationPreference(channelId);
+  const { preference } = useGetChatChannelNotificationPreference(channelId);
   const { updatePreference } = useUpdateChatChannelNotificationPreference();
 
   const { leaveChannel } = useLeaveChannel({

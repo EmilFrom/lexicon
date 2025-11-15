@@ -1,11 +1,7 @@
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { useCallback } from 'react';
 
-import {
-  ChatChannelNotificationPreference,
-  Mutation,
-  Query,
-} from '../../generatedAPI/server';
+import { Mutation, Query } from '../../generatedAPI/server';
 
 const GET_NOTIFICATION_PREFERENCE = gql`
   query getNotificationPreference($channelId: Int!) {

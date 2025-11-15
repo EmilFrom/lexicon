@@ -122,7 +122,9 @@ export function CustomHeader(props: Props) {
 
     if (onPressTitle) {
       return (
-        <TouchableOpacity onPress={onPressTitle}>{titleContent}</TouchableOpacity>
+        <TouchableOpacity onPress={onPressTitle}>
+          {titleContent}
+        </TouchableOpacity>
       );
     }
 
