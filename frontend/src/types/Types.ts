@@ -60,6 +60,7 @@ export enum NotificationType {
   EventReminder = 27,
   EventInvitation = 28,
   ChatMention = 29,
+  ChatMessage = 30,
   WatchingCategoryOrTag = 36,
 }
 

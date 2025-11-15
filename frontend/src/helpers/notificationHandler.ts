@@ -312,16 +312,20 @@ export function notificationHandler(
         break;
       }
       case 'ChatNotification': {
-        const { chatChannelTitle, mentionedByUsername } = data;
+        const { chatChannelTitle, mentionedByUsername, username } = data;
         switch (notificationType) {
           case NotificationType.ChatMention: {
             message = t('Mentioned you in ') + chatChannelTitle;
             break;
           }
+          case NotificationType.ChatMessage: {
+            message = t('New message in ') + chatChannelTitle;
+            break;
+          }
         }
         tempNotification.push({
           id,
-          name: mentionedByUsername || '',
+          name: mentionedByUsername || username || '',
           message,
           createdAt,
           seen,
