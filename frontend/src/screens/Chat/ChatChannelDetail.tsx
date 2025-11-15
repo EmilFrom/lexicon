@@ -465,7 +465,7 @@ export default function ChatChannelDetail() {
             channelDetail?.title ??
             ''
           }
-          isPushEnabled={preference?.push_enabled ?? true}
+          isPushEnabled={preference?.pushEnabled ?? true}
           onTogglePush={handleTogglePush}
         />
         <ChatList

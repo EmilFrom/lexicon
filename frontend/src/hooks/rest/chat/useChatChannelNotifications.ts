@@ -11,9 +11,9 @@ const GET_NOTIFICATION_PREFERENCE = gql`
         path: "/lexicon/chat-notifications/{args.channelId}"
         method: "GET"
       ) {
-      user_id
-      channel_id
-      push_enabled
+      userId
+      channelId
+      pushEnabled
     }
   }
 `;
@@ -22,19 +22,21 @@ const UPDATE_NOTIFICATION_PREFERENCE = gql`
   mutation updateNotificationPreference(
     $channelId: Int!
     $pushEnabled: Boolean!
+    $input: UpdateNotificationPreferenceInput
   ) {
     updateChatChannelNotificationPreference(
       channelId: $channelId
-      pushEnabled: $pushEnabled
+      input: $input
     )
       @rest(
         type: "ChatChannelNotificationPreference"
         path: "/lexicon/chat-notifications/{args.channelId}"
         method: "PUT"
+        bodyKey: "input"
       ) {
-      user_id
-      channel_id
-      push_enabled
+      userId
+      channelId
+      pushEnabled
     }
   }
 `;
@@ -61,18 +63,24 @@ export function useUpdateChatChannelNotificationPreference() {
   const updatePreference = useCallback(
     (channelId: number, pushEnabled: boolean) => {
       return mutate({
-        variables: { channelId, pushEnabled },
+        variables: { 
+          channelId, 
+          pushEnabled,
+          input: { push_enabled: pushEnabled }
+        },
         // Optimistically update the cache
         optimisticResponse: {
           updateChatChannelNotificationPreference: {
             __typename: 'ChatChannelNotificationPreference',
-            user_id: -1, // Placeholder
-            channel_id: channelId,
-            push_enabled: pushEnabled,
+            userId: -1, // Placeholder
+            channelId: channelId,
+            pushEnabled: pushEnabled,
           },
         },
         update: (cache, { data }) => {
-          if (!data?.updateChatChannelNotificationPreference) return;
+          if (!data?.updateChatChannelNotificationPreference) {
+            return;
+          }
           cache.writeQuery({
             query: GET_NOTIFICATION_PREFERENCE,
             variables: { channelId },
