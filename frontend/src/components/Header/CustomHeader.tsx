@@ -2,7 +2,7 @@ import { HeaderBackButton } from '@react-navigation/elements';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { StatusBar, StatusBarStyle } from 'expo-status-bar';
 import React, { useLayoutEffect } from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, TouchableOpacity, View } from 'react-native';
 
 import { ActivityIndicator, Text } from '../../core-ui';
 import { IconName } from '../../icons';
@@ -19,6 +19,7 @@ type Props = {
   rightTitle?: string;
   rightIcon?: IconName;
   onPressRight?: () => void;
+  onPressTitle?: () => void;
   disabled?: boolean;
   isLoading?: boolean;
   prevScreen?: string;
@@ -38,6 +39,7 @@ export function CustomHeader(props: Props) {
     rightTitle = '',
     rightIcon,
     onPressRight,
+    onPressTitle,
     noShadow = false,
     disabled = false,
     isLoading = false,
@@ -105,7 +107,7 @@ export function CustomHeader(props: Props) {
   }, [routesLength, isLoading, navigation, prevScreen, colors, fontSizes]);
 
   const headerTitle = React.useMemo(() => {
-    return (
+    const titleContent = (
       <View style={styles.headerTitle}>
         <Text size="l" variant="semiBold">
           {title}
@@ -117,7 +119,15 @@ export function CustomHeader(props: Props) {
         ) : null}
       </View>
     );
-  }, [styles, title, subtitle]);
+
+    if (onPressTitle) {
+      return (
+        <TouchableOpacity onPress={onPressTitle}>{titleContent}</TouchableOpacity>
+      );
+    }
+
+    return titleContent;
+  }, [styles, title, subtitle, onPressTitle]);
 
   useLayoutEffect(() => {
     navigation.setOptions({

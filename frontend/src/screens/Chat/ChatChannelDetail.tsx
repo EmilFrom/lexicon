@@ -35,15 +35,22 @@ import {
   useChatChannelDetail,
   useChatChannelMessages,
   useCreateThread,
+  useGetChatChannelNotificationPreference,
   useLeaveChannel,
   usePolling,
   useReplyChat,
+  useUpdateChatChannelNotificationPreference,
 } from '../../hooks';
 import { makeStyles } from '../../theme';
 import { ChatMessageContent, StackNavProp, StackRouteProp } from '../../types';
 import { useDevice } from '../../utils';
 
-import { ChatList, ChatMessageItem, FooterReplyChat } from './components';
+import {
+  ChatList,
+  ChannelSettingsMenu,
+  ChatMessageItem,
+  FooterReplyChat,
+} from './components';
 
 type OnScrollInfo = {
   index: number;
@@ -78,6 +85,7 @@ export default function ChatChannelDetail() {
   const nextTargetMessageId = useRef<number>(0);
 
   const [message, setMessage] = useState('');
+  const [isMenuVisible, setMenuVisible] = useState(false);
   const [textInputFocused, setInputFocused] = useState(false);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [hasOlderMessages, setHasOlderMessages] = useState(true);
@@ -141,6 +149,10 @@ export default function ChatChannelDetail() {
     },
     'HIDE_ALERT',
   );
+
+  const { preference, loading: loadingPreference } =
+    useGetChatChannelNotificationPreference(channelId);
+  const { updatePreference } = useUpdateChatChannelNotificationPreference();
 
   const { leaveChannel } = useLeaveChannel({
     onError: (error) => {
@@ -406,6 +418,10 @@ export default function ChatChannelDetail() {
     }
   };
 
+  const handleTogglePush = (newValue: boolean) => {
+    updatePreference(channelId, newValue);
+  };
+
   if (chatChannelDetailLoading || channelMessagesLoading) {
     return <LoadingOrError loading />;
   }
@@ -432,6 +448,7 @@ export default function ChatChannelDetail() {
       })()}
       rightIcon="More"
       onPressRight={onPressMore}
+      onPressTitle={() => setMenuVisible(true)}
       isLoading={isFetchMore}
     />
   );
@@ -440,6 +457,18 @@ export default function ChatChannelDetail() {
     <>
       <SafeAreaView style={styles.container}>
         {Header}
+        <ChannelSettingsMenu
+          visible={isMenuVisible}
+          onClose={() => setMenuVisible(false)}
+          channelTitle={
+            channelTitle ??
+            chatChannelDetailData?.getChatChannelDetail.channel.title ??
+            channelDetail?.title ??
+            ''
+          }
+          isPushEnabled={preference?.push_enabled ?? true}
+          onTogglePush={handleTogglePush}
+        />
         <ChatList
           testID="Chat:ChatList"
           ref={virtualListRef}
