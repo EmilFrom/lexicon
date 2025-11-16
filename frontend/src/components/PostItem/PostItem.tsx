@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 
 import { NO_EXCERPT_WORDING } from '../../constants';
-import { CustomImage, Icon, Text } from '../../core-ui';
+import { AuthenticatedImage, Icon, Text } from '../../core-ui';
+import { FullScreenImageModal } from '../FullScreenImageModal';
 import {
   formatRelativeTime,
   replaceTagsInContent,
@@ -63,6 +64,9 @@ function BasePostItem(props: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
   const { height: windowHeight } = useWindowDimensions();
+  const [fullScreenImage, setFullScreenImage] = React.useState<string | null>(
+    null,
+  );
 
   const {
     topicId,
@@ -200,10 +204,16 @@ function BasePostItem(props: Props) {
   const imageContent =
     showImageRow && images && images.length > 0 ? (
       <View style={styles.imageWrapper}>
-        <CustomImage
-          src={images[0]}
-          debugLabel={`PostItem:${topicId}`}
+        <AuthenticatedImage
+          url={images[0]}
+          testID={`PostItem:${topicId}`}
+          onPress={(uri) => setFullScreenImage(uri)}
         />
+        {images.length > 1 && (
+          <View style={styles.imageCountBadge}>
+            <Text style={styles.imageCountText}>+{images.length - 1} more</Text>
+          </View>
+        )}
       </View>
     ) : null;
   const pollsContent = renderPolls();
@@ -270,13 +280,20 @@ function BasePostItem(props: Props) {
   );
 
   return (
-    <View
-      style={[styles.container, pinned && styles.pinnedBorder, style]}
-      {...otherProps}
-    >
-      {wrappedMainContent}
-      {footer}
-    </View>
+    <>
+      <View
+        style={[styles.container, pinned && styles.pinnedBorder, style]}
+        {...otherProps}
+      >
+        {wrappedMainContent}
+        {footer}
+      </View>
+      <FullScreenImageModal
+        visible={!!fullScreenImage}
+        imageUri={fullScreenImage || ''}
+        onClose={() => setFullScreenImage(null)}
+      />
+    </>
   );
 }
 
@@ -313,6 +330,21 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
     marginVertical: spacing.m,
     borderRadius: spacing.m,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  imageCountBadge: {
+    position: 'absolute',
+    bottom: spacing.m,
+    right: spacing.m,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.xs,
+    borderRadius: spacing.s,
+  },
+  imageCountText: {
+    color: colors.pureWhite,
+    fontSize: fontSizes.xs,
+    fontWeight: '600',
   },
   spacingBottom: {
     marginBottom: spacing.xl,
