@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
-  LayoutChangeEvent,
   TouchableOpacity,
   View,
   ViewProps,
@@ -64,7 +63,6 @@ function BasePostItem(props: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
   const { height: windowHeight } = useWindowDimensions();
-  const [containerHeight, setContainerHeight] = useState(0);
 
   const {
     topicId,
@@ -173,18 +171,8 @@ function BasePostItem(props: Props) {
     });
   };
 
-  const previewHeightLimit =
-    prevScreen === 'Home'
-      ? Math.min(
-          windowHeight * 0.45,
-          containerHeight ? containerHeight * 0.6 : windowHeight * 0.45,
-        )
-      : undefined;
-
   const previewContainerStyle =
-    prevScreen === 'Home'
-      ? [styles.contentPreview, { maxHeight: previewHeightLimit }]
-      : undefined;
+    prevScreen === 'Home' ? styles.contentPreview : undefined;
 
   const mainContent = (
     <>
@@ -209,9 +197,15 @@ function BasePostItem(props: Props) {
     </>
   );
 
-  const imageContent = images && images.length > 0 && (
-    <CustomImage src={images[0]} style={styles.images} />
-  );
+  const imageContent =
+    showImageRow && images && images.length > 0 ? (
+      <View style={styles.imageWrapper}>
+        <CustomImage
+          src={images[0]}
+          debugLabel={`PostItem:${topicId}`}
+        />
+      </View>
+    ) : null;
   const pollsContent = renderPolls();
 
   const wrappedMainContent = !nonclickable ? (
@@ -278,12 +272,6 @@ function BasePostItem(props: Props) {
   return (
     <View
       style={[styles.container, pinned && styles.pinnedBorder, style]}
-      onLayout={(event: LayoutChangeEvent) => {
-        const measuredHeight = event.nativeEvent.layout.height;
-        if (Math.abs(measuredHeight - containerHeight) > 1) {
-          setContainerHeight(measuredHeight);
-        }
-      }}
       {...otherProps}
     >
       {wrappedMainContent}
@@ -321,8 +309,10 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
     marginBottom: spacing.l,
     textTransform: 'capitalize',
   },
-  images: {
+  imageWrapper: {
     marginVertical: spacing.m,
+    borderRadius: spacing.m,
+    overflow: 'hidden',
   },
   spacingBottom: {
     marginBottom: spacing.xl,
@@ -342,5 +332,26 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
     alignSelf: 'flex-start',
   },
 }));
-const PostItem = React.memo(BasePostItem);
+
+// Custom comparison function for React.memo
+// Compare key props that affect rendering
+const areEqual = (prevProps: Props, nextProps: Props) => {
+  return (
+    prevProps.topicId === nextProps.topicId &&
+    prevProps.title === nextProps.title &&
+    prevProps.content === nextProps.content &&
+    prevProps.username === nextProps.username &&
+    prevProps.isLiked === nextProps.isLiked &&
+    prevProps.hidden === nextProps.hidden &&
+    prevProps.isHidden === nextProps.isHidden &&
+    prevProps.prevScreen === nextProps.prevScreen &&
+    prevProps.pinned === nextProps.pinned &&
+    // Compare arrays by length and content
+    prevProps.tags?.length === nextProps.tags?.length &&
+    prevProps.images?.length === nextProps.images?.length &&
+    prevProps.polls?.length === nextProps.polls?.length
+  );
+};
+
+const PostItem = React.memo(BasePostItem, areEqual);
 export { PostItem, Props as PostItemProps };

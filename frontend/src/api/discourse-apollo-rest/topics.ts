@@ -38,6 +38,7 @@ export const TOPICS = gql`
           createdAt
           bumpedAt
           excerpt
+          firstPostContent
           visible
           liked
           tags

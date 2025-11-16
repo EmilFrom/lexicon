@@ -13,6 +13,7 @@ export const TOPIC_FRAGMENT = gql`
     createdAt
     bumpedAt
     excerpt
+    firstPostContent
     visible
     liked
     tags

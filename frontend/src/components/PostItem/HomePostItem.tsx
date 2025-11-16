@@ -1,9 +1,10 @@
 import { OperationVariables, useFragment_experimental } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { TopicFragment, TopicFragmentDoc } from '../../generatedAPI/server';
 import { transformTopicToPost, useStorage } from '../../helpers';
+import { useFirstPostContent } from '../../hooks';
 import { makeStyles } from '../../theme';
 import { StackNavProp } from '../../types';
 import { MetricsProp } from '../Metrics/Metrics';
@@ -60,14 +61,21 @@ function BaseHomePostItem(props: Props) {
     isLiked,
     freqPosters,
     postNumber,
-    content,
+    content: excerptContent,
     imageUrls,
     pinned,
   } = transformTopicToPost({ ...cacheTopic, channels: channelsData ?? [] });
 
+  // Fetch first post content (cache-first, lazy-loaded)
+  const { content: firstPostContent } = useFirstPostContent(topicId);
+
+  // Use first post content if available, otherwise fall back to excerpt
+  const content = firstPostContent || excerptContent;
+
   const isCreator = username === storage.getItem('user')?.username;
 
-  const onPressPost = () => {
+  // Memoize callback to prevent unnecessary re-renders
+  const onPressPost = useCallback(() => {
     navigate('PostDetail', {
       topicId,
       prevScreen,
@@ -75,14 +83,16 @@ function BaseHomePostItem(props: Props) {
       content,
       hidden: isHidden,
     });
-  };
+  }, [navigate, topicId, prevScreen, content, isHidden]);
+
+  const imagePreviewUrls = firstPostContent ? undefined : imageUrls;
 
   return (
     <PostItem
       topicId={topicId}
       title={title}
       content={content}
-      images={imageUrls}
+      images={imagePreviewUrls}
       avatar={avatar}
       channel={channel}
       tags={tags}
@@ -91,7 +101,7 @@ function BaseHomePostItem(props: Props) {
       username={username}
       isLiked={isLiked}
       numberOfLines={5}
-      showImageRow
+      showImageRow={!firstPostContent && !!imagePreviewUrls?.length}
       pinned={pinned}
       style={style}
       footer={
@@ -120,5 +130,16 @@ const useStyles = makeStyles(({ spacing }) => ({
     paddingTop: spacing.m,
   },
 }));
-const HomePostItem = React.memo(BaseHomePostItem);
+
+// Custom comparison function for React.memo
+// Only re-render if topicId changes (content updates are handled internally)
+const areEqual = (prevProps: Props, nextProps: Props) => {
+  return (
+    prevProps.topicId === nextProps.topicId &&
+    prevProps.prevScreen === nextProps.prevScreen &&
+    prevProps.isHidden === nextProps.isHidden
+  );
+};
+
+const HomePostItem = React.memo(BaseHomePostItem, areEqual);
 export { HomePostItem, Props as HomePostItemProps };

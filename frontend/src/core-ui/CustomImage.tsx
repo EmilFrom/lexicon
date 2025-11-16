@@ -1,61 +1,70 @@
 import React, { useState } from 'react';
 import {
-  ImageBackground,
   ImageBackgroundProps,
   StyleProp,
+  StyleSheet,
   TouchableOpacity,
   View,
   ViewStyle,
+  useWindowDimensions,
 } from 'react-native';
+import { useReactiveVar } from '@apollo/client';
 
 import { DEFAULT_IMAGE } from '../../assets/images';
+import { Text } from '../core-ui/Text';
 import { ShowImageModal } from '../components/ShowImageModal';
 import { makeStyles } from '../theme';
-import { convertUrl, isImageValidUrl } from '../helpers';
+import { convertUrl, resolveUploadUrl } from '../helpers';
 
 import CachedImage from './CachedImage';
-
-const variantSize = {
-  s: 84,
-  m: 200,
-};
+import { tokenVar } from '../reactiveVars';
+import { getDiscourseAuthHeaders } from '../helpers/discourseAuthHeaders';
 
 type Props = Omit<ImageBackgroundProps, 'source' | 'style'> & {
   src: string;
-  size?: keyof typeof variantSize;
-  square?: boolean;
   style?: StyleProp<ViewStyle>;
-  defaultImage?: string;
   onPress?: () => void;
+  debugLabel?: string;
+  maxHeightRatio?: number;
 };
+
+const DEBUG_IMAGES = __DEV__;
 
 export function CustomImage(props: Props) {
   const styles = useStyles();
 
-  const {
-    src,
-    size = 'm',
-    square = false,
-    style,
-    defaultImage = DEFAULT_IMAGE,
-    ...otherProps
-  } = props;
+  const { src, style, debugLabel, maxHeightRatio = 0.7 } = props;
 
   const [show, setShow] = useState(false);
-  const [error, setError] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const { height: windowHeight } = useWindowDimensions();
 
-  const sizeStyle = {
-    height: variantSize[size],
-    ...(square && { width: variantSize[size] }),
-  };
+  const containerHeight = Math.max(200, windowHeight * maxHeightRatio);
+  const token = useReactiveVar(tokenVar);
+  const normalizedSrc = src ? resolveUploadUrl(convertUrl(src)) : undefined;
+  const remoteSource = normalizedSrc
+    ? {
+        uri: normalizedSrc,
+        headers: getDiscourseAuthHeaders(token),
+      }
+    : undefined;
+  const imgSource = remoteSource ?? { uri: DEFAULT_IMAGE };
 
-  const imgSource = isImageValidUrl(src)
-    ? { uri: convertUrl(src) }
-    : DEFAULT_IMAGE;
+  if (DEBUG_IMAGES) {
+    console.log('[CustomImage]', debugLabel ?? '', {
+      src,
+      normalizedSrc,
+      containerHeight,
+    });
+  }
 
-  const hideImage = src === '' || error;
+  const hideImage = !normalizedSrc;
 
   const onPress = () => {
+    if (!normalizedSrc) {
+      return;
+    }
     setShow(true);
   };
 
@@ -63,24 +72,74 @@ export function CustomImage(props: Props) {
     setShow(false);
   };
 
-  const content = (
-    <ImageBackground
-      source={defaultImage}
-      style={[styles.image, sizeStyle]}
-      resizeMode="cover"
-      {...otherProps}
+  const calculatedSizeStyle = {
+    height: containerHeight,
+  };
+
+  const handleImageError = () => {
+    if (DEBUG_IMAGES) {
+      console.warn('[CustomImage] error loading image', {
+        label: debugLabel,
+        src,
+        normalizedSrc,
+      });
+    }
+    setHasError(true);
+  };
+
+  const handleImageLoad = () => {
+    setHasError(false);
+  };
+
+  const handleImageLoadStart = () => {
+    setHasError(false);
+  };
+
+  const retryLoad = () => {
+    setHasError(false);
+    setReloadKey((prev) => prev + 1);
+  };
+
+  const renderFallback = (message: string, actionLabel?: string) => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      onPress={actionLabel ? retryLoad : undefined}
+      disabled={!actionLabel}
+      style={styles.fallback}
     >
-      <CachedImage
-        source={imgSource}
-        style={[styles.image, sizeStyle]}
-        resizeMode="cover"
-        onError={() => setError(true)}
-        {...otherProps}
-      />
-    </ImageBackground>
+      <Text variant="semibold" size="s" style={styles.fallbackTitle}>
+        {message}
+      </Text>
+      {actionLabel ? (
+        <Text size="xs" color="textLight">
+          {actionLabel}
+        </Text>
+      ) : null}
+    </TouchableOpacity>
   );
 
-  return !hideImage ? (
+  const content = (
+    <View style={[styles.imageContainer, calculatedSizeStyle, style]}>
+      {!hasError && normalizedSrc ? (
+      <CachedImage
+          key={reloadKey}
+        source={imgSource}
+          style={[styles.image, StyleSheet.absoluteFill]}
+          contentFit="cover"
+          onLoadStart={handleImageLoadStart}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+      />
+      ) : (
+        renderFallback(
+          hideImage ? t('Image unavailable') : t('Failed to load image'),
+          normalizedSrc ? t('Tap to retry') : undefined,
+        )
+      )}
+    </View>
+  );
+
+  return normalizedSrc ? (
     <>
       <TouchableOpacity
         delayPressIn={100}
@@ -97,7 +156,9 @@ export function CustomImage(props: Props) {
       />
     </>
   ) : (
-    <View style={styles.noContent} />
+    <View style={[styles.imageContainer, calculatedSizeStyle, style]}>
+      {renderFallback(t('No image available'))}
+    </View>
   );
 }
 
@@ -105,12 +166,27 @@ const useStyles = makeStyles(({ spacing }) => ({
   container: {
     flexDirection: 'row',
   },
-  noContent: {
-    paddingBottom: spacing.l,
+  imageContainer: {
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    overflow: 'hidden',
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
   },
   image: {
-    borderRadius: 4,
-    overflow: 'hidden',
     width: '100%',
+    height: '100%',
+  },
+  fallback: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.l,
+    width: '100%',
+    height: '100%',
+  },
+  fallbackTitle: {
+    marginBottom: spacing.xs,
   },
 }));

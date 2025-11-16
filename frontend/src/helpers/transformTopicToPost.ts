@@ -16,6 +16,7 @@ const transformTopicToPost = ({
   id,
   title,
   excerpt,
+  firstPostContent,
   visible,
   authorUserId, // We'll keep this for a fallback
   pinned,
@@ -72,7 +73,7 @@ const transformTopicToPost = ({
   return {
     topicId: id,
     title,
-    content: excerpt || NO_EXCERPT_WORDING,
+    content: firstPostContent || excerpt || NO_EXCERPT_WORDING,
     hidden: !visible,
     username: authorUser?.username ?? '',
     // The log shows the property is named `avatar`.

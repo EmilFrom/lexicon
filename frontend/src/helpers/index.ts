@@ -8,6 +8,7 @@ export * from './collapsible';
 export * from './colorScheme';
 export * from './compareTime';
 export * from './convertUrl';
+export * from './resolveUploadUrl';
 export * from './createReactNativeFile';
 export * from './deleteQuoteBbCode';
 export * from './errorHandler';

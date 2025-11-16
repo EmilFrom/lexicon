@@ -66,7 +66,9 @@ export function Markdown(props: MarkdownProps) {
         />
       );
     }
-    return <CustomImage src={src} key={key} style={styles.image} />;
+    return (
+      <CustomImage src={src} key={key} style={styles.image} autoHeight />
+    );
   };
 
   const renderMention = ({ key, content }: ASTNode) => (

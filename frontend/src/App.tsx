@@ -20,10 +20,11 @@ import {
   RedirectProvider,
 } from './utils';
 import { AuthProvider } from './utils/AuthProvider';
+import { useApolloClientDevTools } from '@dev-plugins/apollo-client';
 
 if (__DEV__) {
   void import('react-native-console-time-polyfill');
-  void import('../reactotronConfig');
+  void import('../ReactotronConfig.js');
   // Based on react-native-reanimated documentation about warning https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device
   LogBox.ignoreLogs([
     '[Reanimated] Reduced motion setting is enabled on this device.',
@@ -32,6 +33,10 @@ if (__DEV__) {
 }
 
 export default function App() {
+  if (__DEV__) {
+    useApolloClientDevTools(client);
+  }
+
   const newPostMethods = useForm<NewPostForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',

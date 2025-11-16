@@ -1,10 +1,12 @@
 export * from './useAutoSaveManager';
 export * from './useAutoSavePostDraft';
+export * from './useFirstPostContent';
 export * from './useGetUrlEmoji';
 export * from './useKASVWorkaround';
 export * from './useKeyboardListener';
 export * from './useLoadMorePost';
 export * from './usePolling';
+export * from './usePrefetchVisibleTopics';
 
 export * from './rest/auth/useLogout';
 export * from './rest/auth/usePushNotifications';

@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Dimensions, PixelRatio, Platform, View } from 'react-native';
+import { Dimensions, PixelRatio, Platform, StyleSheet, View } from 'react-native';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import Animated, {
   Extrapolate,
@@ -55,6 +55,7 @@ import {
   useDeletePostDraft,
   useLazyCheckPostDraft,
   useLazyTopicList,
+  usePrefetchVisibleTopics,
   useSiteSettings,
 } from '../../hooks';
 import { makeStyles, useTheme } from '../../theme';
@@ -183,6 +184,7 @@ export default function Home() {
   const [hasMoreTopics, setHasMoreTopics] = useState(false);
   const [allTopicCount, setAllTopicCount] = useState(0);
   const [width, setWidth] = useState(0);
+  const [visibleTopicIds, setVisibleTopicIds] = useState<number[]>([]);
 
   const {
     loading: channelsLoading,
@@ -266,6 +268,25 @@ export default function Home() {
 
   const { deletePostDraft } = useDeletePostDraft();
   const { checkPostDraft } = useLazyCheckPostDraft();
+
+  // Prefetch first post content for visible topics + 30% buffer
+  usePrefetchVisibleTopics({
+    visibleTopicIds,
+    enabled: !!topicsData && topicsData.length > 0,
+  });
+
+  // Callback for tracking visible items
+  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+    const ids = viewableItems
+      .map((item: any) => item.item?.topicId)
+      .filter(Boolean);
+    setVisibleTopicIds(ids);
+  }, []);
+
+  // Stable reference for viewability config
+  const viewabilityConfigRef = useRef({
+    itemVisiblePercentThreshold: 50,
+  });
 
   const getData = useCallback(
     (variables: TopicsQueryVariables) => {
@@ -631,6 +652,8 @@ export default function Home() {
         onScroll={scrollHandler}
         onEndReachedThreshold={0.1}
         onEndReached={onEndReached}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfigRef.current}
         renderItem={({ item }) => {
           return (
             <HomePostItem

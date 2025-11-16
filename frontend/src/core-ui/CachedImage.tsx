@@ -2,14 +2,13 @@
 // A modern replacement for the legacy class component, using expo-image.
 
 import React from 'react';
-import { Image } from 'expo-image'; // <-- Import the modern Image component
-import { ImageStyle, ImageURISource, StyleProp } from 'react-native';
+import { Image, ImageProps } from 'expo-image';
+import { ImageStyle, StyleProp } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 
-// Define the props for our new component. They are much simpler now.
-type Props = {
-  source: Omit<ImageURISource, 'uri'> & { uri: string };
-  style: StyleProp<ImageStyle>;
+type Props = Omit<ImageProps, 'source' | 'style'> & {
+  source: NonNullable<ImageProps['source']>;
+  style?: StyleProp<ImageStyle>;
   isBackground?: boolean;
   visible?: boolean;
   setVisible?: () => void;

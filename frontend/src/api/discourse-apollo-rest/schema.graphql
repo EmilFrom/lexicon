@@ -615,6 +615,7 @@ type Topic {
   categoryId: Int
   createdAt: String!
   excerpt: String
+  firstPostContent: String
   id: Int!
   imageUrl: String
   likeCount: Int!
