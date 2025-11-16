@@ -35,6 +35,7 @@ const GET_ALL_NOTIFICATION_PREFERENCES = gql`
         endpoint: "v1"
       ) {
       preferences @type(name: "[ChatChannelNotificationPreference]") {
+        userId
         channelId
         pushEnabled
       }

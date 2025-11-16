@@ -15,7 +15,7 @@ export function useActivity(
   let variables = options && options.variables;
 
   if (variables && !options?.variables?.filter) {
-    variables = { ...variables, filter: '1,4,5' };
+    variables = { ...variables, filter: '4,5' };
   }
 
   const { data, loading, error, networkStatus, refetch, fetchMore } = useQuery<

@@ -149,6 +149,8 @@ export default function UserInformation() {
   const { data, loading, error, networkStatus, refetch, fetchMore } =
     useActivity({ variables: { username: username, offset: 0 } }, 'HIDE_ALERT');
 
+  console.log('User Activity Data:', data);
+
   const activities = data?.activity ?? [];
 
   const onEndReached = (distanceFromEnd: number) => {
@@ -187,7 +189,7 @@ export default function UserInformation() {
   }
 
   if (
-    (loading || profileLoading || (data && data.activity?.length !== 0)) &&
+    (loading || profileLoading || (data && data.activity?.length > 0)) &&
     activities.length < 1
   ) {
     return <LoadingOrError loading />;
