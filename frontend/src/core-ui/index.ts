@@ -1,5 +1,7 @@
 export * from './ActivityIndicator';
+export * from './AuthenticatedImage';
 export * from './Avatar';
+export { ImageSkeleton } from './ImageSkeleton';
 export * from './Button';
 export * from './CachedImage';
 export * from './ChatBubble';
