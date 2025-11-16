@@ -9,6 +9,7 @@ import {
   VirtualizedList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 import { client } from '../../api/client';
 import {
@@ -41,6 +42,7 @@ import {
   useReplyChat,
   useUpdateChatChannelNotificationPreference,
 } from '../../hooks';
+import { t } from '../../i18n/translate';
 import { makeStyles } from '../../theme';
 import { ChatMessageContent, StackNavProp, StackRouteProp } from '../../types';
 import { useDevice } from '../../utils';
@@ -98,6 +100,7 @@ export default function ChatChannelDetail() {
   const [loadingMessageId, setLoadingMessageId] = useState<number | null>(null);
   const [shouldMaintainVisiblePosition, setShouldMaintainVisiblePosition] =
     useState(false);
+  const previousPushEnabled = useRef<boolean | null>(null);
 
   const {
     getChatChannelDetail,
@@ -150,8 +153,13 @@ export default function ChatChannelDetail() {
     'HIDE_ALERT',
   );
 
-  const { preference } = useGetChatChannelNotificationPreference(channelId);
-  const { updatePreference } = useUpdateChatChannelNotificationPreference();
+  const { preference, refetch: refetchPreference } =
+    useGetChatChannelNotificationPreference(channelId);
+  const {
+    updatePreference,
+    loading: updatePreferenceLoading,
+    error: updatePreferenceError,
+  } = useUpdateChatChannelNotificationPreference();
 
   const { leaveChannel } = useLeaveChannel({
     onError: (error) => {
@@ -417,8 +425,28 @@ export default function ChatChannelDetail() {
     }
   };
 
-  const handleTogglePush = (newValue: boolean) => {
-    updatePreference(channelId, newValue);
+  const handleTogglePush = async (newValue: boolean) => {
+    previousPushEnabled.current = preference?.pushEnabled ?? true;
+    try {
+      await updatePreference(channelId, newValue);
+      Toast.show({
+        type: 'notificationSuccessToast',
+        text1: t('Notifications updated successfully'),
+      });
+      refetchPreference();
+    } catch (e) {
+      Toast.show({
+        type: 'notificationErrorToast',
+        text1: t('Failed to update notification preferences'),
+        text2: t('Please try again'),
+      });
+      // Revert on error
+      if (previousPushEnabled.current !== null) {
+        // This part is tricky as we can't directly set the switch back
+        // We rely on the cache update from refetchPreference to do it.
+        refetchPreference();
+      }
+    }
   };
 
   if (chatChannelDetailLoading || channelMessagesLoading) {
@@ -467,6 +495,7 @@ export default function ChatChannelDetail() {
           }
           isPushEnabled={preference?.pushEnabled ?? true}
           onTogglePush={handleTogglePush}
+          isLoading={updatePreferenceLoading}
         />
         <ChatList
           testID="Chat:ChatList"

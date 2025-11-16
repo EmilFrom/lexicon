@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 
-import { Icon, Text } from '../../../core-ui';
+import { ActivityIndicator, Icon, Text } from '../../../core-ui';
 import { t } from '../../../i18n/translate';
 import { makeStyles, useTheme } from '../../../theme';
 
@@ -17,12 +17,20 @@ type Props = {
   isPushEnabled: boolean;
   onTogglePush: (newValue: boolean) => void;
   channelTitle: string;
+  isLoading: boolean;
 };
 
 export function ChannelSettingsMenu(props: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { visible, onClose, isPushEnabled, onTogglePush, channelTitle } = props;
+  const {
+    visible,
+    onClose,
+    isPushEnabled,
+    onTogglePush,
+    channelTitle,
+    isLoading,
+  } = props;
 
   return (
     <Modal
@@ -48,7 +56,15 @@ export function ChannelSettingsMenu(props: Props) {
                 <View style={styles.row}>
                   <Icon name="Notifications" size="l" />
                   <Text style={styles.label}>{t('Push Notifications')}</Text>
-                  <Switch value={isPushEnabled} onValueChange={onTogglePush} />
+                  {isLoading ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <Switch
+                      value={isPushEnabled}
+                      onValueChange={onTogglePush}
+                      disabled={isLoading}
+                    />
+                  )}
                 </View>
               </View>
             </View>
@@ -91,6 +107,7 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    minHeight: 48, // Ensure consistent height with ActivityIndicator
   },
   label: {
     flex: 1,

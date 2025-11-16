@@ -19,6 +19,12 @@ const toastConfig: ToastConfig = {
   onlineToast: ({ text1, props }) => (
     <ToastItem {...props} mainText={text1} iconName="Online" />
   ),
+  notificationSuccessToast: ({ text1, props }) => (
+    <ToastItem {...props} mainText={text1} iconName="CheckCircle" />
+  ),
+  notificationErrorToast: ({ text1, props }) => (
+    <ToastItem {...props} mainText={text1} iconName="WarningCircle" />
+  ),
 };
 export function Toast() {
   return <BaseToast config={toastConfig} />;

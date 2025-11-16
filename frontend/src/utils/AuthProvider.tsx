@@ -17,7 +17,10 @@ import {
   setToken,
   useStorage,
 } from '../helpers';
-import { useSiteSettings } from '../hooks';
+import {
+  useGetAllChatChannelNotificationPreferences,
+  useSiteSettings,
+} from '../hooks';
 import { setTokenState, tokenVar } from '../reactiveVars';
 
 const { sessionExpired, unauthorizedAccess } = errorTypes;
@@ -68,6 +71,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const token = useReactiveVar(tokenVar);
 
   const storage = useStorage();
+  useGetAllChatChannelNotificationPreferences();
   const {
     canSignUp,
     loginRequired,
