@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback } from 'react';
-import { TouchableOpacity, View, ViewProps } from 'react-native';
+import { TouchableOpacity, View, ViewProps, Pressable } from 'react-native';
 
 import { NO_EXCERPT_WORDING } from '../../constants';
 import { CustomImage, Icon, Text } from '../../core-ui';
@@ -73,7 +73,7 @@ function BasePostItem(props: Props) {
     prevScreen,
     content,
     style,
-    numberOfLines = 0,
+    numberOfLines = 3,
     showImageRow = false,
     nonclickable = false,
     images,
@@ -100,8 +100,6 @@ function BasePostItem(props: Props) {
   const isCreator = username === storage.getItem('user')?.username;
 
   const color: Color = hidden ? 'textLight' : 'textNormal';
-
-  const isTapToView = content === NO_EXCERPT_WORDING;
 
   const onPressPost = () => {
     navigate('PostDetail', {
@@ -178,7 +176,7 @@ function BasePostItem(props: Props) {
           numberOfLines={numberOfLines}
           onPressViewIgnoredContent={onPressViewIgnoredContent}
         />
-      ) : numberOfLines === 0 ? (
+      ) : (
         <>
           {renderPolls()}
           <MarkdownContent
@@ -188,15 +186,6 @@ function BasePostItem(props: Props) {
             mentions={mentionedUsers}
           />
         </>
-      ) : (
-        <Text
-          style={styles.text}
-          numberOfLines={numberOfLines}
-          color={isTapToView ? 'primary' : color}
-          variant={isTapToView ? 'bold' : 'normal'}
-        >
-          {replaceTagsInContent(unescapeHTML(content))}
-        </Text>
       )}
     </>
   );
@@ -229,12 +218,36 @@ function BasePostItem(props: Props) {
         {contentTitle}
         {pinned && <Icon name="Pin" style={styles.pinned} />}
       </TouchableOpacity>
-      {author}
-      <PostGroupings channel={channel} tags={tags} />
+      <View style={styles.header}>
+        <Author
+          image={avatar}
+          title={username}
+          subtitle={time}
+          style={styles.author}
+          subtitleStyle={styles.textTime}
+          onPressAuthor={onPressAuthor}
+          onPressEmptySpaceInPost={onPressPost}
+          showStatus={showStatus}
+          emojiCode={emojiCode}
+          testIDStatus={testIDStatus}
+        />
+        <PostGroupings
+          channel={channel}
+          tags={tags}
+          style={styles.groupings}
+        />
+      </View>
       <TouchableOpacity onPress={onPressPost} delayPressIn={200}>
-        {mainContent}
+        <Text style={styles.text} numberOfLines={3} color={color}>
+          {content === NO_EXCERPT_WORDING
+            ? ''
+            : replaceTagsInContent(unescapeHTML(content))}
+        </Text>
       </TouchableOpacity>
       {imageContent}
+      <Pressable onPress={onPressPost} style={styles.viewPostButton}>
+        <Text color="primary" variant="bold">{t('View Post')}</Text>
+      </Pressable>
     </>
   ) : (
     <>
@@ -263,6 +276,17 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
     backgroundColor: colors.background,
     ...shadow,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  author: {
+    flex: 1,
+  },
+  groupings: {
+    marginLeft: 'auto',
+  },
   markdown: {
     marginTop: spacing.xl,
   },
@@ -286,6 +310,10 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
   contentTitle: { flexDirection: 'row', justifyContent: 'space-between' },
   pinned: { marginLeft: spacing.s },
   pinnedBorder: { borderLeftWidth: 4, borderColor: colors.primary },
+  viewPostButton: {
+    marginTop: spacing.l,
+    alignSelf: 'flex-start',
+  },
 }));
 const PostItem = React.memo(BasePostItem);
 export { PostItem, Props as PostItemProps };

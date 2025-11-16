@@ -1,7 +1,7 @@
 import React from 'react';
-import { ScrollViewProps } from 'react-native';
+import { ScrollViewProps, View } from 'react-native';
 
-import { ChipRow } from '../../core-ui';
+import { Chip, ChipRow } from '../../core-ui';
 import { useSiteSettings } from '../../hooks';
 import { Channel } from '../../types';
 
@@ -20,9 +20,15 @@ export function PostGroupings(props: Props) {
     decorationColor: `#${channel.color}`,
   };
 
-  const items = !taggingEnabled
-    ? [channelChip]
-    : [channelChip, ...tags.map((content) => ({ content }))];
+  if (!taggingEnabled || tags.length === 0) {
+    return (
+      <View {...scrollViewProps}>
+        <Chip {...channelChip} />
+      </View>
+    );
+  }
+
+  const items = [channelChip, ...tags.map((content) => ({ content }))];
 
   return <ChipRow items={items} {...scrollViewProps} />;
 }
