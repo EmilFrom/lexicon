@@ -43,6 +43,7 @@ type Props = ViewProps & {
   nonclickable?: boolean;
   prevScreen?: string;
   images?: Array<string>;
+  imageDimensions?: { width: number; height: number; aspectRatio?: number };
   isHidden?: boolean;
   footer?: React.ReactNode;
   mentionedUsers?: Array<string>;
@@ -86,6 +87,7 @@ function BasePostItem(props: Props) {
     showImageRow = false,
     nonclickable = false,
     images,
+    imageDimensions,
     mentionedUsers,
     isHidden = false,
     footer,
@@ -208,7 +210,8 @@ function BasePostItem(props: Props) {
           url={images[0]}
           testID={`PostItem:${topicId}`}
           onPress={(uri) => setFullScreenImage(uri)}
-          maxHeightRatio={1.5}
+          maxHeightRatio={0.5}
+          serverDimensions={imageDimensions}
         />
         {images.length > 1 && (
           <View style={styles.imageCountBadge}>
