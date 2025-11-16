@@ -432,14 +432,14 @@ export default function NewMessage() {
       setLocalImages([]);
 
       sendMessage({
-        variables: {
+      variables: {
           input: {
             ...data,
             raw: finalContent,
             targetRecipients: data.targetRecipients.join(','),
-          },
         },
-      });
+      },
+    });
     } catch (error) {
       errorHandlerAlert(error as Error);
       setLocalImages((prev) =>

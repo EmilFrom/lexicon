@@ -275,12 +275,12 @@ export default function EditProfile(props: ProfileProps) {
     const user = storage.getItem('user');
     if (user) {
       try {
-        const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: 'images',
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 1,
-        });
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
         if (result.canceled) {
           return;
@@ -296,33 +296,33 @@ export default function EditProfile(props: ProfileProps) {
           if (normalizedExtensions.includes(format) || format === 'jpeg') {
             const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
 
-            if (reactNativeFile) {
-              upload({
-                variables: {
-                  input: {
-                    file: reactNativeFile,
-                    userId: user?.id,
-                    type: UploadTypeEnum.Avatar,
-                  },
+          if (reactNativeFile) {
+            upload({
+              variables: {
+                input: {
+                  file: reactNativeFile,
+                  userId: user?.id,
+                  type: UploadTypeEnum.Avatar,
                 },
-              });
-            } else {
-              Alert.alert(t('Failed Upload!'), t(`Please Try Again`), [
-                { text: t('Got it') },
-              ]);
-            }
-
-            setNoChanges(false);
+              },
+            });
           } else {
-            Alert.alert(
-              t('Failed!'),
-              t(`Please upload image with {stringifyExtensions} format`, {
-                stringifyExtensions,
-              }),
-              [{ text: t('Got it') }],
-            );
+            Alert.alert(t('Failed Upload!'), t(`Please Try Again`), [
+              { text: t('Got it') },
+            ]);
           }
+
+          setNoChanges(false);
+        } else {
+          Alert.alert(
+            t('Failed!'),
+            t(`Please upload image with {stringifyExtensions} format`, {
+              stringifyExtensions,
+            }),
+            [{ text: t('Got it') }],
+          );
         }
+      }
       } catch (error) {
         errorHandlerAlert(String(error));
       }

@@ -204,9 +204,9 @@ export default function NewPost() {
   useEffect(() => {
     if (hyperlinkUrl) {
       const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
-      const { raw } = getValues();
+    const { raw } = getValues();
       const result = insertHyperlink(raw, newTitle, newUrl);
-      setValue('raw', result);
+    setValue('raw', result);
     }
   }, [getValues, setValue, hyperlinkUrl, hyperlinkTitle]);
 
@@ -319,7 +319,7 @@ export default function NewPost() {
               type: UploadTypeEnum.Composer,
             },
           },
-        });
+      });
         const shortUrl = result.data?.upload.shortUrl;
         return shortUrl;
       });

@@ -345,17 +345,17 @@ export default function PostReply() {
       setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
       setLocalImages([]);
 
-      navigate('PostPreview', {
-        reply: true,
+    navigate('PostPreview', {
+      reply: true,
         postData: {
           topicId,
           postNumber: replyingTo?.postNumber,
           replyToPostId,
         },
-        focusedPostNumber,
-        editPostId,
-        editedUser,
-      });
+      focusedPostNumber,
+      editPostId,
+      editedUser,
+    });
     } catch (error) {
       errorHandlerAlert(error as Error);
       setLocalImages((prev) =>

@@ -1,6 +1,13 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback } from 'react';
-import { TouchableOpacity, View, ViewProps, Pressable } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  LayoutChangeEvent,
+  TouchableOpacity,
+  View,
+  ViewProps,
+  Pressable,
+  useWindowDimensions,
+} from 'react-native';
 
 import { NO_EXCERPT_WORDING } from '../../constants';
 import { CustomImage, Icon, Text } from '../../core-ui';
@@ -32,7 +39,6 @@ type Props = ViewProps & {
   hidden?: boolean;
   showLabel?: boolean;
   currentUser?: string;
-  numberOfLines?: number;
   showImageRow?: boolean;
   nonclickable?: boolean;
   prevScreen?: string;
@@ -57,6 +63,8 @@ function BasePostItem(props: Props) {
   const storage = useStorage();
   const styles = useStyles();
   const { colors } = useTheme();
+  const { height: windowHeight } = useWindowDimensions();
+  const [containerHeight, setContainerHeight] = useState(0);
 
   const {
     topicId,
@@ -73,7 +81,6 @@ function BasePostItem(props: Props) {
     prevScreen,
     content,
     style,
-    numberOfLines = 3,
     showImageRow = false,
     nonclickable = false,
     images,
@@ -166,6 +173,19 @@ function BasePostItem(props: Props) {
     });
   };
 
+  const previewHeightLimit =
+    prevScreen === 'Home'
+      ? Math.min(
+          windowHeight * 0.45,
+          containerHeight ? containerHeight * 0.6 : windowHeight * 0.45,
+        )
+      : undefined;
+
+  const previewContainerStyle =
+    prevScreen === 'Home'
+      ? [styles.contentPreview, { maxHeight: previewHeightLimit }]
+      : undefined;
+
   const mainContent = (
     <>
       {nonclickable && <PostGroupings channel={channel} tags={tags} />}
@@ -173,26 +193,26 @@ function BasePostItem(props: Props) {
         <PostHidden
           style={styles.markdown}
           author={isCreator}
-          numberOfLines={numberOfLines}
+          numberOfLines={3}
           onPressViewIgnoredContent={onPressViewIgnoredContent}
         />
       ) : (
-        <>
-          {renderPolls()}
+        <View style={previewContainerStyle}>
           <MarkdownContent
-            content={content}
+            content={replaceTagsInContent(unescapeHTML(content))}
             style={styles.markdown}
             fontColor={colors[color]}
             mentions={mentionedUsers}
           />
-        </>
+        </View>
       )}
     </>
   );
 
-  const imageContent = images && showImageRow && (
+  const imageContent = images && images.length > 0 && (
     <CustomImage src={images[0]} style={styles.images} />
   );
+  const pollsContent = renderPolls();
 
   const wrappedMainContent = !nonclickable ? (
     <>
@@ -202,7 +222,7 @@ function BasePostItem(props: Props) {
             style={styles.label}
             variant="bold"
             color="primary"
-            numberOfLines={numberOfLines}
+            numberOfLines={3}
           >
             {currentUser === storage.getItem('user')?.username
               ? t(`You liked this post`)
@@ -238,12 +258,9 @@ function BasePostItem(props: Props) {
         />
       </View>
       <TouchableOpacity onPress={onPressPost} delayPressIn={200}>
-        <Text style={styles.text} numberOfLines={3} color={color}>
-          {content === NO_EXCERPT_WORDING
-            ? ''
-            : replaceTagsInContent(unescapeHTML(content))}
-        </Text>
+        {mainContent}
       </TouchableOpacity>
+      {pollsContent}
       {imageContent}
       <Pressable onPress={onPressPost} style={styles.viewPostButton}>
         <Text color="primary" variant="bold">{t('View Post')}</Text>
@@ -254,12 +271,19 @@ function BasePostItem(props: Props) {
       {contentTitle}
       {author}
       {mainContent}
+      {pollsContent}
     </>
   );
 
   return (
     <View
       style={[styles.container, pinned && styles.pinnedBorder, style]}
+      onLayout={(event: LayoutChangeEvent) => {
+        const measuredHeight = event.nativeEvent.layout.height;
+        if (Math.abs(measuredHeight - containerHeight) > 1) {
+          setContainerHeight(measuredHeight);
+        }
+      }}
       {...otherProps}
     >
       {wrappedMainContent}
@@ -289,6 +313,9 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
   },
   markdown: {
     marginTop: spacing.xl,
+  },
+  contentPreview: {
+    overflow: 'hidden',
   },
   label: {
     marginBottom: spacing.l,
