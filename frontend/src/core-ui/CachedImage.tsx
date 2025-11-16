@@ -2,8 +2,8 @@
 // A modern replacement for the legacy class component, using expo-image.
 
 import React from 'react';
-import { Image, ImageProps } from 'expo-image';
-import { ImageStyle, StyleProp } from 'react-native';
+import { Image as ExpoImage, ImageProps } from 'expo-image';
+import { Image as RNImage, ImageStyle, StyleProp } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 
 type Props = Omit<ImageProps, 'source' | 'style'> & {
@@ -35,16 +35,75 @@ const CachedImage = ({
     );
   }
 
+  // Determine cache policy based on source type
+  // For local file:// URIs, use 'memory' since they're already on disk
+  // For remote URLs, use 'disk' to cache them
+  const isLocalFile =
+    typeof source === 'object' &&
+    'uri' in source &&
+    source.uri?.startsWith('file://');
+  const cachePolicy = isLocalFile ? 'memory' : 'disk';
+
+  if (__DEV__) {
+    console.log('[CachedImage] Rendering:', {
+      sourceType: typeof source,
+      uri: typeof source === 'object' && 'uri' in source ? source.uri : 'N/A',
+      isLocalFile,
+      cachePolicy,
+      hasStyle: !!style,
+    });
+  }
+
+  // For local file:// URIs, use React Native's Image component
+  // For remote URLs, use expo-image with caching
+  if (isLocalFile) {
+    return (
+      <RNImage
+        source={source}
+        style={style}
+        resizeMode="cover"
+        onLoad={() => {
+          if (__DEV__) {
+            console.log('[CachedImage] RN Image loaded:', typeof source === 'object' && 'uri' in source ? source.uri : 'N/A');
+          }
+          rest.onLoad?.();
+        }}
+        onError={(error) => {
+          if (__DEV__) {
+            console.error('[CachedImage] RN Image error:', {
+              uri: typeof source === 'object' && 'uri' in source ? source.uri : 'N/A',
+              error,
+            });
+          }
+          rest.onError?.(error);
+        }}
+      />
+    );
+  }
+
   // The core of the component is now just the <Image> from expo-image.
   // We pass the props through and set the caching policy.
   return (
-    <Image
+    <ExpoImage
       {...rest}
       source={source}
       style={style}
-      // This single prop replaces all the old file system logic.
-      // 'disk' means it will be cached on the device's storage.
-      cachePolicy="disk"
+      cachePolicy={cachePolicy}
+      onLoad={() => {
+        if (__DEV__) {
+          console.log('[CachedImage] Expo Image loaded:', typeof source === 'object' && 'uri' in source ? source.uri : 'N/A');
+        }
+        rest.onLoad?.();
+      }}
+      onError={(error) => {
+        if (__DEV__) {
+          console.error('[CachedImage] Expo Image error:', {
+            uri: typeof source === 'object' && 'uri' in source ? source.uri : 'N/A',
+            error,
+          });
+        }
+        rest.onError?.(error);
+      }}
     />
   );
 };

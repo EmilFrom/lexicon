@@ -1,5 +1,5 @@
 import { ApolloProvider } from '@apollo/client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { client } from './api/client';
 import { RequestError, Toast } from './components';
 import ErrorBoundary from './components/ErrorBoundary';
 import { FORM_DEFAULT_VALUES } from './constants';
-import { StorageProvider } from './helpers';
+import { StorageProvider, imageCacheManager } from './helpers';
 import AppNavigator from './navigation/AppNavigator';
 import { AppearanceProvider, ThemeProvider } from './theme';
 import { NewPostForm } from './types';
@@ -42,6 +42,23 @@ export default function App() {
     reValidateMode: 'onChange',
     defaultValues: FORM_DEFAULT_VALUES,
   });
+
+  // Clean up expired image cache on app startup
+  useEffect(() => {
+    const cleanupCache = async () => {
+      try {
+        const deletedCount = await imageCacheManager.clearExpiredCache();
+        if (__DEV__ && deletedCount > 0) {
+          console.log(
+            `[ImageCache] Cleaned up ${deletedCount} expired images on startup`,
+          );
+        }
+      } catch (error) {
+        console.warn('[ImageCache] Failed to cleanup on startup:', error);
+      }
+    };
+    cleanupCache();
+  }, []);
 
   /**
    * Error Boundary is inside the ThemeProvider because we need to use the core UI, which relies on the theme provided by the ThemeProvider.

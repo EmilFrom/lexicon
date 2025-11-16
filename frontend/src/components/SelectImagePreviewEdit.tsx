@@ -1,13 +1,12 @@
 import React from 'react';
 import {
   View,
-  ImageBackground,
+  Image,
   ImageBackgroundProps,
   ViewStyle,
   StyleProp,
 } from 'react-native';
 
-import CachedImage from '../core-ui/CachedImage';
 import { DEFAULT_IMAGE } from '../../assets/images';
 import { convertUrl, isImageValidUrl } from '../helpers';
 import { Icon } from '../core-ui';
@@ -47,32 +46,27 @@ export default function SelectImagePreviewEdit(props: Props) {
     : DEFAULT_IMAGE;
 
   return (
-    <View style={style}>
-      <ImageBackground
-        source={DEFAULT_IMAGE}
+    <View style={[style, styles.container, sizeStyle]}>
+      <Image
+        source={imgSource}
         style={[styles.image, sizeStyle]}
         resizeMode="cover"
-        {...otherProps}
-      >
-        <CachedImage
-          source={imgSource}
-          style={[styles.image, sizeStyle]}
-          resizeMode="cover"
-          {...otherProps}
-        />
-        <Icon
-          name="Close"
-          size="m"
-          style={styles.icon}
-          onPress={onDelete}
-          disabled={disableDelete}
-        />
-      </ImageBackground>
+      />
+      <Icon
+        name="Close"
+        size="m"
+        style={styles.icon}
+        onPress={onDelete}
+        disabled={disableDelete}
+      />
     </View>
   );
 }
 
 const useStyles = makeStyles(({ colors }) => ({
+  container: {
+    position: 'relative',
+  },
   image: {
     borderRadius: 8,
     overflow: 'hidden',

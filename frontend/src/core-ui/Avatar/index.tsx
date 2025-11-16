@@ -4,6 +4,7 @@ import {
   ImageBackgroundProps,
   TouchableOpacity,
 } from 'react-native';
+import { Image } from 'expo-image';
 
 import {
   AVATAR_ICON_SIZES,
@@ -12,6 +13,7 @@ import {
 } from '../../constants';
 import { makeStyles, useTheme } from '../../theme';
 import { convertUrl } from '../../helpers';
+import { useAuthenticatedImage } from '../../hooks';
 
 import { LetterAvatar } from './LetterAvatar';
 
@@ -46,8 +48,14 @@ export function Avatar(props: Props) {
   const finalSize = AVATAR_ICON_SIZES[size];
   const fontSize = AVATAR_LETTER_SIZES[size];
 
-  const loadChild = src === '' || error;
-  const imgSource = { uri: convertUrl(src) };
+  const normalizedSrc = src ? convertUrl(src) : undefined;
+
+  // Use authenticated image hook for remote avatars
+  const { localUri, isLoading: isDownloading } =
+    useAuthenticatedImage(normalizedSrc);
+
+  const loadChild = src === '' || error || isDownloading;
+  const imgSource = localUri ? { uri: localUri } : { uri: normalizedSrc };
 
   const letterAvatar = (
     <LetterAvatar
@@ -61,20 +69,20 @@ export function Avatar(props: Props) {
 
   return (
     <TouchableOpacity onPress={onPress}>
-      {src === '' && loading ? (
+      {loadChild ? (
         letterAvatar
       ) : (
-        <ImageBackground
+        <Image
           source={imgSource}
-          style={[{ width: finalSize, height: finalSize }, style]}
-          imageStyle={styles.circle}
+          style={[
+            { width: finalSize, height: finalSize, borderRadius: 100 },
+            style,
+          ]}
           onError={() => setError(true)}
-          // TODO: Decide what to display onLoading
           onLoadEnd={() => setLoading(false)}
+          contentFit="cover"
           {...otherProps}
-        >
-          {loadChild && letterAvatar}
-        </ImageBackground>
+        />
       )}
     </TouchableOpacity>
   );

@@ -1,14 +1,12 @@
 import React from 'react';
-import { Modal, TouchableOpacity, View } from 'react-native';
+import { Modal, TouchableOpacity, View, Image } from 'react-native';
 
-import { ImageProps } from 'expo-image';
-import CachedImage from '../core-ui/CachedImage';
 import { Text } from '../core-ui/Text';
 import { makeStyles } from '../theme';
 
 type Props = {
   show: boolean;
-  userImage: NonNullable<ImageProps['source']>;
+  userImage: { uri?: string };
   onPressCancel: () => void;
 };
 
@@ -26,11 +24,13 @@ export function ShowImageModal(props: Props) {
     >
       <View style={styles.backdrop}>
         <View style={styles.imageWrapper}>
-          <CachedImage
-            source={userImage}
-            style={styles.imageDetail}
-            contentFit="contain"
-          />
+          {userImage.uri && (
+            <Image
+              source={{ uri: userImage.uri }}
+              style={styles.imageDetail}
+              resizeMode="contain"
+            />
+          )}
         </View>
         <TouchableOpacity
           accessibilityRole="button"

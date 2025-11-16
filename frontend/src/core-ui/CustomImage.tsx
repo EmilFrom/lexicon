@@ -8,17 +8,15 @@ import {
   ViewStyle,
   useWindowDimensions,
 } from 'react-native';
-import { useReactiveVar } from '@apollo/client';
 
 import { DEFAULT_IMAGE } from '../../assets/images';
 import { Text } from '../core-ui/Text';
 import { ShowImageModal } from '../components/ShowImageModal';
 import { makeStyles } from '../theme';
 import { convertUrl, resolveUploadUrl } from '../helpers';
+import { useAuthenticatedImage } from '../hooks';
 
 import CachedImage from './CachedImage';
-import { tokenVar } from '../reactiveVars';
-import { getDiscourseAuthHeaders } from '../helpers/discourseAuthHeaders';
 
 type Props = Omit<ImageBackgroundProps, 'source' | 'style'> & {
   src: string;
@@ -36,26 +34,38 @@ export function CustomImage(props: Props) {
   const { src, style, debugLabel, maxHeightRatio = 0.7 } = props;
 
   const [show, setShow] = useState(false);
-  const [hasError, setHasError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const { height: windowHeight } = useWindowDimensions();
 
   const containerHeight = Math.max(200, windowHeight * maxHeightRatio);
-  const token = useReactiveVar(tokenVar);
   const normalizedSrc = src ? resolveUploadUrl(convertUrl(src)) : undefined;
-  const remoteSource = normalizedSrc
-    ? {
-        uri: normalizedSrc,
-        headers: getDiscourseAuthHeaders(token),
-      }
-    : undefined;
-  const imgSource = remoteSource ?? { uri: DEFAULT_IMAGE };
+
+  // Use authenticated image hook for remote Discourse images
+  const {
+    localUri,
+    isLoading: isDownloading,
+    error: downloadError,
+    retry: retryDownload,
+  } = useAuthenticatedImage(normalizedSrc);
+
+  // Determine the actual image source to use
+  const imgSource = localUri
+    ? { uri: localUri }
+    : normalizedSrc
+      ? { uri: normalizedSrc }
+      : { uri: DEFAULT_IMAGE };
+
+  const hasError = !!downloadError;
 
   if (DEBUG_IMAGES) {
     console.log('[CustomImage]', debugLabel ?? '', {
       src,
       normalizedSrc,
+      localUri,
+      isDownloading,
+      hasError,
       containerHeight,
+      imgSource,
     });
   }
 
@@ -82,21 +92,27 @@ export function CustomImage(props: Props) {
         label: debugLabel,
         src,
         normalizedSrc,
+        localUri,
       });
     }
-    setHasError(true);
   };
 
   const handleImageLoad = () => {
-    setHasError(false);
+    if (DEBUG_IMAGES) {
+      console.log('[CustomImage] Image loaded successfully:', {
+        label: debugLabel,
+        localUri,
+        normalizedSrc,
+      });
+    }
   };
 
   const handleImageLoadStart = () => {
-    setHasError(false);
+    // Image started loading
   };
 
   const retryLoad = () => {
-    setHasError(false);
+    retryDownload();
     setReloadKey((prev) => prev + 1);
   };
 
@@ -120,21 +136,30 @@ export function CustomImage(props: Props) {
 
   const content = (
     <View style={[styles.imageContainer, calculatedSizeStyle, style]}>
-      {!hasError && normalizedSrc ? (
-      <CachedImage
-          key={reloadKey}
-        source={imgSource}
-          style={[styles.image, StyleSheet.absoluteFill]}
-          contentFit="cover"
-          onLoadStart={handleImageLoadStart}
-          onError={handleImageError}
-          onLoad={handleImageLoad}
-      />
+      {isDownloading ? (
+        <View style={{ width: '100%', height: '100%', backgroundColor: 'yellow', justifyContent: 'center', alignItems: 'center' }}>
+          <Text>LOADING...</Text>
+        </View>
+      ) : hasError ? (
+        <View style={{ width: '100%', height: '100%', backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
+          <Text>ERROR</Text>
+        </View>
+      ) : !normalizedSrc ? (
+        <View style={{ width: '100%', height: '100%', backgroundColor: 'gray', justifyContent: 'center', alignItems: 'center' }}>
+          <Text>NO IMAGE</Text>
+        </View>
       ) : (
-        renderFallback(
-          hideImage ? t('Image unavailable') : t('Failed to load image'),
-          normalizedSrc ? t('Tap to retry') : undefined,
-        )
+        <View style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}>
+          <CachedImage
+            key={reloadKey}
+            source={imgSource}
+            style={{ width: '100%', height: '100%' }}
+            contentFit="cover"
+            onLoadStart={handleImageLoadStart}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+          />
+        </View>
       )}
     </View>
   );
