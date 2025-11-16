@@ -41,6 +41,11 @@ export type Post = {
   canEdit?: boolean;
   canFlag?: boolean;
   imageUrls?: Array<string>;
+  imageDimensions?: {
+    width: number;
+    height: number;
+    aspectRatio?: number;
+  };
   emojiStatus?: string;
   polls?: Array<Poll>;
   pollsVotes?: Array<PollsVotes>;

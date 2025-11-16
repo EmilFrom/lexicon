@@ -617,7 +617,7 @@ type Topic {
   excerpt: String
   firstPostContent: String
   id: Int!
-  imageUrl: String
+  imageUrl: ImageUrlWithDimensions
   likeCount: Int!
   liked: Boolean
   pinned: Boolean!
@@ -635,6 +635,13 @@ type Topic {
   lastPostedAt: String!
   lastPosterUsername: String
   participants: [MessageParticipant!]
+}
+
+type ImageUrlWithDimensions {
+  url: String!
+  width: Int
+  height: Int
+  aspectRatio: Float
 }
 
 type TopicList {
