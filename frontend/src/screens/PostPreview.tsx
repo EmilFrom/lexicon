@@ -18,7 +18,8 @@ import {
 } from '../components';
 import { PollPostPreview } from '../components/Poll';
 import { FORM_DEFAULT_VALUES, refetchQueriesPostDraft } from '../constants';
-import { CustomImage, Divider, IconWithLabel, Text } from '../core-ui';
+import { AuthenticatedImage, Divider, IconWithLabel, Text } from '../core-ui';
+import { FullScreenImageModal } from '../components/FullScreenImageModal';
 import {
   combineContentWithPollContent,
   errorHandlerAlert,
@@ -52,6 +53,7 @@ export default function PostPreview() {
 
   const navigation = useNavigation<RootStackNavProp<'PostPreview'>>();
   const { goBack } = navigation;
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
 
   // Manual lock for listener effect – no extra state/ref needed anymore.
 
@@ -319,12 +321,18 @@ export default function PostPreview() {
         />
         {!reply &&
           images?.map((image, index) => (
-            <CustomImage
-              src={image}
+            <AuthenticatedImage
+              url={image}
               style={styles.spacingBottom}
               key={`images-${index}`}
+              onPress={(uri) => setFullScreenImage(uri)}
             />
           ))}
+        <FullScreenImageModal
+          visible={!!fullScreenImage}
+          imageUri={fullScreenImage || ''}
+          onClose={() => setFullScreenImage(null)}
+        />
       </ScrollView>
     </SafeAreaView>
   );

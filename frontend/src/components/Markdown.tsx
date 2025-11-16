@@ -10,8 +10,7 @@ import BaseMarkdown, {
 } from 'react-native-markdown-display';
 
 import { discourseHost } from '../constants';
-import CachedImage from '../core-ui/CachedImage';
-import { CustomImage } from '../core-ui/CustomImage';
+import { AuthenticatedImage } from '../core-ui/AuthenticatedImage';
 import { Text } from '../core-ui/Text';
 import {
   extractPathname,
@@ -57,17 +56,18 @@ export function Markdown(props: MarkdownProps) {
   };
 
   const renderImage = ({ attributes: { src }, key, content }: ASTNode) => {
+    // For emojis, keep simple rendering without authentication
     if (isEmojiImage(content)) {
       return (
-        <CachedImage
-          source={{ uri: src }}
+        <AuthenticatedImage
+          url={src}
           key={key}
           style={styles.emojiImage}
         />
       );
     }
     return (
-      <CustomImage src={src} key={key} style={styles.image} autoHeight />
+      <AuthenticatedImage url={src} key={key} style={styles.image} />
     );
   };
 
