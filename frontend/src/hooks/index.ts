@@ -1,3 +1,4 @@
+export * from './useAuthenticatedImage';
 export * from './useAutoSaveManager';
 export * from './useAutoSavePostDraft';
 export * from './useFirstPostContent';
