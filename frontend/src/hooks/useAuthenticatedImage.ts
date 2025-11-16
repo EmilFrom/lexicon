@@ -8,6 +8,7 @@ interface UseAuthenticatedImageOptions {
   maxAge?: number;
   maxSize?: number;
   enabled?: boolean;
+  serverDimensions?: { width: number; height: number; aspectRatio?: number };
 }
 
 interface UseAuthenticatedImageResult {
@@ -15,14 +16,14 @@ interface UseAuthenticatedImageResult {
   isLoading: boolean;
   error: Error | null;
   retry: () => void;
-  dimensions?: { width: number; height: number };
+  dimensions?: { width: number; height: number; aspectRatio?: number };
 }
 
 export function useAuthenticatedImage(
   remoteUrl: string | undefined,
   options: UseAuthenticatedImageOptions = {},
 ): UseAuthenticatedImageResult {
-  const { enabled = true, maxAge, maxSize } = options;
+  const { enabled = true, maxAge, maxSize, serverDimensions } = options;
   const token = useReactiveVar(tokenVar);
 
   const [localUri, setLocalUri] = useState<string | null>(null);
@@ -30,8 +31,8 @@ export function useAuthenticatedImage(
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [dimensions, setDimensions] = useState<
-    { width: number; height: number } | undefined
-  >(undefined);
+    { width: number; height: number; aspectRatio?: number } | undefined
+  >(serverDimensions);
 
   useEffect(() => {
     if (__DEV__) {
@@ -40,7 +41,13 @@ export function useAuthenticatedImage(
         enabled,
         hasToken: !!token,
         currentLocalUri: localUri,
+        hasServerDimensions: !!serverDimensions,
       });
+    }
+
+    // If server dimensions are provided and we don't have dimensions yet, use them
+    if (serverDimensions && !dimensions) {
+      setDimensions(serverDimensions);
     }
 
     if (!remoteUrl || !enabled) {
@@ -78,10 +85,12 @@ export function useAuthenticatedImage(
           if (__DEV__) {
             console.log('[useAuthenticatedImage] Using cached:', cachedUri);
           }
-          // Get cached dimensions
-          const cachedDimensions =
-            await imageCacheManager.getCachedImageDimensions(remoteUrl);
-          setDimensions(cachedDimensions);
+          // Get cached dimensions (only if we don't have server dimensions)
+          if (!serverDimensions) {
+            const cachedDimensions =
+              await imageCacheManager.getCachedImageDimensions(remoteUrl);
+            setDimensions(cachedDimensions);
+          }
           setLocalUri(cachedUri);
           setIsLoading(false);
           return;
@@ -99,10 +108,12 @@ export function useAuthenticatedImage(
         );
 
         if (!cancelled) {
-          // Get dimensions after download
-          const downloadedDimensions =
-            await imageCacheManager.getCachedImageDimensions(remoteUrl);
-          setDimensions(downloadedDimensions);
+          // Get dimensions after download (only if we don't have server dimensions)
+          if (!serverDimensions) {
+            const downloadedDimensions =
+              await imageCacheManager.getCachedImageDimensions(remoteUrl);
+            setDimensions(downloadedDimensions);
+          }
           setLocalUri(downloadedUri);
           setIsLoading(false);
         }
@@ -129,7 +140,7 @@ export function useAuthenticatedImage(
     return () => {
       cancelled = true;
     };
-  }, [remoteUrl, token, enabled, maxAge, maxSize, retryCount]);
+  }, [remoteUrl, token, enabled, maxAge, maxSize, retryCount, serverDimensions]);
 
   const retry = () => {
     setRetryCount((prev) => prev + 1);
