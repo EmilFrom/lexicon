@@ -224,6 +224,7 @@ export default function EditProfile(props: ProfileProps) {
       }
     },
     onError: (error) => {
+      console.error('Upload error:', error);
       errorHandlerAlert(error);
     },
   });
@@ -273,50 +274,58 @@ export default function EditProfile(props: ProfileProps) {
     const stringifyExtensions = normalizedExtensions.toString();
     const user = storage.getItem('user');
     if (user) {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-      if (!result.canceled && result.assets.length) {
-        const manipulatedImage = await ImageManipulator.manipulateAsync(
-          result.assets[0].uri,
-          [],
-          { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP },
-        );
-        const format = getFormat(manipulatedImage.uri);
-        if (normalizedExtensions.includes(format) || format === 'webp') {
-          const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
+      try {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: 'images',
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 1,
+        });
 
-          if (reactNativeFile) {
-            upload({
-              variables: {
-                input: {
-                  file: reactNativeFile,
-                  userId: user?.id,
-                  type: UploadTypeEnum.Avatar,
-                },
-              },
-            });
-          } else {
-            Alert.alert(t('Failed Upload!'), t(`Please Try Again`), [
-              { text: t('Got it') },
-            ]);
-          }
-
-          setNoChanges(false);
-        } else {
-          Alert.alert(
-            t('Failed!'),
-            t(`Please upload image with {stringifyExtensions} format`, {
-              stringifyExtensions,
-            }),
-            [{ text: t('Got it') }],
-          );
+        if (result.canceled) {
+          return;
         }
+
+        if (result.assets && result.assets.length > 0) {
+          const manipulatedImage = await ImageManipulator.manipulateAsync(
+            result.assets[0].uri,
+            [],
+            { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+          );
+          const format = getFormat(manipulatedImage.uri);
+          if (normalizedExtensions.includes(format) || format === 'jpeg') {
+            const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
+
+            if (reactNativeFile) {
+              upload({
+                variables: {
+                  input: {
+                    file: reactNativeFile,
+                    userId: user?.id,
+                    type: UploadTypeEnum.Avatar,
+                  },
+                },
+              });
+            } else {
+              Alert.alert(t('Failed Upload!'), t(`Please Try Again`), [
+                { text: t('Got it') },
+              ]);
+            }
+
+            setNoChanges(false);
+          } else {
+            Alert.alert(
+              t('Failed!'),
+              t(`Please upload image with {stringifyExtensions} format`, {
+                stringifyExtensions,
+              }),
+              [{ text: t('Got it') }],
+            );
+          }
+        }
+      } catch (error) {
+        errorHandlerAlert(String(error));
       }
-      return;
     }
   };
 

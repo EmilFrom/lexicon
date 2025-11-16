@@ -24,7 +24,6 @@ import NewPost from './NewPost';
 import Notifications from './Notifications/Notifications';
 import PostDetail from './PostDetail';
 import PostDraft from './PostDraft';
-import PostImagePreview from './PostImagePreview';
 import PostPreview from './PostPreview';
 import PostReply from './PostReply';
 import DarkMode from './Preferences/DarkMode';
@@ -66,7 +65,6 @@ export {
   Poll,
   PostDetail,
   PostDraft,
-  PostImagePreview,
   PostPreview,
   PostReply,
   Preferences,

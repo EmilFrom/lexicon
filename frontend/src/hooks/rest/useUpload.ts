@@ -1,4 +1,4 @@
-import { MutationHookOptions } from '@apollo/client';
+import { MutationHookOptions, useMutation } from '@apollo/client';
 import { useState } from 'react';
 
 import {
@@ -8,7 +8,6 @@ import {
 } from '../../generatedAPI/server';
 import { errorHandlerAlert, formatImageLink } from '../../helpers';
 import { Image } from '../../types';
-import { useMutation } from '../../utils';
 
 export function useStatelessUpload(
   options?: MutationHookOptions<UploadType, UploadMutationVariables>,
@@ -24,17 +23,17 @@ export function useStatelessUpload(
 
 export function useStatefulUpload(
   initialImages: Array<Image>,
-  currentToken: number,
   options?: MutationHookOptions<UploadType, UploadMutationVariables>,
 ) {
-  const [completedToken, setCompletedToken] = useState(1);
+  const [completedToken, setCompletedToken] = useState(0);
   const [tempArray, setTempArray] = useState<Array<Image>>(initialImages);
 
-  const [upload] = useMutation<UploadType, UploadMutationVariables>(
+  const [uploadMutation] = useMutation<UploadType, UploadMutationVariables>(
     UploadDocument,
     {
       ...options,
-      onCompleted: ({ upload: result }) => {
+      onCompleted: (data) => {
+        const result = data.upload;
         const {
           originalFilename: name,
           width,
@@ -47,24 +46,40 @@ export function useStatefulUpload(
         }
 
         const imageUrl = formatImageLink(name, width, height, url);
-        // Clone the existing array instead of mutating it so React can detect the change.
         setTempArray((prev) => {
           const updatedArray = [...prev];
-          updatedArray[token - 1] = { link: imageUrl, done: true };
+          if (updatedArray[token - 1]) {
+            updatedArray[token - 1] = { link: imageUrl, done: true };
+          }
           return updatedArray;
         });
         setCompletedToken(token);
-      },
-      onError: (error) => {
-        setTempArray((prev) => {
-          const updatedArray = [...prev];
-          updatedArray[currentToken - 2] = { link: '', done: true };
-          return updatedArray;
-        });
-        errorHandlerAlert(error);
+        options?.onCompleted?.(data);
       },
     },
   );
+
+  const upload = (
+    uploadOptions: MutationHookOptions<UploadType, UploadMutationVariables>,
+  ) => {
+    const token = uploadOptions.variables?.input.token;
+    return uploadMutation({
+      ...uploadOptions,
+      onError: (error) => {
+        if (token) {
+          setTempArray((prev) => {
+            const updatedArray = [...prev];
+            if (updatedArray[token - 1]) {
+              updatedArray[token - 1] = { link: '', done: true };
+            }
+            return updatedArray;
+          });
+        }
+        errorHandlerAlert(error);
+        options?.onError?.(error);
+      },
+    });
+  };
 
   return { upload, tempArray, setTempArray, completedToken };
 }

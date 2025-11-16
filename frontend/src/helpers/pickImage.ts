@@ -48,7 +48,7 @@ export async function pickImage(
   const manipulatedImage = await ImageManipulator.manipulateAsync(
     firstAsset.uri,
     [],
-    { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP },
+    { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
   );
 
   // 6. Perform the format validation.

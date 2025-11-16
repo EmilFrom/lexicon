@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAccessoryView } from 'react-native-keyboard-accessory';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 import { DEFAULT_IMAGE } from '../../../assets/images';
 import { MentionList } from '../../components';
@@ -160,7 +161,12 @@ export default function ImagePreview() {
       if (!user || !result || !result.uri) {
         return;
       }
-      const reactNativeFile = createReactNativeFile(result.uri);
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        result.uri,
+        [],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+      );
+      const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
       if (reactNativeFile) {
         setLoading(true);
         upload({
@@ -168,7 +174,7 @@ export default function ImagePreview() {
             input: {
               file: reactNativeFile,
               userId: user?.id,
-              type: UploadTypeEnum.Avatar,
+              type: UploadTypeEnum.Composer,
             },
           },
         });

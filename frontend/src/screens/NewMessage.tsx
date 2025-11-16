@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Platform, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, TextInput, TouchableOpacity, View, Keyboard, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -55,6 +55,7 @@ import {
   useNewMessage,
   useSiteSettings,
   useStatefulUpload,
+  useStatelessUpload,
 } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
 import {
@@ -66,6 +67,13 @@ import {
   RootStackRouteProp,
 } from '../types';
 import { useModal } from '../utils';
+import * as ImageManipulator from 'expo-image-manipulator';
+
+type LocalImage = {
+  uri: string;
+  isUploading?: boolean;
+  uploadedUrl?: string;
+};
 
 export default function NewMessage() {
   const { modal, setModal } = useModal();
@@ -122,6 +130,7 @@ export default function NewMessage() {
   const [isKeyboardShow, setKeyboardShow] = useState(false);
   const [showLeftMenu, setShowLeftMenu] = useState(true);
   const [currentUploadToken, setCurrentUploadToken] = useState(1);
+  const [localImages, setLocalImages] = useState<LocalImage[]>([]);
 
   const uploadsInProgress = imagesArray.filter((image) => !image.done).length;
 
@@ -238,6 +247,16 @@ export default function NewMessage() {
   });
 
   useAutoSaveManager({ debounceSaveDraft });
+
+  const processedImageUriRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!imageUri || processedImageUriRef.current === imageUri) {
+      return;
+    }
+    processedImageUriRef.current = imageUri;
+    setLocalImages((prev) => [...prev, { uri: imageUri }]);
+  }, [imageUri]);
 
   useEffect(() => {
     setModal(true);
@@ -372,32 +391,73 @@ export default function NewMessage() {
     ],
   );
 
-  const sendMessage = handleSubmit(() => {
-    const { title, raw } = getValues();
-    // Make sure auto save draft not save draft when create message
+  const onSendMessage = handleSubmit(async (data) => {
+    Keyboard.dismiss();
 
-    debounceSaveDraft.cancel();
-    const updatedContentWithPoll = combineContentWithPollContent({
-      content: raw,
-      polls: polls || [],
-    });
+    setLocalImages((prev) =>
+      prev.map((image) => ({ ...image, isUploading: true })),
+    );
 
-    setModal(false);
-    newMessage({
-      variables: {
-        newPrivateMessageInput: {
-          title,
-          raw: updatedContentWithPoll,
-          targetRecipients: users || [],
-          draftKey,
+    const uploadPromises = localImages.map(async (image) => {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        image.uri,
+        [],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+      );
+      const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
+      if (!reactNativeFile || !user) {
+        throw new Error('File creation failed');
+      }
+      const result = await upload({
+        variables: {
+          input: {
+            file: reactNativeFile,
+            userId: user.id || 0,
+            type: UploadTypeEnum.Composer,
+          },
         },
-      },
+      });
+      const shortUrl = result.data?.upload.shortUrl;
+      return shortUrl;
     });
+
+    try {
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const markdownLinks = uploadedUrls
+        .filter((url) => url)
+        .map((url) => `![image](${url})`)
+        .join('\n');
+
+      setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
+      setLocalImages([]);
+
+      sendMessage({
+        variables: {
+          input: {
+            ...data,
+            raw: finalContent,
+            targetRecipients: data.targetRecipients.join(','),
+          },
+        },
+      });
+    } catch (error) {
+      errorHandlerAlert(error as Error);
+      setLocalImages((prev) =>
+        prev.map((image) => ({ ...image, isUploading: false })),
+      );
+    }
   });
 
-  const onPressSelectUser = () => {
-    navigate('SelectUser');
-  };
+  const messageValidity = useMemo(() => {
+    const { title, targetRecipients, raw } = getValues();
+    return (
+      title.length > 0 &&
+      targetRecipients.length > 0 &&
+      (raw.length > 0 ||
+        (polls && polls.length > 0) ||
+        localImages.some((image) => image.isUploading))
+    );
+  }, [getValues, localImages, polls]);
 
   const setMentionValue = (text: string) => {
     setValue('raw', text);
@@ -418,7 +478,7 @@ export default function NewMessage() {
         right={
           <HeaderItem
             label={t('Send')}
-            onPressItem={sendMessage}
+            onPressItem={onSendMessage}
             disabled={
               !isValid ||
               selectedUsers.length === 0 ||
@@ -432,7 +492,7 @@ export default function NewMessage() {
       <CustomHeader
         title={t('New Message')}
         rightTitle={t('Send')}
-        onPressRight={sendMessage}
+        onPressRight={onSendMessage}
         disabled={!isValid || selectedUsers.length === 0}
         noShadow
         isLoading={newMessageLoading || loadingCreateAndUpdatePostDraft}
@@ -589,6 +649,26 @@ export default function NewMessage() {
 
             <Divider horizontalSpacing="xxl" />
 
+            <View style={styles.localImagesContainer}>
+              {localImages.map((image, index) => (
+                <View key={index} style={styles.localImageWrapper}>
+                  <Image source={{ uri: image.uri }} style={styles.localImage} />
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={() => {
+                      setLocalImages((prev) => prev.filter((_, i) => i !== index));
+                    }}
+                  >
+                    <Icon name="Close" size="s" color="white" />
+                  </TouchableOpacity>
+                  {image.isUploading && (
+                    <View style={styles.uploadingOverlay}>
+                      <ActivityIndicator color="white" />
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
             <ListCreatePoll
               polls={polls || []}
               setValue={setValue}
@@ -680,5 +760,47 @@ const useStyles = makeStyles(({ colors, fontSizes, spacing }) => ({
   },
   spacingHorizontal: {
     marginHorizontal: spacing.xxl,
+  },
+  localImagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: spacing.m,
+    marginBottom: spacing.xxl,
+  },
+  localImageWrapper: {
+    position: 'relative',
+    margin: spacing.s,
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  localImage: {
+    width: '100%',
+    height: '100%',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  uploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 8,
   },
 }));

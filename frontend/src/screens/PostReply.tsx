@@ -7,7 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Keyboard, Platform, View } from 'react-native';
+import { Keyboard, Platform, View, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -24,7 +24,7 @@ import {
   TextArea,
 } from '../components';
 import { FORM_DEFAULT_VALUES } from '../constants';
-import { Divider, IconWithLabel, TextInputType } from '../core-ui';
+import { Divider, Icon, IconWithLabel, TextInputType } from '../core-ui';
 import {
   PostDraftType,
   PostFragment,
@@ -59,7 +59,7 @@ import {
   useMention,
   usePost,
   useSiteSettings,
-  useStatefulUpload,
+  useStatelessUpload,
 } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
 import {
@@ -70,6 +70,13 @@ import {
   RootStackRouteProp,
 } from '../types';
 import { useModal } from '../utils';
+import * as ImageManipulator from 'expo-image-manipulator';
+
+type LocalImage = {
+  uri: string;
+  isUploading?: boolean;
+  uploadedUrl?: string;
+};
 
 export default function PostReply() {
   const { modal, setModal } = useModal();
@@ -126,6 +133,7 @@ export default function PostReply() {
 
   const storage = useStorage();
   const user = storage.getItem('user');
+  const { discourseUrl } = storage.getItem('config') || {};
 
   const { authorizedExtensions } = useSiteSettings();
   const extensions = authorizedExtensions?.split('|');
@@ -153,76 +161,11 @@ export default function PostReply() {
   const rawContent = watch('raw');
 
   const [showUserList, setShowUserList] = useState(false);
-  const [currentUploadToken, setCurrentUploadToken] = useState(1);
-  const { upload, tempArray, setTempArray, completedToken } = useStatefulUpload(
-    [],
-    currentUploadToken,
-  );
-  const uploadsInProgress = tempArray.filter((image) => !image.done).length;
+  const { upload } = useStatelessUpload();
+  const [localImages, setLocalImages] = useState<LocalImage[]>([]);
   const [isKeyboardShow, setKeyboardShow] = useState(false);
 
-  const debounced = useDebouncedCallback(
-    ({ value, token }: { value: string; token: number }) => {
-      if (tempArray[token - 1]) {
-        const newText = getReplacedImageUploadStatus(
-          value,
-          token,
-          tempArray[token - 1].link,
-        );
-        setValue('raw', newText);
-      }
-    },
-    1500,
-  );
-
   const postReplyRef = useRef<TextInputType>(null);
-
-  const enqueueImageUpload = useCallback(
-    (localUri: string) => {
-      if (!localUri || !user) {
-        return;
-      }
-
-      const placeholderIndex = tempArray.length + 1;
-      setTempArray((prev) => [...prev, { link: '', done: false }]);
-
-      const reactNativeFile = createReactNativeFile(localUri);
-      if (!reactNativeFile) {
-        return;
-      }
-
-      const { raw } = getValues();
-      const result = insertImageUploadStatus(
-        raw,
-        cursorPosition.start,
-        placeholderIndex,
-      );
-      setValue('raw', result);
-      setCurrentUploadToken((prevToken) => {
-        const token = prevToken;
-        upload({
-          variables: {
-            input: {
-              file: reactNativeFile,
-              userId: user.id || 0,
-              type: UploadTypeEnum.Composer,
-              token,
-            },
-          },
-        });
-        return prevToken + 1;
-      });
-    },
-    [
-      cursorPosition.start,
-      getValues,
-      setTempArray,
-      setValue,
-      tempArray.length,
-      upload,
-      user,
-    ],
-  );
 
   const { createPostDraft, loading: loadingCreateAndUpdatePostDraft } =
     useCreateAndUpdatePostDraft({
@@ -256,14 +199,6 @@ export default function PostReply() {
     }
   }, [getPost, getValues, replyToPostId]);
 
-  useEffect(() => {
-    if (!completedToken) {
-      return;
-    }
-    const { raw } = getValues();
-    debounced({ value: raw, token: completedToken });
-  }, [completedToken, debounced, getValues]);
-
   const { mentionMembers } = useMention(
     mentionKeyword,
     showUserList,
@@ -278,8 +213,8 @@ export default function PostReply() {
     }
     processedImageUriRef.current = imageUri;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    enqueueImageUpload(imageUri);
-  }, [enqueueImageUpload, imageUri]);
+    setLocalImages((prev) => [...prev, { uri: imageUri }]);
+  }, [imageUri]);
 
   useEffect(() => {
     setModal(true);
@@ -325,8 +260,7 @@ export default function PostReply() {
       navigation.addListener('beforeRemove', (e) => {
         if (
           ((!formState.dirtyFields.raw && !formState.dirtyFields.polls) ||
-            !modal) &&
-          uploadsInProgress < 1
+            !modal)
         ) {
           reset(FORM_DEFAULT_VALUES);
           return;
@@ -357,7 +291,6 @@ export default function PostReply() {
     [
       modal,
       navigation,
-      uploadsInProgress,
       reset,
       getValues,
       deletePostDraft,
@@ -371,22 +304,70 @@ export default function PostReply() {
     ],
   );
 
-  const onPreview = handleSubmit(() => {
+  const onPreview = handleSubmit(async () => {
     Keyboard.dismiss();
     setValue('title', title);
-    navigate('PostPreview', {
-      reply: true,
-      postData: { topicId, postNumber: replyingTo?.postNumber, replyToPostId },
-      focusedPostNumber,
-      editPostId,
-      editedUser,
+
+    setLocalImages((prev) =>
+      prev.map((image) => ({ ...image, isUploading: true })),
+    );
+
+    const uploadPromises = localImages.map(async (image) => {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        image.uri,
+        [],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+      );
+      const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
+      if (!reactNativeFile || !user) {
+        throw new Error('File creation failed');
+      }
+      const result = await upload({
+        variables: {
+          input: {
+            file: reactNativeFile,
+            userId: user.id || 0,
+            type: UploadTypeEnum.Composer,
+          },
+        },
+      });
+      const shortUrl = result.data?.upload.shortUrl;
+      return shortUrl;
     });
+
+    try {
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const markdownLinks = uploadedUrls
+        .filter((url) => url)
+        .map((url) => `![image](${url})`)
+        .join('\n');
+
+      setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
+      setLocalImages([]);
+
+      navigate('PostPreview', {
+        reply: true,
+        postData: {
+          topicId,
+          postNumber: replyingTo?.postNumber,
+          replyToPostId,
+        },
+        focusedPostNumber,
+        editPostId,
+        editedUser,
+      });
+    } catch (error) {
+      errorHandlerAlert(error as Error);
+      setLocalImages((prev) =>
+        prev.map((image) => ({ ...image, isUploading: false })),
+      );
+    }
   });
 
   const postValidity = useMemo(() => {
     if (editPostId) {
       const { isValid } = existingPostIsValid({
-        uploadsInProgress,
+        uploadsInProgress: localImages.some((image) => image.isUploading),
         title,
         oldTitle: title,
         content: rawContent,
@@ -395,8 +376,13 @@ export default function PostReply() {
       });
       return isValid;
     }
-    return newPostIsValid(title, rawContent, uploadsInProgress, polls);
-  }, [editPostId, uploadsInProgress, oldContent, polls, rawContent, title]);
+    return newPostIsValid(
+      title,
+      rawContent,
+      localImages.some((image) => image.isUploading),
+      polls,
+    );
+  }, [editPostId, localImages, oldContent, polls, rawContent, title]);
 
   const setMentionValue = (text: string) => {
     setValue('raw', text);
@@ -408,7 +394,12 @@ export default function PostReply() {
         title={editPostId ? t('Edit Post') : t('Reply')}
         rightTitle={t('Next')}
         onPressRight={onPreview}
-        disabled={!postValidity || loadingCreateAndUpdatePostDraft}
+        isLoading={localImages.some((image) => image.isUploading)}
+        disabled={
+          !postValidity ||
+          loadingCreateAndUpdatePostDraft ||
+          localImages.some((image) => image.isUploading)
+        }
         noShadow
       />
       {ios && (
@@ -428,7 +419,12 @@ export default function PostReply() {
             <HeaderItem
               label={t('Next')}
               onPressItem={onPreview}
-              disabled={!postValidity || loadingCreateAndUpdatePostDraft}
+              isLoading={localImages.some((image) => image.isUploading)}
+              disabled={
+                !postValidity ||
+                loadingCreateAndUpdatePostDraft ||
+                localImages.some((image) => image.isUploading)
+              }
             />
           }
         />
@@ -523,6 +519,26 @@ export default function PostReply() {
         />
         <Divider style={styles.spacingBottom} horizontalSpacing="xxl" />
         {!loadingRepliedPost && repliedPost}
+        <View style={styles.localImagesContainer}>
+          {localImages.map((image, index) => (
+            <View key={index} style={styles.localImageWrapper}>
+              <Image source={{ uri: image.uri }} style={styles.localImage} />
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => {
+                  setLocalImages((prev) => prev.filter((_, i) => i !== index));
+                }}
+              >
+                <Icon name="Close" size="s" color="white" />
+              </TouchableOpacity>
+              {image.isUploading && (
+                <View style={styles.uploadingOverlay}>
+                  <ActivityIndicator color="white" />
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
         <ListCreatePoll
           polls={polls || []}
           setValue={setValue}
@@ -558,10 +574,6 @@ export default function PostReply() {
                   setMentionKeyword,
                 );
                 onChange(text);
-                debounced({
-                  value: text,
-                  token: currentUploadToken,
-                });
 
                 debounceSaveDraft();
               }}
@@ -607,5 +619,36 @@ const useStyles = makeStyles(({ colors, fontVariants, spacing }) => ({
   },
   spacingBottom: {
     marginBottom: spacing.xl,
+  },
+  localImagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: spacing.xxl,
+    marginBottom: spacing.m,
+  },
+  localImageWrapper: {
+    position: 'relative',
+    marginRight: spacing.m,
+    marginBottom: spacing.m,
+  },
+  localImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  uploadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
   },
 }));

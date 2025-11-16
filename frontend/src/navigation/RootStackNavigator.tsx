@@ -25,7 +25,6 @@ import {
   Notifications,
   Poll,
   PostDetail,
-  PostImagePreview,
   PostPreview,
   PostReply,
   Preferences,
@@ -294,11 +293,6 @@ export default function RootStackNavigator(props: RootStackNavigatorProps) {
           name="HyperLink"
           component={Hyperlink}
           options={{ ...navModal }}
-        />
-        <RootStack.Screen
-          name="PostImagePreview"
-          component={PostImagePreview}
-          options={{ headerShown: false }}
         />
         <RootStack.Screen
           name="Troubleshoot"

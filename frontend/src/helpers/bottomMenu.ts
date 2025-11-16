@@ -9,11 +9,9 @@ import {
 import { imagePickerHandler } from './imagePickerHandler';
 
 export type BottomMenuNavigationScreens =
-  | 'PostImagePreview'
   | 'HyperLink'
   | 'NewPoll';
 export type BottomMenuNavigationParams =
-  | RootStackParamList['PostImagePreview']
   | RootStackParamList['HyperLink']
   | RootStackParamList['NewPoll'];
 
@@ -65,10 +63,11 @@ export function bottomMenu(params: BottomMenuParams) {
         return;
       }
       const imageUri = result.uri;
-      navigate('PostImagePreview', {
+      navigate(prevScreen, {
         imageUri,
-        prevScreen,
         title,
+        topicId,
+        replyToPostId,
       });
     } catch (unknownError) {
       // TODO: Eventually fix this so the type can resolve to ApolloError as well

@@ -1,7 +1,16 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Platform, ScrollView, TouchableOpacity, View } from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Keyboard,
+  ActivityIndicator,
+  StyleSheet,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -35,10 +44,8 @@ import {
   existingPostIsValid,
   formatExtensions,
   getHyperlink,
-  getReplacedImageUploadStatus,
   goBackWithoutSaveDraftAlert,
   insertHyperlink,
-  insertImageUploadStatus,
   mentionHelper,
   newPostIsValid,
   onKeyPress,
@@ -54,17 +61,23 @@ import {
   useKASVWorkaround,
   useMention,
   useSiteSettings,
-  useStatefulUpload,
+  useStatelessUpload,
 } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
 import {
   CursorPosition,
-  Image,
   NewPostForm,
   RootStackNavProp,
   RootStackRouteProp,
 } from '../types';
 import { useModal } from '../utils';
+import * as ImageManipulator from 'expo-image-manipulator';
+
+type LocalImage = {
+  uri: string;
+  isUploading?: boolean;
+  uploadedUrl?: string;
+};
 
 export default function NewPost() {
   const { modal, setModal } = useModal();
@@ -147,7 +160,7 @@ export default function NewPost() {
     sequence,
     isDraft,
   } = memoizedFormParams;
-  let { hyperlinkUrl, hyperlinkTitle } = memoizedFormParams;
+  const { hyperlinkUrl, hyperlinkTitle } = memoizedFormParams;
 
   /**
    * Using the watch function to update the values of the channel and tags fields when changes occur in the form.
@@ -158,10 +171,8 @@ export default function NewPost() {
 
   const selectedTags: Array<string> = watch('tags');
   const polls = watch('polls');
+  const rawContent = watch('raw');
 
-  const [imagesArray, setImagesArray] = useState<Array<Image>>([]);
-  const [uri, setUri] = useState('');
-  const [postValidity, setPostValidity] = useState(false);
   const [editPostType, setEditPostType] = useState('');
   const [isKeyboardShow, setKeyboardShow] = useState(false);
   const [showLeftMenu, setShowLeftMenu] = useState(true);
@@ -172,42 +183,17 @@ export default function NewPost() {
   const [showUserList, setShowUserList] = useState(false);
   const [mentionLoading, setMentionLoading] = useState(false);
   const [mentionKeyword, setMentionKeyword] = useState('');
-  const [currentUploadToken, setCurrentUploadToken] = useState(1);
-
-  const uploadsInProgress = imagesArray.filter((image) => !image.done).length;
-
-  const debounced = useDebouncedCallback(
-    ({ value, token }: { value: string; token: number }) => {
-      if (imagesArray[token - 1]) {
-        const newText = getReplacedImageUploadStatus(
-          value,
-          token,
-          imagesArray[token - 1].link,
-        );
-
-        setValue('raw', newText);
-      }
-    },
-    1500,
-  );
+  const [localImages, setLocalImages] = useState<LocalImage[]>([]);
 
   const kasv = useKASVWorkaround();
 
   const newPostRef = useRef<TextInputType>(null);
 
-  if (hyperlinkUrl) {
-    const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
-    hyperlinkUrl = newUrl;
-    hyperlinkTitle = newTitle;
-  }
+  const { upload } = useStatelessUpload();
 
   useEffect(() => {
     setModal(true);
   }, [setModal]);
-
-  useEffect(() => {
-    setUri(imageUri);
-  }, [imageUri]);
 
   const { mentionMembers } = useMention(
     mentionKeyword,
@@ -216,12 +202,12 @@ export default function NewPost() {
   );
 
   useEffect(() => {
-    if (!hyperlinkUrl || !hyperlinkTitle) {
-      return;
+    if (hyperlinkUrl) {
+      const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
+      const { raw } = getValues();
+      const result = insertHyperlink(raw, newTitle, newUrl);
+      setValue('raw', result);
     }
-    const { raw } = getValues();
-    const result = insertHyperlink(raw, hyperlinkTitle, hyperlinkUrl);
-    setValue('raw', result);
   }, [getValues, setValue, hyperlinkUrl, hyperlinkTitle]);
 
   const onPressSelectChannel = () => {
@@ -251,11 +237,6 @@ export default function NewPost() {
     });
   });
 
-  const { upload, tempArray, completedToken } = useStatefulUpload(
-    imagesArray,
-    currentUploadToken,
-  );
-
   const { createPostDraft, loading: loadingCreateAndUpdatePostDraft } =
     useCreateAndUpdatePostDraft({
       onError: (error) => {
@@ -279,54 +260,15 @@ export default function NewPost() {
 
   useAutoSaveManager({ debounceSaveDraft });
 
-  useEffect(() => {
-    const { raw } = getValues();
-    if (completedToken) {
-      debounced({ value: raw, token: completedToken });
-    }
-    setImagesArray(tempArray);
-  }, [getValues, tempArray, debounced, completedToken]);
+  const processedImageUriRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!uri || !user) {
+    if (!imageUri || processedImageUriRef.current === imageUri) {
       return;
     }
-    setImagesArray([...imagesArray, { link: '', done: false }]);
-    setCurrentUploadToken(currentUploadToken + 1);
-    const reactNativeFile = createReactNativeFile(uri);
-
-    if (!reactNativeFile) {
-      return;
-    }
-    const { raw } = getValues();
-    const result = insertImageUploadStatus(
-      raw,
-      cursorPosition.start,
-      imagesArray.length + 1,
-    );
-    setValue('raw', result);
-    upload({
-      variables: {
-        input: {
-          file: reactNativeFile,
-          userId: user.id || 0,
-          type: UploadTypeEnum.Composer,
-          token: currentUploadToken,
-        },
-      },
-    });
-    setUri('');
-  }, [
-    currentUploadToken,
-    cursorPosition.start,
-    imagesArray,
-    getValues,
-    setValue,
-    upload,
-    uploadsInProgress,
-    uri,
-    user,
-  ]);
+    processedImageUriRef.current = imageUri;
+    setLocalImages((prev) => [...prev, { uri: imageUri }]);
+  }, [imageUri]);
 
   const onNavigate = (
     screen: BottomMenuNavigationScreens,
@@ -351,44 +293,67 @@ export default function NewPost() {
     extensions: normalizedExtensions,
   });
 
-  useEffect(() => {
-    const { title, raw: content, polls } = getValues();
+  const onPreview = handleSubmit(async (data) => {
+    Keyboard.dismiss();
 
-    let currentPostValidity; // temp variable to get the value of existingPostIsValid or newPostIsValid helper
+    setLocalImages((prev) =>
+      prev.map((image) => ({ ...image, isUploading: true })),
+    );
 
-    if (editTopicId || editPostId) {
-      currentPostValidity = existingPostIsValid({
-        uploadsInProgress,
-        title,
-        content,
-        getFieldState,
-        formState,
-        polls,
+    try {
+      const uploadPromises = localImages.map(async (image) => {
+        const manipulatedImage = await ImageManipulator.manipulateAsync(
+          image.uri,
+          [],
+          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+        );
+        const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
+        if (!reactNativeFile || !user) {
+          throw new Error('File creation failed');
+        }
+        const result = await upload({
+          variables: {
+            input: {
+              file: reactNativeFile,
+              userId: user.id || 0,
+              type: UploadTypeEnum.Composer,
+            },
+          },
+        });
+        const shortUrl = result.data?.upload.shortUrl;
+        return shortUrl;
       });
 
-      setPostValidity(currentPostValidity.isValid);
-      setEditPostType(currentPostValidity.editType);
-    } else {
-      currentPostValidity = newPostIsValid(
-        title,
-        content,
-        uploadsInProgress,
-        polls,
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const markdownLinks = uploadedUrls
+        .filter((url) => url)
+        .map((url) => `![image](${url})`)
+        .join('\n');
+
+      setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
+      setLocalImages([]);
+
+      navigate('PostPreview', {
+        reply: false,
+        postData: { topicId: editTopicId || 0 },
+        editPostId:
+          editPostType === 'Post' || editPostType === 'Both'
+            ? editPostId
+            : undefined,
+        editTopicId:
+          editPostType === 'Topic' || editPostType === 'Both'
+            ? editTopicId
+            : undefined,
+        editedUser,
+        focusedPostNumber: editTopicId ? 1 : undefined,
+      });
+    } catch (error) {
+      errorHandlerAlert(String(error));
+      setLocalImages((prev) =>
+        prev.map((image) => ({ ...image, isUploading: false })),
       );
-      setPostValidity(currentPostValidity);
     }
-  }, [
-    editTopicId,
-    editPostId,
-    getValues,
-    oldContent,
-    oldTitle,
-    selectedChannel,
-    selectedTags,
-    uploadsInProgress,
-    getFieldState,
-    formState,
-  ]);
+  });
 
   useEffect(
     () =>
@@ -397,9 +362,9 @@ export default function NewPost() {
          * Add condition only when change title or content we show alert
          */
         if (
-          ((!dirtyFields.title && !dirtyFields.raw && !dirtyFields.polls) ||
-            !modal) &&
-          uploadsInProgress < 1
+          (!dirtyFields.title && !dirtyFields.raw && !dirtyFields.polls) ||
+          !modal ||
+          localImages.some((image) => image.isUploading)
         ) {
           return;
         }
@@ -426,10 +391,8 @@ export default function NewPost() {
         }
       }),
     [
-      postValidity,
       modal,
       navigation,
-      uploadsInProgress,
       resetForm,
       createPostDraft,
       deletePostDraft,
@@ -442,12 +405,43 @@ export default function NewPost() {
       editPostId,
       editTopicId,
       debounceSaveDraft,
+      localImages,
     ],
   );
 
   const setMentionValue = (text: string) => {
     setValue('raw', text);
   };
+
+  const postValidity = useMemo(() => {
+    const uploadsInProgress = localImages.filter((image) => image.isUploading).length;
+    if (editPostId) {
+      const { isValid } = existingPostIsValid({
+        uploadsInProgress,
+        title: getValues('title'),
+        oldTitle,
+        content: rawContent,
+        oldContent,
+        polls,
+        getFieldState,
+        formState,
+      });
+      return isValid;
+    }
+    return newPostIsValid(getValues('title'), rawContent, uploadsInProgress, polls);
+  }, [
+    editPostId,
+    getValues,
+    localImages,
+    oldContent,
+    oldTitle,
+    polls,
+    rawContent,
+    selectedTags,
+    getFieldState,
+    formState,
+  ]);
+
 
   const Header = () =>
     ios ? (
@@ -466,8 +460,13 @@ export default function NewPost() {
         right={
           <HeaderItem
             label={t('Next')}
-            onPressItem={doneCreatePost}
-            disabled={!postValidity || loadingCreateAndUpdatePostDraft}
+            onPressItem={onPreview}
+            loading={localImages.some((image) => image.isUploading)}
+            disabled={
+              !postValidity ||
+              loadingCreateAndUpdatePostDraft ||
+              localImages.some((image) => image.isUploading)
+            }
           />
         }
       />
@@ -475,8 +474,13 @@ export default function NewPost() {
       <CustomHeader
         title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
         rightTitle={t('Next')}
-        disabled={!postValidity || loadingCreateAndUpdatePostDraft}
-        onPressRight={doneCreatePost}
+        isLoading={localImages.some((image) => image.isUploading)}
+        disabled={
+          !postValidity ||
+          loadingCreateAndUpdatePostDraft ||
+          localImages.some((image) => image.isUploading)
+        }
+        onPressRight={onPreview}
       />
     );
 
@@ -580,27 +584,18 @@ export default function NewPost() {
                   onChangeText={(text) => {
                     const { raw: content, polls } = getValues();
 
-                    let currentPostValidity; // temp variable to get the value of existingPostIsValid or newPostIsValid helper
-
                     if (editTopicId || editPostId) {
-                      currentPostValidity = existingPostIsValid({
-                        uploadsInProgress,
+                      const { editType } = existingPostIsValid({
+                        uploadsInProgress: localImages.filter(
+                          (image) => image.isUploading,
+                        ).length,
                         title: text,
                         content,
                         getFieldState,
                         formState,
                         polls,
                       });
-                      setPostValidity(currentPostValidity.isValid);
-                      setEditPostType(currentPostValidity.editType);
-                    } else {
-                      currentPostValidity = newPostIsValid(
-                        text,
-                        content,
-                        uploadsInProgress,
-                        polls,
-                      );
-                      setPostValidity(currentPostValidity);
+                      setEditPostType(editType);
                     }
                     onChange(text);
                     debounceSaveDraft();
@@ -697,6 +692,32 @@ export default function NewPost() {
             </>
           )}
 
+          <View style={styles.localImagesContainer}>
+            {localImages.map((image, index) => (
+              <View key={index} style={styles.localImageWrapper}>
+                <Image
+                  source={{ uri: image.uri }}
+                  style={styles.localImage}
+                />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={() => {
+                    setLocalImages((prev) =>
+                      prev.filter((_, i) => i !== index),
+                    );
+                  }}
+                >
+                  <Icon name="Close" size="s" color="white" />
+                </TouchableOpacity>
+                {image.isUploading && (
+                  <View style={styles.uploadingOverlay}>
+                    <ActivityIndicator color="white" />
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+
           <ListCreatePoll
             polls={polls || []}
             setValue={setValue}
@@ -737,31 +758,21 @@ export default function NewPost() {
                   onChange(text);
 
                   debounceSaveDraft();
-                  debounced({ value: text, token: currentUploadToken });
 
                   const { title, polls } = getValues();
 
-                  let currentPostValidity; // temp variable to get the value of existingPostIsValid or newPostIsValid helper
-
                   if (editTopicId || editPostId) {
-                    currentPostValidity = existingPostIsValid({
-                      uploadsInProgress,
+                    const { editType } = existingPostIsValid({
+                      uploadsInProgress: localImages.filter(
+                        (image) => image.isUploading,
+                      ).length,
                       title,
                       content: text,
                       getFieldState,
                       formState,
                       polls,
                     });
-                    setPostValidity(currentPostValidity.isValid);
-                    setEditPostType(currentPostValidity.editType);
-                  } else {
-                    currentPostValidity = newPostIsValid(
-                      title,
-                      text,
-                      uploadsInProgress,
-                      polls,
-                    );
-                    setPostValidity(currentPostValidity);
+                    setEditPostType(editType);
                   }
                 }}
                 onFocus={(event) => {
@@ -811,4 +822,35 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
   },
   iconRight: { marginStart: spacing.m },
   label: { color: colors.textLight },
+  localImagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: spacing.xxl,
+    marginBottom: spacing.m,
+  },
+  localImageWrapper: {
+    position: 'relative',
+    marginRight: spacing.m,
+    marginBottom: spacing.m,
+  },
+  localImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  uploadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+  },
 }));

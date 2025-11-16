@@ -55,12 +55,6 @@ type ImagePreviewParams = {
   topicId: number;
 };
 
-type PostImagePreviewParams = {
-  imageUri: string;
-  title?: string;
-  prevScreen: 'NewPost' | 'PostReply' | 'NewMessage';
-};
-
 export type MessageDetailParams = {
   id: number;
   postNumber?: number;
@@ -212,7 +206,6 @@ export type RootStackParamList = {
   NewPost: NewPostParams | undefined;
   PostPreview: PostPreviewParams;
   PostReply: PostReplyParams;
-  PostImagePreview: PostImagePreviewParams;
   SelectUser: undefined;
   Tags: TagsParams;
   Troubleshoot: TroubleshootParams;
