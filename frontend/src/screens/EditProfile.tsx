@@ -15,6 +15,7 @@ import {
 // } from '@react-native-community/datetimepicker';
 import { useRoute } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { Controller, useForm } from 'react-hook-form';
 
 import { CustomHeader, ShowImageModal } from '../components';
@@ -273,15 +274,20 @@ export default function EditProfile(props: ProfileProps) {
     const user = storage.getItem('user');
     if (user) {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaType.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1,
       });
       if (!result.canceled && result.assets.length) {
-        const format = getFormat(result.assets[0].uri);
-        if (normalizedExtensions.includes(format)) {
-          const reactNativeFile = createReactNativeFile(result.assets[0].uri);
+        const manipulatedImage = await ImageManipulator.manipulateAsync(
+          result.assets[0].uri,
+          [],
+          { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP },
+        );
+        const format = getFormat(manipulatedImage.uri);
+        if (normalizedExtensions.includes(format) || format === 'webp') {
+          const reactNativeFile = createReactNativeFile(manipulatedImage.uri);
 
           if (reactNativeFile) {
             upload({

@@ -1,9 +1,5 @@
-import {
-  launchImageLibraryAsync,
-  requestMediaLibraryPermissionsAsync,
-  MediaTypeOptions,
-  ImagePickerOptions,
-} from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 import { getFormat } from './getFormat';
 
@@ -16,7 +12,7 @@ export async function pickImage(
   extensions?: Array<string>,
 ): Promise<PickImageResult | null> {
   // 1. Request permissions first. The new API returns a more detailed object.
-  const permissionResult = await requestMediaLibraryPermissionsAsync();
+  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
   if (permissionResult.granted === false) {
     // The user has explicitly denied permissions.
@@ -26,8 +22,8 @@ export async function pickImage(
   }
 
   // 2. Define the options for the image picker.
-  const options: ImagePickerOptions = {
-    mediaTypes: MediaTypeOptions.Images,
+  const options: ImagePicker.ImagePickerOptions = {
+    mediaTypes: 'images',
     quality: 1,
     // The modern API supports 'allowsMultipleSelection', but the old code's logic
     // was designed for a single image, so we keep it that way.
@@ -35,7 +31,7 @@ export async function pickImage(
   };
 
   // 3. Launch the image library.
-  const result = await launchImageLibraryAsync(options);
+  const result = await ImagePicker.launchImageLibraryAsync(options);
 
   // 4. The modern API has a much simpler cancellation check.
   //    The 'getPendingResultAsync' workaround is no longer needed.
@@ -49,8 +45,14 @@ export async function pickImage(
   //    The old logic for checking !result.assets.length is redundant.
   const firstAsset = result.assets[0];
 
+  const manipulatedImage = await ImageManipulator.manipulateAsync(
+    firstAsset.uri,
+    [],
+    { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP },
+  );
+
   // 6. Perform the format validation.
-  const format = getFormat(firstAsset.uri);
+  const format = getFormat(manipulatedImage.uri);
   if (extensions && !extensions.includes(format)) {
     return {
       error: 'format',
@@ -59,6 +61,6 @@ export async function pickImage(
 
   // 7. Return the URI in the expected object format.
   return {
-    uri: firstAsset.uri,
+    uri: manipulatedImage.uri,
   };
 }
