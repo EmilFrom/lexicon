@@ -18,6 +18,7 @@ type Props = {
   onPress?: (imageUri: string) => void;
   showSkeleton?: boolean;
   maxHeightRatio?: number;
+  serverDimensions?: { width: number; height: number; aspectRatio?: number };
 };
 
 /**
@@ -28,6 +29,7 @@ type Props = {
  * - Set maxHeightRatio to Infinity for unlimited height
  * - Shows loading skeleton
  * - Supports tap to full-screen
+ * - Accepts serverDimensions for instant sizing without waiting for download
  */
 export function AuthenticatedImage({
   url,
@@ -36,9 +38,10 @@ export function AuthenticatedImage({
   onPress,
   showSkeleton = true,
   maxHeightRatio = 1.5,
+  serverDimensions,
 }: Props) {
   const { localUri, isLoading, error, retry, dimensions } =
-    useAuthenticatedImage(url);
+    useAuthenticatedImage(url, { serverDimensions });
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   // Calculate image height based on dimensions and constraints
@@ -48,7 +51,8 @@ export function AuthenticatedImage({
       return 300;
     }
 
-    const aspectRatio = dimensions.width / dimensions.height;
+    // Use aspectRatio if available for more efficient calculation
+    const aspectRatio = dimensions.aspectRatio || (dimensions.width / dimensions.height);
     const calculatedHeight = screenWidth / aspectRatio;
 
     // If maxHeightRatio is 0 or Infinity, don't cap the height
