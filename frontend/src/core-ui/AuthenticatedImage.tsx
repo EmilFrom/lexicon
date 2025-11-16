@@ -24,7 +24,8 @@ type Props = {
  * Authenticated image component with proper sizing and aspect ratio preservation
  * - Full width display
  * - Preserves aspect ratio
- * - Caps at maxHeightRatio of viewport height (default 70%)
+ * - Caps at maxHeightRatio of viewport height (default 1.5x for taller images)
+ * - Set maxHeightRatio to Infinity for unlimited height
  * - Shows loading skeleton
  * - Supports tap to full-screen
  */
@@ -34,7 +35,7 @@ export function AuthenticatedImage({
   testID,
   onPress,
   showSkeleton = true,
-  maxHeightRatio = 0.7,
+  maxHeightRatio = 1.5,
 }: Props) {
   const { localUri, isLoading, error, retry, dimensions } =
     useAuthenticatedImage(url);
@@ -47,10 +48,15 @@ export function AuthenticatedImage({
       return 300;
     }
 
-    const maxHeight = screenHeight * maxHeightRatio;
     const aspectRatio = dimensions.width / dimensions.height;
     const calculatedHeight = screenWidth / aspectRatio;
 
+    // If maxHeightRatio is 0 or Infinity, don't cap the height
+    if (maxHeightRatio === 0 || maxHeightRatio === Infinity) {
+      return calculatedHeight;
+    }
+
+    const maxHeight = screenHeight * maxHeightRatio;
     return Math.min(calculatedHeight, maxHeight);
   };
 
@@ -151,14 +157,10 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
   },
   imageContainer: {
     width: '100%',
-    borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#F5F5F5',
   },
   image: {
     width: '100%',

@@ -67,7 +67,12 @@ export function Markdown(props: MarkdownProps) {
       );
     }
     return (
-      <AuthenticatedImage url={src} key={key} style={styles.image} />
+      <AuthenticatedImage 
+        url={src} 
+        key={key} 
+        style={styles.image}
+        maxHeightRatio={Infinity}
+      />
     );
   };
 

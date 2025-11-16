@@ -326,6 +326,7 @@ export default function PostPreview() {
               style={styles.spacingBottom}
               key={`images-${index}`}
               onPress={(uri) => setFullScreenImage(uri)}
+              maxHeightRatio={Infinity}
             />
           ))}
         <FullScreenImageModal

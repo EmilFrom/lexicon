@@ -208,6 +208,7 @@ function BasePostItem(props: Props) {
           url={images[0]}
           testID={`PostItem:${topicId}`}
           onPress={(uri) => setFullScreenImage(uri)}
+          maxHeightRatio={1.5}
         />
         {images.length > 1 && (
           <View style={styles.imageCountBadge}>

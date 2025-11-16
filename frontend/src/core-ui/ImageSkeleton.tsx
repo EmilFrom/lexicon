@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#E1E9EE',
     overflow: 'hidden',
-    borderRadius: 12,
   },
   shimmer: {
     width: '100%',
