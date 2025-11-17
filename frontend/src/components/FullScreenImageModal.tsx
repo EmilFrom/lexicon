@@ -10,12 +10,11 @@ import {
   View,
 } from 'react-native';
 import ImageView from 'react-native-image-viewing';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as MediaLibrary from 'expo-media-library';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, Text } from '../core-ui';
-import { t } from '../i18n/translate';
 
 type Props = {
   visible: boolean;
@@ -51,6 +50,7 @@ export function FullScreenImageModal({ visible, imageUri, onClose }: Props) {
 
     try {
       await Share.share({ url: imageUri });
+      showMessage('Share dialog opened');
     } catch (error) {
       console.error('[FullScreenImageModal] Share failed', error);
       showMessage('Unable to share image');
@@ -69,7 +69,6 @@ export function FullScreenImageModal({ visible, imageUri, onClose }: Props) {
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status !== 'granted') {
           showMessage('Storage permission denied');
-          setIsSaving(false);
           return;
         }
       }
@@ -101,7 +100,7 @@ export function FullScreenImageModal({ visible, imageUri, onClose }: Props) {
       <View style={styles.headerActions}>
         <TouchableOpacity onPress={handleShare} style={styles.actionButton}>
           <Icon name="Send" size="m" color="#FFF" />
-          <Text style={styles.actionLabel}>{t('Share')}</Text>
+          <Text style={styles.actionLabel}>Share</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSave}
@@ -113,7 +112,7 @@ export function FullScreenImageModal({ visible, imageUri, onClose }: Props) {
           ) : (
             <>
               <Icon name="Photo" size="m" color="#FFF" />
-              <Text style={styles.actionLabel}>{t('Save')}</Text>
+              <Text style={styles.actionLabel}>Save</Text>
             </>
           )}
         </TouchableOpacity>
@@ -143,17 +142,22 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 16,
     paddingBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.35)',
     zIndex: 1,
   },
   closeButton: {
+    position: 'absolute',
+    left: 16,
+    bottom: 8,
     padding: 12,
     zIndex: 2,
   },
   headerActions: {
+    position: 'absolute',
+    right: 16,
+    bottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -173,3 +177,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+
