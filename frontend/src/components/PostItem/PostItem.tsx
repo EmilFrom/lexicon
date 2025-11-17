@@ -62,7 +62,7 @@ function BasePostItem(props: Props) {
 
   const { navigate } = useNavigation<StackNavProp<'TabNav'>>();
   const storage = useStorage();
-  const styles = useStyles();
+  const styles = useStyles()
   const { colors } = useTheme();
   const { height: windowHeight } = useWindowDimensions();
   const [fullScreenImage, setFullScreenImage] = React.useState<string | null>(

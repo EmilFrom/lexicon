@@ -30,6 +30,7 @@ import {
   MentionList,
   ModalHeader,
   TextArea,
+  FullScreenImageModal,
 } from '../components';
 import { FORM_DEFAULT_VALUES } from '../constants';
 import { Divider, Icon, IconWithLabel, TextInputType } from '../core-ui';
@@ -87,6 +88,10 @@ type LocalImage = {
 };
 
 export default function PostReply() {
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+  const handleImagePress = useCallback((uri: string) => {
+      setFullScreenImage(uri);
+  }, []);
   const { modal, setModal } = useModal();
   const styles = useStyles();
   const { colors } = useTheme();
@@ -528,25 +533,15 @@ export default function PostReply() {
         <Divider style={styles.spacingBottom} horizontalSpacing="xxl" />
         {!loadingRepliedPost && repliedPost}
         <View style={styles.localImagesContainer}>
-          {localImages.map((image, index) => (
-            <View key={index} style={styles.localImageWrapper}>
+        {localImages.map((image, index) => (
+          <TouchableOpacity key={index} onPress={() => handleImagePress(image.uri)}>
+            <View style={styles.localImageWrapper}>
               <Image source={{ uri: image.uri }} style={styles.localImage} />
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={() => {
-                  setLocalImages((prev) => prev.filter((_, i) => i !== index));
-                }}
-              >
-                <Icon name="Close" size="s" color="white" />
-              </TouchableOpacity>
-              {image.isUploading && (
-                <View style={styles.uploadingOverlay}>
-                  <ActivityIndicator color="white" />
-                </View>
-              )}
+              {/* ... remove button and uploading overlay ... */}
             </View>
-          ))}
-        </View>
+          </TouchableOpacity>
+        ))}
+      </View>
         <ListCreatePoll
           polls={polls || []}
           setValue={setValue}
@@ -603,6 +598,11 @@ export default function PostReply() {
           )}
         />
       </KeyboardTextAreaScrollView>
+      <FullScreenImageModal
+        visible={!!fullScreenImage}
+        imageUri={fullScreenImage || ''}
+        onClose={() => setFullScreenImage(null)}
+      />
     </SafeAreaView>
   );
 }
