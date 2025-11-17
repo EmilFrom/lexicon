@@ -55,6 +55,7 @@ type Props = ViewProps & {
   postId?: number;
   testIDStatus?: string;
   pinned?: boolean;
+  onImagePress?: (uri: string) => void;
 };
 
 function BasePostItem(props: Props) {
@@ -99,6 +100,7 @@ function BasePostItem(props: Props) {
     postId,
     testIDStatus,
     pinned,
+    onImagePress,
     ...otherProps
   } = props;
 
@@ -197,6 +199,7 @@ function BasePostItem(props: Props) {
             style={styles.markdown}
             fontColor={colors[color]}
             mentions={mentionedUsers}
+            onImagePress={onImagePress}
           />
         </View>
       )}

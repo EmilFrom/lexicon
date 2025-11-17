@@ -1,3 +1,5 @@
+// src/screens/PostDetail/PostDetail.tsx
+
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, {
   useCallback,
@@ -9,6 +11,7 @@ import React, {
 import { useFormContext } from 'react-hook-form';
 import { Alert, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ComponentProps } from 'react';
 
 import {
   ActionSheet,
@@ -20,23 +23,20 @@ import {
   LoadingOrError,
   NestedComment,
   PostDetailHeaderItem,
-  PostDetailHeaderItemProps,
   PressMoreParams,
   PressReplyParams,
   RenderItemCustomOption,
+  FullScreenImageModal, // Import the new component
 } from '../../components';
 import {
-  FORM_DEFAULT_VALUES,
+  FIRST_POST_NUMBER,
   MAX_POST_COUNT_PER_REQUEST,
-  RESULTS_DROPDOWN_OPTIONS,
 } from '../../constants';
 import { Text } from '../../core-ui';
 import {
   checkDraftAlert,
   errorHandler,
   errorHandlerAlert,
-  filterMarkdownContentPoll,
-  handleUnsupportedMarkdown,
   LoginError,
   postDetailContentHandler,
   privateTopicAlert,
@@ -57,10 +57,6 @@ import { NewPostForm, Post, StackNavProp, StackRouteProp } from '../../types';
 import { useNotificationScroll } from './hooks';
 import PostDetailSkeletonLoading from './PostDetailSkeletonLoading';
 
-// postNumber of the topic is 1
-// scrollToIndex is postNumber -2 for replies because the postNumber will start at 2
-// while the index in flatlist will start at 0
-
 type PostReplyItem = { item: Post };
 
 type OnScrollInfo = {
@@ -74,11 +70,9 @@ const MAX_DEFAULT_LOADED_POST_INDEX = MAX_POST_COUNT_PER_REQUEST - 1;
 export default function PostDetail() {
   const styles = useStyles();
   const { colors } = useTheme();
-
   const navigation = useNavigation<StackNavProp<'PostDetail'>>();
   const { navigate, reset, setParams, goBack } = navigation;
   const useInitialLoadResult = useInitialLoad();
-
   const {
     params: {
       topicId,
@@ -89,16 +83,18 @@ export default function PostDetail() {
       content: initialContent,
     },
   } = useRoute<StackRouteProp<'PostDetail'>>();
-
   const storage = useStorage();
   const currentUserId = storage.getItem('user')?.id;
-
   const channels = storage.getItem('channels');
-
   const customFlatListRef = useRef<CustomFlatlistRefType>(null);
 
+  // --- State for the Full-Screen Image Modal ---
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+
+  // Other state variables...
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [loading, setLoading] = useState(true);
+  // ... (rest of your existing state declarations)
   const [canFlagFocusPost, setCanFlagFocusPost] = useState(false);
   const [canEditFocusPost, setCanEditFocusPost] = useState(false);
   const [showActionSheet, setShowActionSheet] = useState(false);
@@ -118,11 +114,15 @@ export default function PostDetail() {
 
   const postIdOnFocusRef = useRef<number | null>(null);
   const postIdOnFocus = postIdOnFocusRef.current;
-
-  const { setValue, reset: resetForm } = useFormContext<NewPostForm>();
-
+  const { setValue } = useFormContext<NewPostForm>();
   const ios = Platform.OS === 'ios';
 
+  // --- Callback to handle image press ---
+  const handleImagePress = useCallback((uri: string) => {
+    setFullScreenImage(uri);
+  }, []);
+
+  // ... (rest of your hooks and functions: useTopicDetail, usePostRaw, etc.)
   const {
     data,
     loading: topicDetailLoading,
@@ -145,13 +145,6 @@ export default function PostDetail() {
         }
       },
       onError: (error) => {
-        /**
-         * if we get error about private post which cannot be access.
-         * we need check first it is because user haven't login or because post it self only open to specific group
-         * if user not login we will redirect to login scene.
-         * But if user already login still get same error will redirect to home scene and show private post alert
-         */
-
         if (error.message.includes('Invalid Access')) {
           if (
             !useInitialLoadResult.loading &&
@@ -199,16 +192,13 @@ export default function PostDetail() {
 
   const canEditFirstPost = Boolean(firstPost?.canEdit);
   const canFlagFirstPost = Boolean(firstPost?.canFlag && !firstPost?.hidden);
-  /**
-   * Explicit booleans keep the intent clear and avoid the constant-truthiness lint warning.
-   */
+
   const showOptions = canEditFirstPost || canFlagFirstPost;
 
   useEffect(() => {
     if (!firstPost) {
       return;
     }
-    // TODO: Optimize this to fetch the query only when needed #847
     postRaw({ variables: { postId: firstPost.id } });
     setHidden(firstPost.hidden || false);
     setFirstPostId(firstPost.id);
@@ -233,10 +223,6 @@ export default function PostDetail() {
 
   const refreshPost = async () => {
     setLoadingRefresh(true);
-    /**
-     * unset postNumber since refetching when we have postNumber will
-     * preserve the postNumber (which might not return firstPost)
-     */
     refetch({ topicId, postNumber: undefined }).then(() => {
       setLoadingRefresh(false);
     });
@@ -249,8 +235,8 @@ export default function PostDetail() {
     }
     const newPostIndex = await loadMorePosts({
       fetchMore,
-      firstLoadedPostIndex: firstLoadedCommentIndex,
-      lastLoadedPostIndex: lastLoadedCommentIndex,
+      firstLoadedPostIndex,
+      lastLoadedPostIndex,
       stream: stream ?? undefined,
       loadNewerPosts,
       fetchMoreVariables: { includeFirstPost: undefined },
@@ -347,6 +333,8 @@ export default function PostDetail() {
       navigate('FlagPost', { postId, isPost, flaggedAuthor });
     }
   };
+  
+  const { reset: resetForm } = useFormContext<NewPostForm>();
 
   const navToPost = () => {
     if (!topic || !postIdOnFocus || !firstPost) {
@@ -373,17 +361,7 @@ export default function PostDetail() {
     } = focusedPost;
 
     if (postIdOnFocus === firstPostId) {
-      /**
-       * Here, we set the default value of the form context before navigating to edit a post.
-       * This is done to check if the value has changed compared to the initial value of the post before editing, using `react-hook-form`'s `isDirty` feature.
-       */
-
       const newContentFilter = filterMarkdownContentPoll(oldContent);
-
-      /**
-       * Add polls reset from based on PollFormContextValues type for default value if polls not null
-       * which mean if not empty array the post already has poll
-       */
 
       resetForm({
         title: title,
@@ -492,9 +470,7 @@ export default function PostDetail() {
       }
       case 1:
         if (canEditFocusPost && !flaggedByCommunity) {
-          /**
-           * Only admins/mods can reach this branch; return early instead of relying on a short-circuit expression.
-           */
+
           return navToFlag();
         }
         return;
@@ -569,12 +545,10 @@ export default function PostDetail() {
     ],
   );
 
-  const onPressReplyProps: PostDetailHeaderItemProps['onPressReply'] = ({
-    postId,
-  }) => {
-    if (postId) {
-      onPressReply({ replyToPostId: postId });
-    }
+const onPressReplyProps: ComponentProps<typeof PostDetailHeaderItem>['onPressReply'] = ({ postId }) => {
+  if (postId) {
+    onPressReply({ replyToPostId: postId });
+  }
   };
 
   const keyExtractor = ({ id }: Post) => `post-${id}`;
@@ -583,10 +557,7 @@ export default function PostDetail() {
     { item }: PostReplyItem,
     { isItemLoading, onLayout }: RenderItemCustomOption,
   ) => {
-    //console.log('--- Post object FROM POSTDETAIL ---', JSON.stringify(item, null, 2));
-
     const { replyToPostNumber, canEdit, canFlag, hidden, id } = item;
-
     const replyToPostId =
       replyToPostNumber && replyToPostNumber > 0
         ? stream?.[replyToPostNumber - 1]
@@ -611,15 +582,13 @@ export default function PostDetail() {
         onPressReply={onPressReply}
         onPressMore={onPressMore}
         onPressAuthor={onPressAuthor}
+        onImagePress={handleImagePress} // Pass handler to NestedComment
         testIDStatus={`PostDetail:NestedComment:Author:EmojiStatus`}
       />
     );
   };
-
+  
   const onScrollToIndexFailedHandler = ({ index }: OnScrollInfo) => {
-    /**
-     * Re-trying the scroll here causes an infinite loop, but we still keep a hook for debugging purposes.
-     */
     if (__DEV__) {
       console.warn(`PostDetail: failed to scroll to index ${index}`);
     }
@@ -642,13 +611,6 @@ export default function PostDetail() {
     );
   }
 
-  /*  // --- THIS IS THE FINAL SET OF LOGS YOU NEED ---
-  console.log('--- PostDetail Component State Before Render ---');
-  console.log('Is loading:', loading); // The loading state from your query
-  console.log('Error object:', JSON.stringify(error, null, 2)); // The error from your query
-  console.log('Data from Query:', JSON.stringify(data, null, 2)); // The raw data from your query
-  console.log('postComments variable:', JSON.stringify(postComments, null, 2)); // The variable you pass to the list
-  // --- END OF LOGS --- */
   return isLoading ? (
     <PostDetailSkeletonLoading isLoading={isLoading} />
   ) : (
@@ -678,7 +640,7 @@ export default function PostDetail() {
             <PostDetailHeaderItem
               topicId={topicId}
               postDetailContent={postDetailContent}
-              content={handleUnsupportedMarkdown(firstPost?.content || content)}
+              content={content}
               mentionedUsers={mentionedUsers}
               isHidden={isHidden}
               onPressViewIgnoredContent={onPressViewIgnoredContent}
@@ -686,6 +648,7 @@ export default function PostDetail() {
               polls={firstPost?.polls}
               pollsVotes={firstPost?.pollsVotes}
               postId={firstPost?.id ?? firstPostId}
+              onImagePress={handleImagePress} // Pass handler to HeaderItem
             />
           }
           onRefresh={hasOlderPost ? () => loadMoreComments(false) : refreshPost}
@@ -725,6 +688,13 @@ export default function PostDetail() {
           />
         )}
       </TouchableOpacity>
+
+      {/* Render the modal */}
+      <FullScreenImageModal
+        visible={!!fullScreenImage}
+        imageUri={fullScreenImage || ''}
+        onClose={() => setFullScreenImage(null)}
+      />
     </>
   );
 }

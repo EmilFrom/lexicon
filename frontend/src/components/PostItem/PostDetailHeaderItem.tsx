@@ -27,7 +27,7 @@ type Props = Required<
     'isHidden' | 'mentionedUsers' | 'onPressViewIgnoredContent'
   >
 > &
-  Pick<PostItemProps, 'polls' | 'postId' | 'pollsVotes'> &
+  Pick<PostItemProps, 'polls' | 'postId' | 'pollsVotes' | 'onImagePress'> &
   Pick<MetricsProp, 'onPressReply'> & {
     topicId: number;
     content: string;
@@ -50,6 +50,7 @@ function BasePostDetailHeaderItem(props: Props) {
     polls,
     postId,
     pollsVotes,
+    onImagePress,
   } = props;
 
   const cacheTopicResult = useFragment_experimental<
@@ -113,6 +114,7 @@ function BasePostDetailHeaderItem(props: Props) {
       pollsVotes={pollsVotes}
       postId={postId}
       testIDStatus="PostDetailHeaderItem:Author:EmojiStatus"
+      onImagePress={onImagePress}
       footer={
         <PostItemFooter
           postId={postItemFooterProps.postId}

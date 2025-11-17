@@ -13,6 +13,7 @@ import { makeStyles, useTheme } from '../theme';
 
 type Props = MarkdownProps & {
   renderPollsInCollapsible?: () => React.ReactNode;
+  onImagePress?: (uri: string) => void;
 };
 
 export function MarkdownContent(props: Props) {
@@ -32,7 +33,7 @@ export function MarkdownContent(props: Props) {
       );
     } else {
       return (
-        <Markdown key={`content-${index}`} content={content} {...otherProps} />
+        <Markdown key={`content-${index}`} content={content} onImagePress={onImagePress} {...otherProps} />
       );
     }
   });
