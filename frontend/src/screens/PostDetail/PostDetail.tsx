@@ -690,6 +690,7 @@ export default function PostDetail() {
               isHidden={isHidden}
               onPressViewIgnoredContent={onPressViewIgnoredContent}
               onPressReply={onPressReplyProps}
+              onImagePress={handleImagePress}
               polls={firstPost?.polls}
               pollsVotes={firstPost?.pollsVotes}
               postId={firstPost?.id ?? firstPostId}

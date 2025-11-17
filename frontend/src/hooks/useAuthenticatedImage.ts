@@ -27,7 +27,7 @@ export function useAuthenticatedImage(
   const token = useReactiveVar(tokenVar);
 
   const [localUri, setLocalUri] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [dimensions, setDimensions] = useState<
@@ -64,7 +64,6 @@ export function useAuthenticatedImage(
 
     const loadImage = async () => {
       try {
-        setIsLoading(true);
         setError(null);
 
         if (__DEV__) {

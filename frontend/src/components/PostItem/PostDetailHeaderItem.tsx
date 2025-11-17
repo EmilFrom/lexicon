@@ -33,6 +33,7 @@ type Props = Required<
     content: string;
     postDetailContent?: ReturnType<typeof postDetailContentHandler>;
     postId?: number;
+    onImagePress?: (uri: string) => void;
   };
 
 function BasePostDetailHeaderItem(props: Props) {
@@ -50,6 +51,7 @@ function BasePostDetailHeaderItem(props: Props) {
     polls,
     postId,
     pollsVotes,
+    onImagePress,
   } = props;
 
   const cacheTopicResult = useFragment_experimental<
@@ -106,6 +108,7 @@ function BasePostDetailHeaderItem(props: Props) {
       isLiked={postItemProps.isLiked}
       mentionedUsers={mentionedUsers}
       onPressViewIgnoredContent={onPressViewIgnoredContent}
+      onImagePress={onImagePress}
       nonclickable
       showStatus
       emojiCode={postItemProps.emojiCode}
@@ -113,6 +116,7 @@ function BasePostDetailHeaderItem(props: Props) {
       pollsVotes={pollsVotes}
       postId={postId}
       testIDStatus="PostDetailHeaderItem:Author:EmojiStatus"
+      showModal={false}
       footer={
         <PostItemFooter
           postId={postItemFooterProps.postId}

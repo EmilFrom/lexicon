@@ -66,17 +66,6 @@ export function AuthenticatedImage({
 
   const imageHeight = calculateImageHeight();
 
-  if (__DEV__) {
-    console.log('[AuthenticatedImage]', {
-      url,
-      localUri,
-      isLoading,
-      hasError: !!error,
-      dimensions,
-      imageHeight,
-    });
-  }
-
   // Loading state
   if (isLoading) {
     return showSkeleton ? (
@@ -115,13 +104,10 @@ export function AuthenticatedImage({
 
   // Success - render the image
   const imageContent = (
-    <View
-      style={[styles.imageContainer, { height: imageHeight }, style]}
-      testID={testID}
-    >
+    <View style={[styles.imageContainer, style]} testID={testID}>
       <Image
         source={{ uri: localUri }}
-        style={styles.image}
+        style={[styles.image, { height: imageHeight }]}
         resizeMode="cover"
         onLoad={() => {
           if (__DEV__) {
@@ -164,11 +150,9 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    overflow: 'hidden',
   },
   image: {
     width: '100%',
-    height: '100%',
   },
   error: {
     backgroundColor: '#FFE5E5',

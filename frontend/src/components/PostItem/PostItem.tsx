@@ -48,6 +48,7 @@ type Props = ViewProps & {
   footer?: React.ReactNode;
   mentionedUsers?: Array<string>;
   onPressViewIgnoredContent?: () => void;
+  onImagePress?: (uri: string) => void;
   showStatus?: boolean;
   emojiCode?: string;
   polls?: Array<Poll>;
@@ -55,6 +56,7 @@ type Props = ViewProps & {
   postId?: number;
   testIDStatus?: string;
   pinned?: boolean;
+  showModal?: boolean;
 };
 
 function BasePostItem(props: Props) {
@@ -92,6 +94,7 @@ function BasePostItem(props: Props) {
     isHidden = false,
     footer,
     onPressViewIgnoredContent = () => {},
+    onImagePress,
     showStatus,
     emojiCode,
     polls,
@@ -99,6 +102,7 @@ function BasePostItem(props: Props) {
     postId,
     testIDStatus,
     pinned,
+    showModal = true,
     ...otherProps
   } = props;
 
@@ -197,6 +201,7 @@ function BasePostItem(props: Props) {
             style={styles.markdown}
             fontColor={colors[color]}
             mentions={mentionedUsers}
+            onImagePress={onImagePress}
           />
         </View>
       )}
@@ -292,11 +297,13 @@ function BasePostItem(props: Props) {
         {wrappedMainContent}
         {footer}
       </View>
-      <FullScreenImageModal
-        visible={!!fullScreenImage}
-        imageUri={fullScreenImage || ''}
-        onClose={() => setFullScreenImage(null)}
-      />
+      {showModal && (
+        <FullScreenImageModal
+          visible={!!fullScreenImage}
+          imageUri={fullScreenImage || ''}
+          onClose={() => setFullScreenImage(null)}
+        />
+      )}
     </>
   );
 }
