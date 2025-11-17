@@ -103,9 +103,7 @@ export default function PostDetail() {
   const [fromPost, setFromPost] = useState(false);
   const [author, setAuthor] = useState('');
   const [flaggedByCommunity, setFlaggedByCommunity] = useState(false);
-  const [content, setContent] = useState(initialContent);
   const [firstPostId, setFirstPostId] = useState<number>(0);
-  const [mentionedUsers, setMentionedUsers] = useState<Array<string>>([]);
   const [isHidden, setHidden] = useState(hidden ?? false);
   const [flatListReady, setFlatListReady] = useState(false);
 
@@ -164,13 +162,6 @@ export default function PostDetail() {
     'HIDE_ALERT',
   );
 
-  const { postRaw } = usePostRaw({
-    onCompleted: ({ postRaw: { cooked } }) => {
-      setContent(cooked.markdownContent);
-      setMentionedUsers(cooked.mentions);
-    },
-  });
-
   const { deletePostDraft } = useDeletePostDraft();
 
   const { checkPostDraft } = useLazyCheckPostDraft();
@@ -191,15 +182,6 @@ export default function PostDetail() {
   const canFlagFirstPost = Boolean(firstPost?.canFlag && !firstPost?.hidden);
 
   const showOptions = canEditFirstPost || canFlagFirstPost;
-
-  useEffect(() => {
-    if (!firstPost) {
-      return;
-    }
-    postRaw({ variables: { postId: firstPost.id } });
-    setHidden(firstPost.hidden || false);
-    setFirstPostId(firstPost.id);
-  }, [firstPost, postRaw]);
 
   useEffect(() => {
     if (postDetailContent) {
@@ -638,15 +620,17 @@ export default function PostDetail() {
             <PostDetailHeaderItem
               topicId={topicId}
               postDetailContent={postDetailContent}
-              content={content}
-              mentionedUsers={mentionedUsers}
+              // Use the 'cooked' content directly from the main topic query
+              content={postDetailContent?.firstPost?.cooked} 
+              // Use the mentions from the main topic query
+              mentionedUsers={postDetailContent?.firstPost?.mentionedUsers}
               isHidden={isHidden}
               onPressViewIgnoredContent={onPressViewIgnoredContent}
               onPressReply={onPressReplyProps}
               polls={firstPost?.polls}
               pollsVotes={firstPost?.pollsVotes}
               postId={firstPost?.id ?? firstPostId}
-              onImagePress={handleImagePress} // Pass handler to HeaderItem
+              onImagePress={handleImagePress}
             />
           }
           onRefresh={hasOlderPost ? () => loadMoreComments(false) : refreshPost}
