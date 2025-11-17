@@ -25,7 +25,6 @@ import {
   PressReplyParams,
   RenderItemCustomOption,
 } from '../../components';
-import { FullScreenImageModal } from '../../components/FullScreenImageModal';
 import {
   FORM_DEFAULT_VALUES,
   MAX_POST_COUNT_PER_REQUEST,
@@ -108,7 +107,6 @@ export default function PostDetail() {
     useState<number>();
   const [lastLoadedCommentIndex, setLastLoadedCommentIndex] =
     useState<number>();
-  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [fromPost, setFromPost] = useState(false);
   const [author, setAuthor] = useState('');
   const [flaggedByCommunity, setFlaggedByCommunity] = useState(false);
@@ -339,10 +337,6 @@ export default function PostDetail() {
     },
     [navigate],
   );
-
-  const handleImagePress = useCallback((uri: string) => {
-    setFullScreenImage(uri);
-  }, []);
 
   const navToFlag = (
     postId = postIdOnFocus,
@@ -617,7 +611,6 @@ export default function PostDetail() {
         onPressReply={onPressReply}
         onPressMore={onPressMore}
         onPressAuthor={onPressAuthor}
-        onImagePress={handleImagePress}
         testIDStatus={`PostDetail:NestedComment:Author:EmojiStatus`}
       />
     );
@@ -732,11 +725,6 @@ export default function PostDetail() {
           />
         )}
       </TouchableOpacity>
-      <FullScreenImageModal
-        visible={!!fullScreenImage}
-        imageUri={fullScreenImage || ''}
-        onClose={() => setFullScreenImage(null)}
-      />
     </>
   );
 }

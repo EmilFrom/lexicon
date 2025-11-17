@@ -13,15 +13,14 @@ import { makeStyles, useTheme } from '../theme';
 
 type Props = MarkdownProps & {
   renderPollsInCollapsible?: () => React.ReactNode;
-  onImagePress?: (uri: string) => void;
 };
 
 export function MarkdownContent(props: Props) {
-  const { content, renderPollsInCollapsible, onImagePress, ...otherProps } = props;
+  const { content, renderPollsInCollapsible, ...otherProps } = props;
   const splittedContent = separateCollapsibleInContent(content);
 
   return splittedContent.map((content, index) => {
-      if (isCollapsible(content)) {
+    if (isCollapsible(content)) {
       const { title, details } = extractCollapsibleContent(content);
       return (
         <Collapsible
@@ -29,17 +28,11 @@ export function MarkdownContent(props: Props) {
           title={title}
           details={details}
           renderPollsInCollapsible={renderPollsInCollapsible}
-            onImagePress={onImagePress}
         />
       );
     } else {
       return (
-          <Markdown
-            key={`content-${index}`}
-            content={content}
-            onImagePress={onImagePress}
-            {...otherProps}
-          />
+        <Markdown key={`content-${index}`} content={content} {...otherProps} />
       );
     }
   });
@@ -49,11 +42,10 @@ type CollapsibleProps = {
   title: string;
   details: string;
   renderPollsInCollapsible?: () => React.ReactNode;
-  onImagePress?: (uri: string) => void;
 };
 
 export function Collapsible(props: CollapsibleProps) {
-  const { title, details, renderPollsInCollapsible, onImagePress } = props;
+  const { title, details, renderPollsInCollapsible } = props;
   const styles = useStyles();
   const { colors } = useTheme();
 
@@ -78,7 +70,6 @@ export function Collapsible(props: CollapsibleProps) {
             content={generateMarkdownContent(details)}
             nonClickable={true}
             renderPollsInCollapsible={renderPollsInCollapsible}
-            onImagePress={onImagePress}
           />
         </View>
       )}
