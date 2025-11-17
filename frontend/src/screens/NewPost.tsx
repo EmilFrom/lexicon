@@ -34,7 +34,7 @@ import {
   TextInput,
   TextInputType,
 } from '../core-ui';
-import { PostDraftType, UploadTypeEnum } from '../generatedAPI/server';
+import { PostDraftType, UploadTypeEnum, UploadOutput } from '../generatedAPI/server';
 import {
   BottomMenuNavigationParams,
   BottomMenuNavigationScreens,
@@ -52,6 +52,7 @@ import {
   parseInt,
   saveAndDiscardPostDraftAlert,
   useStorage,
+  formatImageLink,
 } from '../helpers';
 import {
   useAutoSaveManager,
@@ -320,15 +321,25 @@ export default function NewPost() {
             },
           },
         });
-        const shortUrl = result.data?.upload.shortUrl;
-        return shortUrl;
-      });
+        return result.data?.upload;
+        });
 
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const markdownLinks = uploadedUrls
-        .filter((url) => url)
-        .map((url) => `![image](${url})`)
-        .join('\n');
+        const uploadResults = await Promise.all(uploadPromises);
+
+        // Use a type guard to filter out undefined results and satisfy TypeScript
+        const validUploads: UploadOutput[] = uploadResults.filter(
+            (result): result is UploadOutput => !!result
+        );
+
+      
+
+      const markdownLinks = validUploads
+            .map((upload) => {
+                const { originalFilename, width, height, shortUrl } = upload;
+                // Use the helper to create the correct markdown link
+                return formatImageLink(originalFilename, width, height, shortUrl);
+            })
+            .join('\n');
 
       setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
       setLocalImages([]);

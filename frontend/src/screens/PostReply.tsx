@@ -30,6 +30,7 @@ import {
   MentionList,
   ModalHeader,
   TextArea,
+  formatImageLink,
 } from '../components';
 import { FORM_DEFAULT_VALUES } from '../constants';
 import { Divider, Icon, IconWithLabel, TextInputType } from '../core-ui';
@@ -38,6 +39,7 @@ import {
   PostFragment,
   PostFragmentDoc,
   UploadTypeEnum,
+  UploadOutput,
 } from '../generatedAPI/server';
 import {
   BottomMenuNavigationParams,
@@ -339,15 +341,23 @@ export default function PostReply() {
           },
         },
       });
-      const shortUrl = result.data?.upload.shortUrl;
-      return shortUrl;
+      return result.data?.upload;
     });
 
     try {
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const markdownLinks = uploadedUrls
-        .filter((url) => url)
-        .map((url) => `![image](${url})`)
+      const uploadResults = await Promise.all(uploadPromises);
+
+      // Use a type guard to filter out undefined results and satisfy TypeScript
+      const validUploads: UploadOutput[] = uploadResults.filter(
+        (result): result is UploadOutput => !!result
+      );
+
+      const markdownLinks = validUploads
+        .map((upload) => {
+          const { originalFilename, width, height, shortUrl } = upload;
+          // Use the helper to create the correct markdown link
+          return formatImageLink(originalFilename, width, height, shortUrl);
+        })
         .join('\n');
 
       setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
