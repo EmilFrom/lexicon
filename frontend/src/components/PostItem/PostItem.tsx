@@ -210,7 +210,7 @@ function BasePostItem(props: Props) {
           url={images[0]}
           testID={`PostItem:${topicId}`}
           onPress={(uri) => setFullScreenImage(uri)}
-          maxHeightRatio={0.8}
+          maxHeightRatio={0.5}
           serverDimensions={imageDimensions}
         />
         {images.length > 1 && (

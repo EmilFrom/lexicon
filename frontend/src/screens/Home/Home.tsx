@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Dimensions, PixelRatio, Platform, View } from 'react-native';
+import { Dimensions, PixelRatio, Platform, StyleSheet, View } from 'react-native';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import Animated, {
   Extrapolate,
@@ -276,19 +276,12 @@ export default function Home() {
   });
 
   // Callback for tracking visible items
-  const onViewableItemsChanged = useCallback(
-    ({
-      viewableItems,
-    }: {
-      viewableItems: Array<{ item?: { topicId?: number } }>;
-    }) => {
-      const ids = viewableItems
-        .map((item) => item.item?.topicId)
-        .filter(Boolean) as number[];
-      setVisibleTopicIds(ids);
-    },
-    [],
-  );
+  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+    const ids = viewableItems
+      .map((item: any) => item.item?.topicId)
+      .filter(Boolean);
+    setVisibleTopicIds(ids);
+  }, []);
 
   // Stable reference for viewability config
   const viewabilityConfigRef = useRef({
@@ -603,7 +596,83 @@ export default function Home() {
     return t('All Channels');
   };
 
-  const homeContent = (
+  const postContent = () => {
+    if (channelsError) {
+      return (
+        <LoadingOrError
+          message={errorHandler(channelsError, true)}
+          refreshing={refreshing}
+          progressViewOffset={headerViewHeight}
+          onRefresh={() => {
+            channelsRefetch();
+            onRefresh();
+          }}
+        />
+      );
+    }
+    if (topicsError) {
+      return (
+        <LoadingOrError
+          message={errorHandler(topicsError, true)}
+          refreshing={refreshing}
+          progressViewOffset={headerViewHeight}
+          onRefresh={onRefreshError}
+        />
+      );
+    }
+
+    if (!topicsData || channelsLoading || loading) {
+      return <LoadingOrError loading />;
+    }
+    if (topicsData && topicsData.length < 1) {
+      return <LoadingOrError message={t('No Posts available')} />;
+    }
+    return (
+      <PostList
+        postListRef={postListRef}
+        data={topicsData}
+        contentInset={{
+          // statusBarHeight ios phone device value from expo is bigger than tablet and android. when check android and tablet around 25-30 but ios phone show result 54
+          top: headerViewHeight - (ios && !isTablet ? statusBarHeight / 3 : 0),
+        }}
+        contentOffset={{
+          x: 0,
+          y: Platform.OS === 'ios' ? -headerViewHeight : 0,
+        }}
+        progressViewOffset={headerViewHeight}
+        automaticallyAdjustContentInsets={false}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        style={styles.fill}
+        contentContainerStyle={[
+          styles.postListContent,
+          isTablet ? styles.postListContentTablet : undefined,
+        ]}
+        scrollEventThrottle={16}
+        onScroll={scrollHandler}
+        onEndReachedThreshold={0.1}
+        onEndReached={onEndReached}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfigRef.current}
+        renderItem={({ item }) => {
+          return (
+            <HomePostItem
+              topicId={item.topicId}
+              prevScreen={'Home'}
+              onPressReply={onPressReply}
+              style={isTablet ? styles.postItemCardTablet : undefined}
+            />
+          );
+        }}
+        ListFooterComponent={
+          <FooterLoadingIndicator isHidden={!hasMoreTopics || !topicsData} />
+        }
+        testID="Home:PostList"
+      />
+    );
+  };
+
+  const homeContent = () => (
     <>
       <View
         style={styles.container}
@@ -642,70 +711,7 @@ export default function Home() {
             selectedIndex={selectedIndex()}
           />
         </Animated.View>
-        {channelsError ? (
-          <LoadingOrError
-            message={errorHandler(channelsError, true)}
-            refreshing={refreshing}
-            progressViewOffset={headerViewHeight}
-            onRefresh={() => {
-              channelsRefetch();
-              onRefresh();
-            }}
-          />
-        ) : topicsError ? (
-          <LoadingOrError
-            message={errorHandler(topicsError, true)}
-            refreshing={refreshing}
-            progressViewOffset={headerViewHeight}
-            onRefresh={onRefreshError}
-          />
-        ) : !topicsData || channelsLoading || loading ? (
-          <LoadingOrError loading />
-        ) : topicsData && topicsData.length < 1 ? (
-          <LoadingOrError message={t('No Posts available')} />
-        ) : (
-          <PostList
-            postListRef={postListRef}
-            data={topicsData}
-            contentInset={{
-              // statusBarHeight ios phone device value from expo is bigger than tablet and android. when check android and tablet around 25-30 but ios phone show result 54
-              top: headerViewHeight - (ios && !isTablet ? statusBarHeight / 3 : 0),
-            }}
-            contentOffset={{
-              x: 0,
-              y: Platform.OS === 'ios' ? -headerViewHeight : 0,
-            }}
-            progressViewOffset={headerViewHeight}
-            automaticallyAdjustContentInsets={false}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            style={styles.fill}
-            contentContainerStyle={[
-              styles.postListContent,
-              isTablet ? styles.postListContentTablet : undefined,
-            ]}
-            scrollEventThrottle={16}
-            onScroll={scrollHandler}
-            onEndReachedThreshold={0.1}
-            onEndReached={onEndReached}
-            onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={viewabilityConfigRef.current}
-            renderItem={({ item }) => {
-              return (
-                <HomePostItem
-                  topicId={item.topicId}
-                  prevScreen={'Home'}
-                  onPressReply={onPressReply}
-                  style={isTablet ? styles.postItemCardTablet : undefined}
-                />
-              );
-            }}
-            ListFooterComponent={
-              <FooterLoadingIndicator isHidden={!hasMoreTopics || !topicsData} />
-            }
-            testID="Home:PostList"
-          />
-        )}
+        {postContent()}
         {!ios && <FloatingButton onPress={onPressAdd} style={styles.fab} />}
       </View>
     </>
@@ -718,7 +724,7 @@ export default function Home() {
         setSelectedChannelId={onPressSideBarSelectedChannel}
         hideSideBar={toggleSideBar}
       >
-        {homeContent}
+        {homeContent()}
       </ChannelSideBarDrawer>
     ) : (
       <DrawerLayout
@@ -741,11 +747,11 @@ export default function Home() {
           />
         )}
       >
-        {homeContent}
+        {homeContent()}
       </DrawerLayout>
     )
   ) : (
-    homeContent
+    homeContent()
   );
 }
 

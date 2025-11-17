@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import ImageView from 'react-native-image-viewing';
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -97,7 +97,7 @@ export function FullScreenImageModal({ visible, imageUri, onClose }: Props) {
       >
         <Icon name="Close" size="l" color="#FFF" />
       </TouchableOpacity>
-      <View style={styles.headerActions}>
+      <View style={styles.actions}>
         <TouchableOpacity onPress={handleShare} style={styles.actionButton}>
           <Icon name="Send" size="m" color="#FFF" />
           <Text style={styles.actionLabel}>Share</Text>
@@ -140,24 +140,17 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     backgroundColor: 'rgba(0,0,0,0.35)',
     zIndex: 1,
   },
   closeButton: {
-    position: 'absolute',
-    left: 16,
-    bottom: 8,
-    padding: 12,
-    zIndex: 2,
+    padding: 8,
   },
-  headerActions: {
-    position: 'absolute',
-    right: 16,
-    bottom: 8,
+  actions: {
     flexDirection: 'row',
     alignItems: 'center',
   },

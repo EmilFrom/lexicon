@@ -111,14 +111,15 @@ describe('anchorToMarkdown change anchor tag to markdown', () => {
 
 describe('generateMarkdownContent returns markdown content with complete urls', () => {
   const rawContent = 'Hello Lexicon! ![image](upload://shortUrl.com)';
-const resultRawContent = 'Hello Lexicon!';
+  const resultRawContent = 'Hello Lexicon! ![image](1)';
   const shortImageUrl = '![image](upload://shortUrl.com)';
+  const defaultImageUrl = '![image](1)';
   const imageUrls = ['https://wiki.kfox.io/example.png'];
   const markdownContent =
     'Hello Lexicon! ![image](https://wiki.kfox.io/example.png)';
 
   it('should return raw content when image urls are empty', () => {
-    expect(generateMarkdownContent(rawContent, []).trim()).toBe(resultRawContent);
+    expect(generateMarkdownContent(rawContent, [])).toBe(resultRawContent);
   });
   it('should return raw content when there are no short urls in raw content', () => {
     const rawContentWithNoImage = 'Hello Lexicon!';
@@ -129,8 +130,8 @@ const resultRawContent = 'Hello Lexicon!';
 
   it('should return raw content with short urls and complete urls when the total number of short urls is more than the complete image urls', () => {
     expect(
-      generateMarkdownContent(`${rawContent} ${shortImageUrl}`, imageUrls).trim(),
-    ).toBe(markdownContent);
+      generateMarkdownContent(`${rawContent} ${shortImageUrl}`, imageUrls),
+    ).toBe(`${markdownContent} ${defaultImageUrl}`);
   });
   it('should return raw content with no short url when the total number of short urls is less than the complete image urls', () => {
     expect(
