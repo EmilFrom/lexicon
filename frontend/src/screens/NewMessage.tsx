@@ -32,7 +32,6 @@ import {
   bottomMenu,
   BottomMenuNavigationParams,
   BottomMenuNavigationScreens,
-  combineContentWithPollContent,
   createReactNativeFile,
   errorHandlerAlert,
   formatExtensions,
@@ -55,7 +54,6 @@ import {
   useNewMessage,
   useSiteSettings,
   useStatefulUpload,
-  useStatelessUpload,
 } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
 import {
@@ -106,7 +104,7 @@ export default function NewMessage() {
 
   const users: Array<string> | undefined = watch('messageTargetSelectedUsers');
   const polls: Array<PollFormContextValues> | undefined = watch('polls');
-  const { isDraft, draftKey } = getValues();
+  const { isDraft } = getValues();
 
   const memoizedLinkParams = useMemo(() => {
     return {
@@ -190,7 +188,7 @@ export default function NewMessage() {
     currentUploadToken,
   );
 
-  const { newMessage, loading: newMessageLoading } = useNewMessage({
+  const { loading: newMessageLoading } = useNewMessage({
     onCompleted: () => {
       resetForm(FORM_DEFAULT_VALUES);
       navToMessages();
@@ -447,17 +445,6 @@ export default function NewMessage() {
       );
     }
   });
-
-  const messageValidity = useMemo(() => {
-    const { title, targetRecipients, raw } = getValues();
-    return (
-      title.length > 0 &&
-      targetRecipients.length > 0 &&
-      (raw.length > 0 ||
-        (polls && polls.length > 0) ||
-        localImages.some((image) => image.isUploading))
-    );
-  }, [getValues, localImages, polls]);
 
   const setMentionValue = (text: string) => {
     setValue('raw', text);

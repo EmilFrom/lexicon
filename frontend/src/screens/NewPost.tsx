@@ -12,7 +12,6 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDebouncedCallback } from 'use-debounce';
 
 import {
   BottomMenu,
@@ -183,7 +182,9 @@ export default function NewPost() {
   const [showUserList, setShowUserList] = useState(false);
   const [mentionLoading, setMentionLoading] = useState(false);
   const [mentionKeyword, setMentionKeyword] = useState('');
-  const [localImages, setLocalImages] = useState<LocalImage[]>([]);
+  const [localImages, setLocalImages] = useState<LocalImage[]>(() => 
+    imageUri ? [{ uri: imageUri }] : []
+  );
 
   const kasv = useKASVWorkaround();
 
@@ -220,22 +221,6 @@ export default function NewPost() {
     });
   };
 
-  const doneCreatePost = handleSubmit(() => {
-    navigate('PostPreview', {
-      reply: false,
-      postData: { topicId: editTopicId || 0 },
-      editPostId:
-        editPostType === 'Post' || editPostType === 'Both'
-          ? editPostId
-          : undefined,
-      editTopicId:
-        editPostType === 'Topic' || editPostType === 'Both'
-          ? editTopicId
-          : undefined,
-      editedUser,
-      focusedPostNumber: editTopicId ? 1 : undefined,
-    });
-  });
 
   const { createPostDraft, loading: loadingCreateAndUpdatePostDraft } =
     useCreateAndUpdatePostDraft({
@@ -260,16 +245,6 @@ export default function NewPost() {
 
   useAutoSaveManager({ debounceSaveDraft });
 
-  const processedImageUriRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!imageUri || processedImageUriRef.current === imageUri) {
-      return;
-    }
-    processedImageUriRef.current = imageUri;
-    setLocalImages((prev) => [...prev, { uri: imageUri }]);
-  }, [imageUri]);
-
   const onNavigate = (
     screen: BottomMenuNavigationScreens,
     params: BottomMenuNavigationParams,
@@ -293,7 +268,7 @@ export default function NewPost() {
     extensions: normalizedExtensions,
   });
 
-  const onPreview = handleSubmit(async (data) => {
+  const onPreview = handleSubmit(async () => {
     Keyboard.dismiss();
 
     setLocalImages((prev) =>
@@ -437,56 +412,67 @@ export default function NewPost() {
     oldTitle,
     polls,
     rawContent,
-    selectedTags,
     getFieldState,
     formState,
   ]);
 
 
-  const Header = () =>
-    ios ? (
-      <ModalHeader
-        title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
-        left={
-          <HeaderItem
-            label={t('Cancel')}
-            left
-            onPressItem={() => {
-              goBack();
-            }}
-            disabled={loadingCreateAndUpdatePostDraft}
-          />
-        }
-        right={
-          <HeaderItem
-            label={t('Next')}
-            onPressItem={onPreview}
-            loading={localImages.some((image) => image.isUploading)}
-            disabled={
-              !postValidity ||
-              loadingCreateAndUpdatePostDraft ||
-              localImages.some((image) => image.isUploading)
-            }
-          />
-        }
-      />
-    ) : (
-      <CustomHeader
-        title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
-        rightTitle={t('Next')}
-        isLoading={localImages.some((image) => image.isUploading)}
-        disabled={
-          !postValidity ||
-          loadingCreateAndUpdatePostDraft ||
-          localImages.some((image) => image.isUploading)
-        }
-        onPressRight={onPreview}
-      />
-    );
+  const header = useMemo(
+    () =>
+      ios ? (
+        <ModalHeader
+          title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
+          left={
+            <HeaderItem
+              label={t('Cancel')}
+              left
+              onPressItem={() => {
+                goBack();
+              }}
+              disabled={loadingCreateAndUpdatePostDraft}
+            />
+          }
+          right={
+            <HeaderItem
+              label={t('Next')}
+              onPressItem={onPreview}
+              loading={localImages.some((image) => image.isUploading)}
+              disabled={
+                !postValidity ||
+                loadingCreateAndUpdatePostDraft ||
+                localImages.some((image) => image.isUploading)
+              }
+            />
+          }
+        />
+      ) : (
+        <CustomHeader
+          title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
+          rightTitle={t('Next')}
+          isLoading={localImages.some((image) => image.isUploading)}
+          disabled={
+            !postValidity ||
+            loadingCreateAndUpdatePostDraft ||
+            localImages.some((image) => image.isUploading)
+          }
+          onPressRight={onPreview}
+        />
+      ),
+    [
+      ios,
+      editTopicId,
+      editPostId,
+      goBack,
+      loadingCreateAndUpdatePostDraft,
+      onPreview,
+      localImages,
+      postValidity,
+    ],
+  );
 
   return (
     <SafeAreaView style={styles.container} testID="NewPost:SafeAreaView">
-      <Header />
+      {header}
       <KeyboardTextAreaScrollView
         {...kasv.props}
         bottomMenu={

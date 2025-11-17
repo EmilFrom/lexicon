@@ -125,7 +125,6 @@ export function generateMarkdownContent(
   imageUrls?: Array<string>,
 ) {
   let urlIndex = 0;
-  let placeholderIndex = 0;
   const markdown = raw.replace(
     imageMarkdownRegex,
     (
@@ -134,17 +133,13 @@ export function generateMarkdownContent(
       _shortImageUrl: string,
       closeParenthesis: string,
     ) => {
-      // Check if a corresponding URL actually exists in our array
+      // Only replace when we have a matching URL; otherwise drop the image markup
       if (imageUrls && imageUrls[urlIndex]) {
         const currentImageUrl = imageUrls[urlIndex];
-        // If we found a URL, use it and increment the URL counter
         urlIndex += 1;
         return `${imageName}${currentImageUrl}${closeParenthesis}`;
-      } else {
-        // If we did NOT find a URL, use the placeholder counter (1-indexed)
-        placeholderIndex += 1;
-        return `${imageName}${placeholderIndex}${closeParenthesis}`;
       }
+      return '';
     },
   );
   return markdown;

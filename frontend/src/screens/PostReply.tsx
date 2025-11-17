@@ -1,6 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, {
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -9,7 +8,6 @@ import React, {
 import { Controller, useFormContext } from 'react-hook-form';
 import { Keyboard, Platform, View, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDebouncedCallback } from 'use-debounce';
 
 import { client } from '../api/client';
 import {
@@ -40,10 +38,8 @@ import {
   existingPostIsValid,
   formatExtensions,
   getHyperlink,
-  getReplacedImageUploadStatus,
   goBackWithoutSaveDraftAlert,
   insertHyperlink,
-  insertImageUploadStatus,
   mentionHelper,
   newPostIsValid,
   onKeyPress,
@@ -133,7 +129,6 @@ export default function PostReply() {
 
   const storage = useStorage();
   const user = storage.getItem('user');
-  const { discourseUrl } = storage.getItem('config') || {};
 
   const { authorizedExtensions } = useSiteSettings();
   const extensions = authorizedExtensions?.split('|');
