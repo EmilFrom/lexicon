@@ -48,6 +48,7 @@ type Props = Omit<ViewProps, 'onLayout' | 'id'> &
     onPressReply?: (params: PressReplyParams) => void;
     onPressMore?: (params: PressMoreParams) => void;
     onPressAuthor?: (username: string) => void;
+    onImagePress?: (uri: string) => void;
   } & Post & { testIDStatus?: string };
 
 function BaseNestedComment(props: Props) {
@@ -81,6 +82,7 @@ function BaseNestedComment(props: Props) {
     polls,
     pollsVotes,
     testIDStatus,
+    onImagePress,
     ...otherProps
   } = props;
 
@@ -201,6 +203,7 @@ function BaseNestedComment(props: Props) {
               }
               fontColor={colors[color]}
               mentions={mentionedUsers}
+              onImagePress={onImagePress}
             />
           </>
         )}

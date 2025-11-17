@@ -28,6 +28,7 @@ export type MarkdownProps = Omit<BaseMarkdownProps, 'rules' | 'style'> & {
   mentionColor?: string;
   mentions?: Array<string>;
   nonClickable?: boolean;
+  onImagePress?: (uri: string) => void;
 };
 
 const ios = Platform.OS === 'ios';
@@ -37,7 +38,7 @@ export function Markdown(props: MarkdownProps) {
   const baseStyles = useStyles();
 
   const { content, ...restProps } = props;
-  const { fontColor, mentionColor, style, nonClickable, ...otherProps } =
+  const { fontColor, mentionColor, style, nonClickable, onImagePress, ...otherProps } =
     restProps;
 
   const filteredContent = filterMarkdownContentPoll(content).filteredMarkdown;
@@ -63,6 +64,7 @@ export function Markdown(props: MarkdownProps) {
           url={src}
           key={key}
           style={styles.emojiImage}
+          onPress={onImagePress}
         />
       );
     }
@@ -72,6 +74,7 @@ export function Markdown(props: MarkdownProps) {
         key={key} 
         style={styles.image}
         maxHeightRatio={Infinity}
+        onPress={onImagePress}
       />
     );
   };
