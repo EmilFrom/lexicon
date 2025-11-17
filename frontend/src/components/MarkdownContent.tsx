@@ -33,7 +33,12 @@ export function MarkdownContent(props: Props) {
       );
     } else {
       return (
-        <Markdown key={`content-${index}`} content={content} onImagePress={onImagePress} {...otherProps} />
+        <Markdown
+          key={`content-${index}`}
+          content={content}
+          onImagePress={onImagePress}
+          {...otherProps}
+        />
       );
     }
   });

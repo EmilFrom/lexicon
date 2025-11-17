@@ -28,10 +28,7 @@ import {
   RenderItemCustomOption,
   FullScreenImageModal, // Import the new component
 } from '../../components';
-import {
-  FIRST_POST_NUMBER,
-  MAX_POST_COUNT_PER_REQUEST,
-} from '../../constants';
+import { FIRST_POST_NUMBER, MAX_POST_COUNT_PER_REQUEST } from '../../constants';
 import { Text } from '../../core-ui';
 import {
   checkDraftAlert,
@@ -333,7 +330,7 @@ export default function PostDetail() {
       navigate('FlagPost', { postId, isPost, flaggedAuthor });
     }
   };
-  
+
   const { reset: resetForm } = useFormContext<NewPostForm>();
 
   const navToPost = () => {
@@ -470,7 +467,6 @@ export default function PostDetail() {
       }
       case 1:
         if (canEditFocusPost && !flaggedByCommunity) {
-
           return navToFlag();
         }
         return;
@@ -545,10 +541,12 @@ export default function PostDetail() {
     ],
   );
 
-const onPressReplyProps: ComponentProps<typeof PostDetailHeaderItem>['onPressReply'] = ({ postId }) => {
-  if (postId) {
-    onPressReply({ replyToPostId: postId });
-  }
+  const onPressReplyProps: ComponentProps<
+    typeof PostDetailHeaderItem
+  >['onPressReply'] = ({ postId }) => {
+    if (postId) {
+      onPressReply({ replyToPostId: postId });
+    }
   };
 
   const keyExtractor = ({ id }: Post) => `post-${id}`;
@@ -587,7 +585,7 @@ const onPressReplyProps: ComponentProps<typeof PostDetailHeaderItem>['onPressRep
       />
     );
   };
-  
+
   const onScrollToIndexFailedHandler = ({ index }: OnScrollInfo) => {
     if (__DEV__) {
       console.warn(`PostDetail: failed to scroll to index ${index}`);
