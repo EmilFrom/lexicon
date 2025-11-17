@@ -127,7 +127,7 @@ class ImageCacheManager {
 
     // Download with authentication headers
     const headers = getDiscourseAuthHeaders(token);
-    
+
     if (__DEV__) {
       console.log('[ImageCache] Downloading:', {
         url,
@@ -314,4 +314,3 @@ class ImageCacheManager {
 
 // Singleton instance
 export const imageCacheManager = new ImageCacheManager();
-

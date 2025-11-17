@@ -21,4 +21,3 @@ describe('resolveUploadUrl', () => {
     expect(resolveUploadUrl('')).toBe('');
   });
 });
-

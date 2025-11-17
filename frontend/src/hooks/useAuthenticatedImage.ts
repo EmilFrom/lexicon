@@ -140,7 +140,15 @@ export function useAuthenticatedImage(
     return () => {
       cancelled = true;
     };
-  }, [remoteUrl, token, enabled, maxAge, maxSize, retryCount, serverDimensions]);
+  }, [
+    remoteUrl,
+    token,
+    enabled,
+    maxAge,
+    maxSize,
+    retryCount,
+    serverDimensions,
+  ]);
 
   const retry = () => {
     setRetryCount((prev) => prev + 1);
@@ -154,4 +162,3 @@ export function useAuthenticatedImage(
     dimensions,
   };
 }
-

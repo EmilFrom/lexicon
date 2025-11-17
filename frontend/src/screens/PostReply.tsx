@@ -7,7 +7,15 @@ import React, {
   useState,
 } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Keyboard, Platform, View, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import {
+  Keyboard,
+  Platform,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -259,8 +267,8 @@ export default function PostReply() {
     () =>
       navigation.addListener('beforeRemove', (e) => {
         if (
-          ((!formState.dirtyFields.raw && !formState.dirtyFields.polls) ||
-            !modal)
+          (!formState.dirtyFields.raw && !formState.dirtyFields.polls) ||
+          !modal
         ) {
           reset(FORM_DEFAULT_VALUES);
           return;
@@ -345,17 +353,17 @@ export default function PostReply() {
       setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
       setLocalImages([]);
 
-    navigate('PostPreview', {
-      reply: true,
+      navigate('PostPreview', {
+        reply: true,
         postData: {
           topicId,
           postNumber: replyingTo?.postNumber,
           replyToPostId,
         },
-      focusedPostNumber,
-      editPostId,
-      editedUser,
-    });
+        focusedPostNumber,
+        editPostId,
+        editedUser,
+      });
     } catch (error) {
       errorHandlerAlert(error as Error);
       setLocalImages((prev) =>

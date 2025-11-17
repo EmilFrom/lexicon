@@ -1,9 +1,4 @@
-import {
-  gql,
-  useApolloClient,
-  useMutation,
-  useQuery,
-} from '@apollo/client';
+import { gql, useApolloClient, useMutation, useQuery } from '@apollo/client';
 import { useCallback } from 'react';
 import { useReactiveVar } from '@apollo/client';
 

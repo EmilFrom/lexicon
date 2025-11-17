@@ -9,7 +9,7 @@ type UsePrefetchVisibleTopicsParams = {
 
 /**
  * Hook to prefetch topic details for visible items + 30% buffer.
- * 
+ *
  * Strategy:
  * 1. Calculate visible range + 30% buffer
  * 2. Batch-fetch topic details for calculated range
@@ -88,4 +88,3 @@ export function usePrefetchVisibleTopics({
     };
   }, []);
 }
-

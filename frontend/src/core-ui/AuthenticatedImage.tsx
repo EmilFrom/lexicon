@@ -52,7 +52,8 @@ export function AuthenticatedImage({
     }
 
     // Use aspectRatio if available for more efficient calculation
-    const aspectRatio = dimensions.aspectRatio || (dimensions.width / dimensions.height);
+    const aspectRatio =
+      dimensions.aspectRatio || dimensions.width / dimensions.height;
     const calculatedHeight = screenWidth / aspectRatio;
 
     // If maxHeightRatio is 0 or Infinity, don't cap the height

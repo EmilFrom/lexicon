@@ -64,14 +64,22 @@ const CachedImage = ({
         resizeMode="cover"
         onLoad={() => {
           if (__DEV__) {
-            console.log('[CachedImage] RN Image loaded:', typeof source === 'object' && 'uri' in source ? source.uri : 'N/A');
+            console.log(
+              '[CachedImage] RN Image loaded:',
+              typeof source === 'object' && 'uri' in source
+                ? source.uri
+                : 'N/A',
+            );
           }
           rest.onLoad?.();
         }}
         onError={(error) => {
           if (__DEV__) {
             console.error('[CachedImage] RN Image error:', {
-              uri: typeof source === 'object' && 'uri' in source ? source.uri : 'N/A',
+              uri:
+                typeof source === 'object' && 'uri' in source
+                  ? source.uri
+                  : 'N/A',
               error,
             });
           }
@@ -91,14 +99,20 @@ const CachedImage = ({
       cachePolicy={cachePolicy}
       onLoad={() => {
         if (__DEV__) {
-          console.log('[CachedImage] Expo Image loaded:', typeof source === 'object' && 'uri' in source ? source.uri : 'N/A');
+          console.log(
+            '[CachedImage] Expo Image loaded:',
+            typeof source === 'object' && 'uri' in source ? source.uri : 'N/A',
+          );
         }
         rest.onLoad?.();
       }}
       onError={(error) => {
         if (__DEV__) {
           console.error('[CachedImage] Expo Image error:', {
-            uri: typeof source === 'object' && 'uri' in source ? source.uri : 'N/A',
+            uri:
+              typeof source === 'object' && 'uri' in source
+                ? source.uri
+                : 'N/A',
             error,
           });
         }

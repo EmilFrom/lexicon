@@ -204,9 +204,9 @@ export default function NewPost() {
   useEffect(() => {
     if (hyperlinkUrl) {
       const { newUrl, newTitle } = getHyperlink(hyperlinkUrl, hyperlinkTitle);
-    const { raw } = getValues();
+      const { raw } = getValues();
       const result = insertHyperlink(raw, newTitle, newUrl);
-    setValue('raw', result);
+      setValue('raw', result);
     }
   }, [getValues, setValue, hyperlinkUrl, hyperlinkTitle]);
 
@@ -319,7 +319,7 @@ export default function NewPost() {
               type: UploadTypeEnum.Composer,
             },
           },
-      });
+        });
         const shortUrl = result.data?.upload.shortUrl;
         return shortUrl;
       });
@@ -414,7 +414,9 @@ export default function NewPost() {
   };
 
   const postValidity = useMemo(() => {
-    const uploadsInProgress = localImages.filter((image) => image.isUploading).length;
+    const uploadsInProgress = localImages.filter(
+      (image) => image.isUploading,
+    ).length;
     if (editPostId) {
       const { isValid } = existingPostIsValid({
         uploadsInProgress,
@@ -428,7 +430,12 @@ export default function NewPost() {
       });
       return isValid;
     }
-    return newPostIsValid(getValues('title'), rawContent, uploadsInProgress, polls);
+    return newPostIsValid(
+      getValues('title'),
+      rawContent,
+      uploadsInProgress,
+      polls,
+    );
   }, [
     editPostId,
     getValues,
@@ -441,7 +448,6 @@ export default function NewPost() {
     getFieldState,
     formState,
   ]);
-
 
   const Header = () =>
     ios ? (
@@ -695,10 +701,7 @@ export default function NewPost() {
           <View style={styles.localImagesContainer}>
             {localImages.map((image, index) => (
               <View key={index} style={styles.localImageWrapper}>
-                <Image
-                  source={{ uri: image.uri }}
-                  style={styles.localImage}
-                />
+                <Image source={{ uri: image.uri }} style={styles.localImage} />
                 <TouchableOpacity
                   style={styles.removeImageButton}
                   onPress={() => {

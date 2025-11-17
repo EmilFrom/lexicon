@@ -12,7 +12,8 @@ export async function pickImage(
   extensions?: Array<string>,
 ): Promise<PickImageResult | null> {
   // 1. Request permissions first. The new API returns a more detailed object.
-  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const permissionResult =
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
 
   if (permissionResult.granted === false) {
     // The user has explicitly denied permissions.

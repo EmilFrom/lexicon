@@ -16,4 +16,3 @@ export function getDiscourseAuthHeaders(token?: string | null) {
 
   return headers;
 }
-

@@ -49,7 +49,7 @@ export function useStatefulUpload(
         setTempArray((prev) => {
           const updatedArray = [...prev];
           if (updatedArray[token - 1]) {
-          updatedArray[token - 1] = { link: imageUrl, done: true };
+            updatedArray[token - 1] = { link: imageUrl, done: true };
           }
           return updatedArray;
         });
@@ -67,13 +67,13 @@ export function useStatefulUpload(
       ...uploadOptions,
       onError: (error) => {
         if (token) {
-        setTempArray((prev) => {
-          const updatedArray = [...prev];
+          setTempArray((prev) => {
+            const updatedArray = [...prev];
             if (updatedArray[token - 1]) {
               updatedArray[token - 1] = { link: '', done: true };
             }
-          return updatedArray;
-        });
+            return updatedArray;
+          });
         }
         errorHandlerAlert(error);
         options?.onError?.(error);

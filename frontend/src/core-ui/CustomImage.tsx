@@ -52,8 +52,8 @@ export function CustomImage(props: Props) {
   const imgSource = localUri
     ? { uri: localUri }
     : normalizedSrc
-      ? { uri: normalizedSrc }
-      : { uri: DEFAULT_IMAGE };
+    ? { uri: normalizedSrc }
+    : { uri: DEFAULT_IMAGE };
 
   const hasError = !!downloadError;
 
@@ -137,19 +137,45 @@ export function CustomImage(props: Props) {
   const content = (
     <View style={[styles.imageContainer, calculatedSizeStyle, style]}>
       {isDownloading ? (
-        <View style={{ width: '100%', height: '100%', backgroundColor: 'yellow', justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'yellow',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Text>LOADING...</Text>
         </View>
       ) : hasError ? (
-        <View style={{ width: '100%', height: '100%', backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'red',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Text>ERROR</Text>
         </View>
       ) : !normalizedSrc ? (
-        <View style={{ width: '100%', height: '100%', backgroundColor: 'gray', justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'gray',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Text>NO IMAGE</Text>
         </View>
       ) : (
-        <View style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}>
+        <View
+          style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
+        >
           <CachedImage
             key={reloadKey}
             source={imgSource}

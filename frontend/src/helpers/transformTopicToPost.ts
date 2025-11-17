@@ -87,16 +87,17 @@ const transformTopicToPost = ({
     tags: tags || [],
     createdAt,
     freqPosters: frequentUserArray,
-    imageUrls: imageUrl 
-      ? [typeof imageUrl === 'string' ? imageUrl : imageUrl.url] 
+    imageUrls: imageUrl
+      ? [typeof imageUrl === 'string' ? imageUrl : imageUrl.url]
       : undefined,
-    imageDimensions: imageUrl && typeof imageUrl === 'object' && imageUrl.width
-      ? { 
-          width: imageUrl.width, 
-          height: imageUrl.height,
-          aspectRatio: imageUrl.aspectRatio 
-        }
-      : undefined,
+    imageDimensions:
+      imageUrl && typeof imageUrl === 'object' && imageUrl.width
+        ? {
+            width: imageUrl.width,
+            height: imageUrl.height,
+            aspectRatio: imageUrl.aspectRatio,
+          }
+        : undefined,
   };
 };
 

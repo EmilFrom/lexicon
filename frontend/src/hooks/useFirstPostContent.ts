@@ -15,7 +15,7 @@ type UseFirstPostContentResult = {
 
 /**
  * Hook to fetch and extract the first post's content for a topic.
- * 
+ *
  * Strategy:
  * 1. Check Apollo cache for existing topicDetail data
  * 2. If cached, extract markdownContent immediately
@@ -97,4 +97,3 @@ export function useFirstPostContent(
     loading: !cacheResult.complete && loading,
   };
 }
-

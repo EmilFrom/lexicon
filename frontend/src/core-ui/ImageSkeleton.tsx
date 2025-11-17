@@ -26,11 +26,7 @@ export function ImageSkeleton({ width = '100%', height = 300, style }: Props) {
   }, [shimmerTranslate]);
 
   const animatedStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(
-      shimmerTranslate.value,
-      [0, 1],
-      [-300, 300],
-    );
+    const translateX = interpolate(shimmerTranslate.value, [0, 1], [-300, 300]);
 
     return {
       transform: [{ translateX }],
@@ -55,4 +51,3 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
 });
-

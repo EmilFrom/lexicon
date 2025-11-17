@@ -15,4 +15,3 @@ export function resolveUploadUrl(url?: string) {
 
   return url;
 }
-

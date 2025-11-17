@@ -259,11 +259,7 @@ function BasePostItem(props: Props) {
           emojiCode={emojiCode}
           testIDStatus={testIDStatus}
         />
-        <PostGroupings
-          channel={channel}
-          tags={tags}
-          style={styles.groupings}
-        />
+        <PostGroupings channel={channel} tags={tags} style={styles.groupings} />
       </View>
       <TouchableOpacity onPress={onPressPost} delayPressIn={200}>
         {mainContent}
@@ -271,7 +267,9 @@ function BasePostItem(props: Props) {
       {pollsContent}
       {imageContent}
       <Pressable onPress={onPressPost} style={styles.viewPostButton}>
-        <Text color="primary" variant="bold">{t('View Post')}</Text>
+        <Text color="primary" variant="bold">
+          {t('View Post')}
+        </Text>
       </Pressable>
     </>
   ) : (

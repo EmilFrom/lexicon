@@ -8,7 +8,13 @@ import React, {
   useState,
 } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Dimensions, PixelRatio, Platform, StyleSheet, View } from 'react-native';
+import {
+  Dimensions,
+  PixelRatio,
+  Platform,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import Animated, {
   Extrapolate,

@@ -8,9 +8,7 @@ import {
 } from './fontFormatting';
 import { imagePickerHandler } from './imagePickerHandler';
 
-export type BottomMenuNavigationScreens =
-  | 'HyperLink'
-  | 'NewPoll';
+export type BottomMenuNavigationScreens = 'HyperLink' | 'NewPoll';
 export type BottomMenuNavigationParams =
   | RootStackParamList['HyperLink']
   | RootStackParamList['NewPoll'];

@@ -9,4 +9,3 @@ declare module 'expo-blur' {
 
   export const BlurView: ComponentType<BlurViewProps>;
 }
-

@@ -24,4 +24,3 @@ export function FullScreenImageModal({ visible, imageUri, onClose }: Props) {
     />
   );
 }
-

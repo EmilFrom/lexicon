@@ -59,17 +59,13 @@ export function Markdown(props: MarkdownProps) {
     // For emojis, keep simple rendering without authentication
     if (isEmojiImage(content)) {
       return (
-        <AuthenticatedImage
-          url={src}
-          key={key}
-          style={styles.emojiImage}
-        />
+        <AuthenticatedImage url={src} key={key} style={styles.emojiImage} />
       );
     }
     return (
-      <AuthenticatedImage 
-        url={src} 
-        key={key} 
+      <AuthenticatedImage
+        url={src}
+        key={key}
         style={styles.image}
         maxHeightRatio={Infinity}
       />

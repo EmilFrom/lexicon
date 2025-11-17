@@ -5,7 +5,14 @@ import {
 } from '@react-navigation/native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Platform, TextInput, TouchableOpacity, View, Keyboard, ActivityIndicator } from 'react-native';
+import {
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Keyboard,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -432,14 +439,14 @@ export default function NewMessage() {
       setLocalImages([]);
 
       sendMessage({
-      variables: {
+        variables: {
           input: {
             ...data,
             raw: finalContent,
             targetRecipients: data.targetRecipients.join(','),
+          },
         },
-      },
-    });
+      });
     } catch (error) {
       errorHandlerAlert(error as Error);
       setLocalImages((prev) =>
@@ -652,11 +659,16 @@ export default function NewMessage() {
             <View style={styles.localImagesContainer}>
               {localImages.map((image, index) => (
                 <View key={index} style={styles.localImageWrapper}>
-                  <Image source={{ uri: image.uri }} style={styles.localImage} />
+                  <Image
+                    source={{ uri: image.uri }}
+                    style={styles.localImage}
+                  />
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => {
-                      setLocalImages((prev) => prev.filter((_, i) => i !== index));
+                      setLocalImages((prev) =>
+                        prev.filter((_, i) => i !== index),
+                      );
                     }}
                   >
                     <Icon name="Close" size="s" color="white" />
