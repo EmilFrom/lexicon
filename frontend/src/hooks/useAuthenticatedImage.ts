@@ -1,8 +1,10 @@
+// frontend/src/hooks/useAuthenticatedImage.ts
 import { useState, useEffect } from 'react';
 import { useReactiveVar } from '@apollo/client';
 
 import { tokenVar } from '../reactiveVars';
 import { imageCacheManager } from '../helpers/imageCache';
+import { resolveUploadUrl } from '../helpers/resolveUploadUrl';
 
 interface UseAuthenticatedImageOptions {
   maxAge?: number;
@@ -34,10 +36,12 @@ export function useAuthenticatedImage(
     { width: number; height: number; aspectRatio?: number } | undefined
   >(serverDimensions);
 
+  const resolvedUrl = resolveUploadUrl(remoteUrl);
+
   useEffect(() => {
     if (__DEV__) {
       console.log('[useAuthenticatedImage] Effect triggered:', {
-        url: remoteUrl,
+        url: resolvedUrl,
         enabled,
         hasToken: !!token,
         currentLocalUri: localUri,
@@ -45,12 +49,11 @@ export function useAuthenticatedImage(
       });
     }
 
-    // If server dimensions are provided and we don't have dimensions yet, use them
     if (serverDimensions && !dimensions) {
       setDimensions(serverDimensions);
     }
 
-    if (!remoteUrl || !enabled) {
+    if (!resolvedUrl || !enabled) {
       if (__DEV__) {
         console.log('[useAuthenticatedImage] Skipping - no URL or disabled');
       }
@@ -69,14 +72,13 @@ export function useAuthenticatedImage(
 
         if (__DEV__) {
           console.log('[useAuthenticatedImage] Loading:', {
-            url: remoteUrl,
+            url: resolvedUrl,
             hasToken: !!token,
             tokenLength: token?.length,
           });
         }
 
-        // Check cache first
-        const cachedUri = await imageCacheManager.getCachedImage(remoteUrl, {
+        const cachedUri = await imageCacheManager.getCachedImage(resolvedUrl, {
           maxAge,
           maxSize,
         });
@@ -85,10 +87,9 @@ export function useAuthenticatedImage(
           if (__DEV__) {
             console.log('[useAuthenticatedImage] Using cached:', cachedUri);
           }
-          // Get cached dimensions (only if we don't have server dimensions)
           if (!serverDimensions) {
             const cachedDimensions =
-              await imageCacheManager.getCachedImageDimensions(remoteUrl);
+              await imageCacheManager.getCachedImageDimensions(resolvedUrl);
             setDimensions(cachedDimensions);
           }
           setLocalUri(cachedUri);
@@ -96,22 +97,20 @@ export function useAuthenticatedImage(
           return;
         }
 
-        // Download and cache if not in cache
         if (!token) {
           throw new Error('No authentication token available');
         }
 
         const downloadedUri = await imageCacheManager.downloadAndCacheImage(
-          remoteUrl,
+          resolvedUrl, // <-- THE FIX IS HERE
           token,
           { maxAge, maxSize },
         );
 
         if (!cancelled) {
-          // Get dimensions after download (only if we don't have server dimensions)
           if (!serverDimensions) {
             const downloadedDimensions =
-              await imageCacheManager.getCachedImageDimensions(remoteUrl);
+              await imageCacheManager.getCachedImageDimensions(resolvedUrl);
             setDimensions(downloadedDimensions);
           }
           setLocalUri(downloadedUri);
@@ -122,7 +121,7 @@ export function useAuthenticatedImage(
           const errorMessage =
             err instanceof Error ? err.message : 'Failed to load image';
           console.error('[useAuthenticatedImage] Error:', {
-            url: remoteUrl,
+            url: resolvedUrl, // <-- AND THE FIX IS HERE
             error: errorMessage,
             errorDetails: err,
           });
@@ -140,15 +139,7 @@ export function useAuthenticatedImage(
     return () => {
       cancelled = true;
     };
-  }, [
-    remoteUrl,
-    token,
-    enabled,
-    maxAge,
-    maxSize,
-    retryCount,
-    serverDimensions,
-  ]);
+  }, [resolvedUrl, token, enabled, maxAge, maxSize, retryCount, serverDimensions, dimensions, localUri]);
 
   const retry = () => {
     setRetryCount((prev) => prev + 1);

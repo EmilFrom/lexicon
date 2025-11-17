@@ -1,3 +1,4 @@
+// frontend/src/helpers/resolveUploadUrl.ts
 import { discourseHost } from '../constants';
 
 /**
@@ -9,9 +10,16 @@ export function resolveUploadUrl(url?: string) {
     return url;
   }
 
+  // Check if the URL uses the 'upload://' scheme
   if (url.startsWith('upload://')) {
-    return `${discourseHost}${url.replace('upload://', '/uploads/')}`;
+    // Extract the file identifier from the URL
+    const fileName = url.substring('upload://'.length);
+
+    // This is the fix: construct the full, default path that Discourse uses for original uploads.
+    // The '1X' is a standard part of the path for these uploads.
+    return `${discourseHost}/uploads/default/original/1X/${fileName}`;
   }
 
+  // If it's not an 'upload://' URL, it's probably already a full URL, so return it as is.
   return url;
 }

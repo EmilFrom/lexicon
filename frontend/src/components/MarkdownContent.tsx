@@ -1,3 +1,4 @@
+// frontend/src/components/MarkdownContent.tsx
 import React, { useState } from 'react';
 import { View, TouchableWithoutFeedback } from 'react-native';
 
@@ -13,11 +14,10 @@ import { makeStyles, useTheme } from '../theme';
 
 type Props = MarkdownProps & {
   renderPollsInCollapsible?: () => React.ReactNode;
-  onImagePress?: (uri: string) => void;
 };
 
 export function MarkdownContent(props: Props) {
-  const { content, renderPollsInCollapsible, ...otherProps } = props;
+  const { content, renderPollsInCollapsible, onImagePress, ...otherProps } = props;
   const splittedContent = separateCollapsibleInContent(content);
 
   return splittedContent.map((content, index) => {
@@ -29,16 +29,13 @@ export function MarkdownContent(props: Props) {
           title={title}
           details={details}
           renderPollsInCollapsible={renderPollsInCollapsible}
+          // 4. Pass onImagePress from the parent MarkdownContent into the Collapsible
+          onImagePress={onImagePress}
         />
       );
     } else {
       return (
-        <Markdown
-          key={`content-${index}`}
-          content={content}
-          onImagePress={onImagePress}
-          {...otherProps}
-        />
+        <Markdown key={`content-${index}`} content={content} onImagePress={onImagePress} {...otherProps} />
       );
     }
   });
@@ -48,10 +45,13 @@ type CollapsibleProps = {
   title: string;
   details: string;
   renderPollsInCollapsible?: () => React.ReactNode;
+  // 1. Add onImagePress to the Collapsible's props
+  onImagePress?: (uri: string) => void;
 };
 
 export function Collapsible(props: CollapsibleProps) {
-  const { title, details, renderPollsInCollapsible } = props;
+  // 2. Destructure onImagePress so we can use it
+  const { title, details, renderPollsInCollapsible, onImagePress } = props;
   const styles = useStyles();
   const { colors } = useTheme();
 
@@ -76,6 +76,8 @@ export function Collapsible(props: CollapsibleProps) {
             content={generateMarkdownContent(details)}
             nonClickable={true}
             renderPollsInCollapsible={renderPollsInCollapsible}
+            // 3. Pass it down to the recursive MarkdownContent call inside
+            onImagePress={onImagePress}
           />
         </View>
       )}

@@ -8,6 +8,7 @@ export * from './DateTimePicker';
 export * from './Dropdown';
 export * from './ErrorBoundary';
 export * from './FooterLoadingIndicator';
+export * from './FullScreenImageModal';
 export * from './Header';
 export * from './KeyboardTextAreaScrollView';
 export * from './LoadingOrError';
