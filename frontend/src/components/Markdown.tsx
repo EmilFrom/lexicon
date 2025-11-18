@@ -28,6 +28,7 @@ export type MarkdownProps = Omit<BaseMarkdownProps, 'rules' | 'style'> & {
   mentionColor?: string;
   mentions?: Array<string>;
   nonClickable?: boolean;
+  disableImages?: boolean;
 };
 
 const ios = Platform.OS === 'ios';
@@ -36,9 +37,11 @@ export function Markdown(props: MarkdownProps) {
   const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
   const baseStyles = useStyles();
 
-  const { content, ...restProps } = props;
+  const { content, disableImages, ...restProps } = props;
   const { fontColor, mentionColor, style, nonClickable, ...otherProps } =
     restProps;
+
+ 
 
   const filteredContent = filterMarkdownContentPoll(content).filteredMarkdown;
 
@@ -63,12 +66,13 @@ export function Markdown(props: MarkdownProps) {
       );
     }
     return (
-      <AuthenticatedImage
-        url={src}
-        key={key}
-        style={styles.image}
-        maxHeightRatio={Infinity}
-      />
+      <React.Fragment key={key}>
+        <AuthenticatedImage
+          url={src}
+          style={styles.image}
+          maxHeightRatio={Infinity}
+        />
+      </React.Fragment>
     );
   };
 
@@ -132,16 +136,21 @@ export function Markdown(props: MarkdownProps) {
     );
   };
 
+  const rules = {
+    mention: renderMention,
+    hashtag: renderHashtag,
+    link: renderLink,
+  };
+
+  if (!disableImages) {
+    rules.image = renderImage;
+  }
+
   return (
     <View style={style}>
       <BaseMarkdown
         markdownit={markdownItInstance}
-        rules={{
-          image: renderImage,
-          mention: renderMention,
-          hashtag: renderHashtag, //need to add hashtag to prevent warning
-          link: renderLink,
-        }}
+        rules={rules}
         style={styles}
         {...otherProps}
       >
@@ -169,6 +178,10 @@ const useStyles = makeStyles(
     table: { borderColor: colors.border },
     tr: { borderColor: colors.border },
     paragraph: { marginTop: 0, marginBottom: spacing.m },
+    image_container: {
+      marginTop: 0,
+      marginBottom: spacing.m,
+    },
     image: { paddingVertical: spacing.l },
     bullet_list_icon: {
       flex: 1,

@@ -197,6 +197,7 @@ function BasePostItem(props: Props) {
             style={styles.markdown}
             fontColor={colors[color]}
             mentions={mentionedUsers}
+            disableImages={true}
           />
         </View>
       )}
@@ -204,22 +205,24 @@ function BasePostItem(props: Props) {
   );
 
   const imageContent =
-    showImageRow && images && images.length > 0 ? (
-      <View style={styles.imageWrapper}>
-        <AuthenticatedImage
-          url={images[0]}
-          testID={`PostItem:${topicId}`}
-          onPress={(uri) => setFullScreenImage(uri)}
-          maxHeightRatio={0.5}
-          serverDimensions={imageDimensions}
-        />
-        {images.length > 1 && (
-          <View style={styles.imageCountBadge}>
-            <Text style={styles.imageCountText}>+{images.length - 1} more</Text>
-          </View>
-        )}
-      </View>
-    ) : null;
+      (showImageRow || (images && images.length > 0)) && images && images.length > 0 ? (
+        <View style={styles.imageGrid}>
+          {/* This .map() loop iterates over every image URL.
+              For each one, it provides the 'imageUrl' and its 'index'. */}
+          {images.map((imageUrl, index) => (
+            <View key={index} style={styles.imageWrapper}>
+              <AuthenticatedImage
+                url={imageUrl} // Use the imageUrl for the current item in the loop
+                testID={`PostItem:${topicId}-image-${index}`}
+                onPress={(uri) => setFullScreenImage(uri)}
+                maxHeightRatio={0.5}
+                // The 'index' variable is now correctly defined within this loop
+                serverDimensions={index === 0 ? imageDimensions : undefined}
+              />
+            </View>
+          ))}
+        </View>
+      ) : null;
   const pollsContent = renderPolls();
 
   const wrappedMainContent = !nonclickable ? (
@@ -329,11 +332,14 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
     textTransform: 'capitalize',
   },
   imageWrapper: {
-    marginVertical: spacing.m,
+    marginVertical: spacing.s,
     borderRadius: spacing.m,
     overflow: 'hidden',
     position: 'relative',
   },
+  imageGrid: { // Add this style
+        marginTop: spacing.m,
+      },
   imageCountBadge: {
     position: 'absolute',
     bottom: spacing.m,
