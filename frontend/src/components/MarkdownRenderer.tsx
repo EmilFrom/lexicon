@@ -84,7 +84,8 @@ export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Pr
     },
     details: ({ TDefaultRenderer, tnode, ...props }: any) => {
       const summaryNode = tnode.children.find(
-        (c: TNode) => c.type === 'element' && c.tagName === 'summary'
+        // FIX: Use 'tagName' in c as the type guard
+        (c: TNode) => 'tagName' in c && c.tagName === 'summary'
       );
       
       let title = 'Details';

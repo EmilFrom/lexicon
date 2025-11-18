@@ -1,3 +1,158 @@
+# Plan to Integrate Markdown Rendering in PostDetail and PostPreview
+
+## 1. Analysis
+
+The successful implementation on the HomeScreen confirms that our `MarkdownRenderer` and the "Content Processing Pattern" are correct. The blank screens on `PostDetail` and `PostPreview` indicate that this pattern has not yet been implemented in those components. This plan will provide the complete code needed to add the rendering logic to both screens.
+
+## 2. Plan
+
+The plan is to modify `PostDetail.tsx`'s header component and `PostPreview.tsx` to incorporate the full content processing logic.
+
+---
+
+### Part 1: Implementing Content Rendering in `PostDetailHeader.tsx`
+
+**Objective:** Fetch the post content, process it, and render it using `<MarkdownRenderer>` and `<ImageCarousel>`.
+
+**File Path:** `src/screens/PostDetail/components/PostDetailHeader.tsx`
+
+**Full Code:**
+```typescript
+import React, { useState } from 'react';
+import { View } from 'react-native';
+
+import {
+  Author,
+  ImageCarousel,
+  MarkdownRenderer,
+  Poll,
+  PostGroupings,
+  FullScreenImageModal,
+} from '../../../components';
+import { Divider } from '../../../core-ui';
+import {
+  formatRelativeTime,
+  handleUnsupportedMarkdown,
+  markdownToHtml,
+  getCompleteImageVideoUrls,
+  useStorage,
+} from '../../../helpers';
+import { makeStyles } from '../../../theme';
+import { Post, Poll as PollType } from '../../../types';
+
+type Props = {
+  post: Post;
+  onPressAuthor?: (username: string) => void;
+};
+
+export function PostDetailHeader({ post, onPressAuthor }: Props) {
+  const styles = useStyles();
+  const storage = useStorage();
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+
+  const {
+    avatar,
+    username,
+    createdAt,
+    content,
+    channel,
+    tags,
+    polls,
+    pollsVotes,
+    id,
+    topicId,
+  } = post;
+
+  const isCreator = username === storage.getItem('user')?.username;
+  const time = formatRelativeTime(createdAt);
+
+  // --- NEW CONTENT PROCESSING PATTERN ---
+  const htmlContent = markdownToHtml(content);
+  const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+  const imageTagRegex = /<img[^>]*>/g;
+  const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
+  // --- END OF PATTERN ---
+
+  const renderPolls = () => {
+    if (!polls) {
+      return null;
+    }
+    return polls.map((poll: PollType, index: number) => {
+      const pollVotes = pollsVotes?.find(
+        (pollVote) => pollVote.pollName === poll.name,
+      );
+      return (
+        <Poll
+          key={index}
+          poll={poll}
+          pollVotes={pollVotes?.pollOptionIds}
+          isCreator={isCreator}
+          postId={id}
+          topicId={topicId}
+          postCreatedAt={createdAt}
+        />
+      );
+    });
+  };
+
+  return (
+    <>
+      <View style={styles.container}>
+        <Author
+          image={avatar}
+          title={username}
+          subtitle={time}
+          onPressAuthor={onPressAuthor}
+          showStatus
+        />
+        <PostGroupings
+          style={styles.postGroupingsContainer}
+          channel={channel}
+          tags={tags}
+        />
+        <View style={styles.contentContainer}>
+          {renderPolls()}
+          <MarkdownRenderer content={handleUnsupportedMarkdown(contentWithoutImages)} />
+          <ImageCarousel
+            images={images}
+            onImagePress={(uri) => setFullScreenImage(uri)}
+          />
+        </View>
+        <Divider />
+      </View>
+      <FullScreenImageModal
+        visible={!!fullScreenImage}
+        imageUri={fullScreenImage || ''}
+        onClose={() => setFullScreenImage(null)}
+      />
+    </>
+  );
+}
+
+const useStyles = makeStyles(({ spacing }) => ({
+  container: {
+    paddingHorizontal: spacing.xxl,
+    paddingTop: spacing.xl,
+  },
+  postGroupingsContainer: {
+    paddingVertical: spacing.l,
+  },
+  contentContainer: {
+    paddingBottom: spacing.xl,
+  },
+}));
+```
+
+---
+
+### Part 2: Implementing Content Rendering in `PostPreview.tsx`
+
+**Objective:** Take the raw markdown from the form state, process it, and render a preview.
+
+**File Path:** `src/screens/PostPreview.tsx`
+
+**Full Code:**
+```typescript
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -28,9 +183,9 @@ import {
   getPostShortUrl,
   sortImageUrl,
   useStorage,
+  markdownToHtml,
+  getCompleteImageVideoUrls,
 } from '../helpers';
-import { markdownToHtml } from '../helpers/markdownToHtml';
-import { getCompleteImageVideoUrls } from '../helpers/api/processRawContent';
 import {
   useEditPost,
   useEditTopic,
@@ -92,7 +247,6 @@ export default function PostPreview() {
       }, 0);
     },
     refetchQueries,
-    onError: (error) => errorHandlerAlert(error),
   });
 
   const { reply: replyTopic, loading: replyLoading } = useReplyTopic({
@@ -112,7 +266,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    onError: (error) => errorHandlerAlert(error),
+    onError: errorHandlerAlert,
   });
 
   const { editPost, loading: editPostLoading } = useEditPost({
@@ -122,7 +276,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    onError: (error) => errorHandlerAlert(error),
+    onError: errorHandlerAlert,
   });
 
   const { editTopic, loading: editTopicLoading } = useEditTopic({
@@ -132,7 +286,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-   onError: (error) => errorHandlerAlert(error),
+    onError: errorHandlerAlert,
   });
 
   const loading = reply
@@ -315,3 +469,8 @@ const useStyles = makeStyles(({ colors, fontVariants, spacing }) => ({
     marginBottom: spacing.xl,
   },
 }));
+```
+
+## 3. Approval
+
+This plan is now ready for your review and approval.

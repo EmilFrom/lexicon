@@ -148,6 +148,9 @@ export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Pr
 
 This step remains the same. Systematically go through each file listed below, replace the old `<Markdown>` or `<MarkdownContent>` with the enhanced `<MarkdownRenderer>`, and apply the image-stripping pattern.
 
+import { getCompleteImageVideoUrls } from '../../../src/helpers/api/processRawContent';
+
+
 **The Image Stripping Pattern:**
 ```tsx
 // In the component that needs to render content...

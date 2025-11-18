@@ -1,3 +1,282 @@
+# Corrected Plan to Integrate Markdown Rendering (v2)
+
+## 1. Analysis
+
+This plan corrects the previous version by targeting the right files. The architecture is now clear: `PostDetail.tsx` is the data-fetching container, and `PostDetailHeaderItem.tsx` is the presentational component for the main post. The blank screen is caused by `PostDetailHeaderItem.tsx` not correctly processing and passing down the content to its child `PostItem`.
+
+This plan applies our proven "Content Processing Pattern" to `PostDetailHeaderItem.tsx` and reaffirms the correct implementation for `PostPreview.tsx`.
+
+## 2. Plan
+
+---
+
+### Part 1: Correctly Implement Content Rendering in `PostDetailHeaderItem.tsx`
+
+**Objective:** Process the `content` prop in `PostDetailHeaderItem.tsx` and pass the processed data down to the `<PostItem>` component.
+
+**File Path:** `src/components/PostItem/PostDetailHeaderItem.tsx`
+
+**Full Code:**
+```typescript
+import { OperationVariables, useFragment_experimental } from '@apollo/client';
+import React from 'react';
+
+import {
+  PostFragment,
+  PostFragmentDoc,
+  TopicFragment,
+  TopicFragmentDoc,
+} from '../../generatedAPI/server';
+import {
+  getImage,
+  postDetailContentHandler,
+  transformPostsToFrontendPost,
+  transformTopicToPost,
+  useStorage,
+  markdownToHtml,
+  getCompleteImageVideoUrls,
+} from '../../helpers';
+import { makeStyles } from '../../theme';
+import { Channel } from '../../types';
+import { MetricsProp } from '../Metrics/Metrics';
+
+import { PostItem, PostItemProps } from './PostItem';
+import { PostItemFooter, PostItemFooterProps } from './PostItemFooter';
+
+type Props = Required<
+  Pick<
+    PostItemProps,
+    'isHidden' | 'mentionedUsers' | 'onPressViewIgnoredContent'
+  >
+> &
+  Pick<PostItemProps, 'polls' | 'postId' | 'pollsVotes'> &
+  Pick<MetricsProp, 'onPressReply'> & {
+    topicId: number;
+    content: string;
+    postDetailContent?: ReturnType<typeof postDetailContentHandler>;
+    postId?: number;
+  };
+
+function BasePostDetailHeaderItem(props: Props) {
+  const storage = useStorage();
+  const styles = useStyles();
+
+  const {
+    topicId,
+    content,
+    postDetailContent,
+    isHidden,
+    mentionedUsers,
+    onPressReply,
+    onPressViewIgnoredContent,
+    polls,
+    postId,
+    pollsVotes,
+  } = props;
+
+  // --- NEW CONTENT PROCESSING PATTERN ---
+  const htmlContent = markdownToHtml(content);
+  const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+  const imageTagRegex = /<img[^>]*>/g;
+  const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
+  // --- END OF PATTERN ---
+
+  const cacheTopicResult = useFragment_experimental<
+    TopicFragment,
+    OperationVariables
+  >({
+    fragment: TopicFragmentDoc,
+    fragmentName: 'TopicFragment',
+    from: {
+      __typename: 'Topic',
+      id: topicId,
+    },
+  });
+  const cacheFirstPostResult = useFragment_experimental<
+    PostFragment,
+    OperationVariables
+  >({
+    fragment: PostFragmentDoc,
+    fragmentName: 'PostFragment',
+    from: {
+      __typename: 'Post',
+      id: postId,
+    },
+  });
+  const cachedTopic = cacheTopicResult.data;
+  const cachedFirstPost = cacheFirstPostResult.data;
+  const username = storage.getItem('user')?.username ?? '';
+  const channels = storage.getItem('channels') ?? [];
+
+  const resolvedPostItemPropsResult = resolvePostItemProps({
+    postDetailContent,
+    cachedTopic,
+    username,
+    channels,
+    cachedFirstPost,
+  });
+
+  if (!resolvedPostItemPropsResult) {
+    // This can be a valid state while loading, so we can return a loading indicator or null.
+    // For now, returning null to avoid a crash.
+    return null;
+  }
+
+  const { postItemProps, postItemFooterProps } = resolvedPostItemPropsResult;
+  return (
+    <PostItem
+      topicId={topicId}
+      title={postItemProps.title}
+      content={contentWithoutImages} // Pass the processed content
+      images={images} // Pass the extracted images
+      avatar={postItemProps.avatar}
+      channel={postItemProps.channel}
+      tags={postItemProps.tags}
+      isHidden={isHidden}
+      createdAt={postItemProps.createdAt}
+      username={postItemProps.username}
+      isLiked={postItemProps.isLiked}
+      mentionedUsers={mentionedUsers}
+      onPressViewIgnoredContent={onPressViewIgnoredContent}
+      nonclickable
+      showStatus
+      emojiCode={postItemProps.emojiCode}
+      polls={polls}
+      pollsVotes={pollsVotes}
+      postId={postId}
+      testIDStatus="PostDetailHeaderItem:Author:EmojiStatus"
+      footer={
+        <PostItemFooter
+          postId={postItemFooterProps.postId}
+          topicId={topicId}
+          viewCount={postItemFooterProps.viewCount}
+          likeCount={postItemFooterProps.likeCount}
+          replyCount={postItemFooterProps.replyCount}
+          isLiked={postItemFooterProps.isLiked}
+          isCreator={postItemFooterProps.isCreator}
+          postNumber={postItemFooterProps.postNumber}
+          frequentPosters={postItemFooterProps.frequentPosters.slice(1)}
+          likePerformedFrom={'topic-detail'}
+          onPressReply={onPressReply}
+          style={styles.spacingTop}
+        />
+      }
+    />
+  );
+}
+
+type ResolvePostItemPropsParams = {
+  postDetailContent: ReturnType<typeof postDetailContentHandler> | undefined;
+  cachedTopic?: TopicFragment;
+  username: string;
+  channels: Array<Channel>;
+  cachedFirstPost?: PostFragment;
+};
+const resolvePostItemProps = ({
+  postDetailContent,
+  cachedTopic,
+  username,
+  channels,
+  cachedFirstPost,
+}: ResolvePostItemPropsParams):
+  | {
+      postItemProps: Omit<PostItemProps, 'topicId'>;
+      postItemFooterProps: Omit<PostItemFooterProps, 'topicId' | 'postList'>;
+    }
+  | undefined => {
+  if (!postDetailContent && !cachedTopic) {
+    return;
+  }
+
+  if (postDetailContent) {
+    const { topic } = postDetailContent;
+    let { firstPost } = postDetailContent;
+    if (!firstPost && cachedFirstPost?.id) {
+      const freqPosters = cachedTopic?.posters
+        ? cachedTopic.posters.map(({ user }) => ({
+            id: user.id,
+            username: user.username,
+            avatar: getImage(user.avatar),
+            name: user.name,
+          }))
+        : [];
+      const channel = channels?.find(
+        (channel) => channel.id === cachedTopic?.categoryId,
+      );
+      const formattedFirstPost = transformPostsToFrontendPost({
+        post: cachedFirstPost,
+        channel,
+        freqPosters,
+      });
+      firstPost = formattedFirstPost;
+    }
+
+    if (firstPost) {
+      const isCreator = firstPost?.username === username;
+      return {
+        postItemProps: {
+          title: topic.title,
+          content: firstPost.content,
+          avatar: firstPost.avatar,
+          channel: firstPost.channel,
+          tags: topic.selectedTag,
+          createdAt: firstPost.createdAt,
+          username: firstPost.username,
+          isLiked: firstPost.isLiked,
+          emojiCode: firstPost.emojiStatus,
+          postId: firstPost.id,
+        },
+        postItemFooterProps: {
+          postId: firstPost.id,
+          viewCount: topic.viewCount,
+          likeCount: firstPost.likeCount,
+          replyCount: topic.replyCount,
+          isLiked: firstPost.isLiked,
+          isCreator: isCreator,
+          postNumber: firstPost.postNumber,
+          frequentPosters: firstPost.freqPosters.slice(1),
+        },
+      };
+    }
+  }
+  if (cachedTopic) {
+    const { topicId: transformedTopicId, ...post } = transformTopicToPost({
+      ...cachedTopic,
+      channels,
+    });
+    void transformedTopicId;
+    return {
+      postItemProps: post,
+      postItemFooterProps: {
+        isLiked: post.isLiked,
+        replyCount: 0,
+        likeCount: 0,
+        frequentPosters: [],
+      },
+    };
+  }
+};
+
+const useStyles = makeStyles(({ spacing }) => ({
+  spacingTop: {
+    paddingTop: spacing.m,
+  },
+}));
+const PostDetailHeaderItem = React.memo(BasePostDetailHeaderItem);
+
+export { PostDetailHeaderItem, Props as PostDetailHeaderItemProps };
+```
+
+---
+
+### Part 2: Implementing Content Rendering in `PostPreview.tsx`
+
+**Objective:** Take the raw markdown from the form state, process it, and render a preview.
+
+**File Path:** `src/screens/PostPreview.tsx`
+
+**Full Code:**
+```typescript
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -28,9 +307,9 @@ import {
   getPostShortUrl,
   sortImageUrl,
   useStorage,
+  markdownToHtml,
+  getCompleteImageVideoUrls,
 } from '../helpers';
-import { markdownToHtml } from '../helpers/markdownToHtml';
-import { getCompleteImageVideoUrls } from '../helpers/api/processRawContent';
 import {
   useEditPost,
   useEditTopic,
@@ -92,7 +371,6 @@ export default function PostPreview() {
       }, 0);
     },
     refetchQueries,
-    onError: (error) => errorHandlerAlert(error),
   });
 
   const { reply: replyTopic, loading: replyLoading } = useReplyTopic({
@@ -112,7 +390,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    onError: (error) => errorHandlerAlert(error),
+    onError: errorHandlerAlert,
   });
 
   const { editPost, loading: editPostLoading } = useEditPost({
@@ -122,7 +400,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    onError: (error) => errorHandlerAlert(error),
+    onError: errorHandlerAlert,
   });
 
   const { editTopic, loading: editTopicLoading } = useEditTopic({
@@ -132,7 +410,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-   onError: (error) => errorHandlerAlert(error),
+    onError: errorHandlerAlert,
   });
 
   const loading = reply
@@ -315,3 +593,8 @@ const useStyles = makeStyles(({ colors, fontVariants, spacing }) => ({
     marginBottom: spacing.xl,
   },
 }));
+```
+
+## 3. Approval
+
+This plan is now ready for your review and approval.

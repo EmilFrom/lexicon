@@ -41,9 +41,7 @@ const ChatBubble = memo((props: Props) => {
     >
       <MarkdownRenderer
         fontColor={automaticFontColor(colors[bgColor])}
-        mentionColor={bgColor}
         content={message}
-        mentions={mentions}
         nonClickable={nonClickable}
       />
     </View>

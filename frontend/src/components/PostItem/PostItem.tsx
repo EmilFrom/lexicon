@@ -44,9 +44,11 @@ type Props = ViewProps & {
   showImageRow?: boolean;
   nonclickable?: boolean;
   prevScreen?: string;
+  images?: Array<string>;
   imageDimensions?: { width: number; height: number; aspectRatio?: number };
   isHidden?: boolean;
   footer?: React.ReactNode;
+  mentionedUsers?: Array<string>;
   onPressViewIgnoredContent?: () => void;
   showStatus?: boolean;
   emojiCode?: string;

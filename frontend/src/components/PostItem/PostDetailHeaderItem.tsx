@@ -14,10 +14,12 @@ import {
   transformTopicToPost,
   useStorage,
 } from '../../helpers';
-import { getCompleteImageVideoUrls } from '../../helpers/api/processRawContent'; 
 import { makeStyles } from '../../theme';
 import { Channel } from '../../types';
 import { MetricsProp } from '../Metrics/Metrics';
+
+import { getCompleteImageVideoUrls } from '../../helpers/api/processRawContent';
+import { markdownToHtml } from '../../helpers/markdownToHtml';
 
 import { PostItem, PostItemProps } from './PostItem';
 import { PostItemFooter, PostItemFooterProps } from './PostItemFooter';
@@ -39,7 +41,6 @@ type Props = Required<
 function BasePostDetailHeaderItem(props: Props) {
   const storage = useStorage();
   const styles = useStyles();
-  
 
   const {
     topicId,
@@ -53,6 +54,13 @@ function BasePostDetailHeaderItem(props: Props) {
     postId,
     pollsVotes,
   } = props;
+
+  // --- NEW CONTENT PROCESSING PATTERN ---
+  const htmlContent = markdownToHtml(content);
+  const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+  const imageTagRegex = /<img[^>]*>/g;
+  const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
+  // --- END OF PATTERN ---
 
   const cacheTopicResult = useFragment_experimental<
     TopicFragment,
@@ -90,7 +98,9 @@ function BasePostDetailHeaderItem(props: Props) {
   });
 
   if (!resolvedPostItemPropsResult) {
-    throw new Error('Post not found');
+    // This can be a valid state while loading, so we can return a loading indicator or null.
+    // For now, returning null to avoid a crash.
+    return null;
   }
 
   const { postItemProps, postItemFooterProps } = resolvedPostItemPropsResult;
@@ -98,7 +108,8 @@ function BasePostDetailHeaderItem(props: Props) {
     <PostItem
       topicId={topicId}
       title={postItemProps.title}
-      content={content || postItemProps.content}
+      content={contentWithoutImages} // Pass the processed content
+      images={images} // Pass the extracted images
       avatar={postItemProps.avatar}
       channel={postItemProps.channel}
       tags={postItemProps.tags}
@@ -182,14 +193,11 @@ const resolvePostItemProps = ({
     }
 
     if (firstPost) {
-      const rawImages = getCompleteImageVideoUrls(firstPost.content ??'');
-      const images = rawImages?.filter(Boolean) as string[] | undefined;
       const isCreator = firstPost?.username === username;
       return {
         postItemProps: {
           title: topic.title,
           content: firstPost.content,
-          images: images,
           avatar: firstPost.avatar,
           channel: firstPost.channel,
           tags: topic.selectedTag,
