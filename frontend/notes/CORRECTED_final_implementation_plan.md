@@ -1,8 +1,28 @@
+# CORRECTED Final Implementation Plan for MarkdownRenderer.tsx
+
+## 1. Objective
+
+This document provides the **correct and final** implementation plan for `src/components/MarkdownRenderer.tsx`. The previous file contained an older, incorrect version of the code. This version matches the approved plan and is designed to resolve all outstanding TypeScript errors related to type definitions and prop handling.
+
+## 2. Full and Final Code
+
+As approved, the following code should replace the **entire contents** of the `src/components/MarkdownRenderer.tsx` file. This version correctly imports and uses the types from `react-native-render-html` and fixes the prop-spreading order.
+
+**File Path:** `src/components/MarkdownRenderer.tsx`
+
+**Full Code:**
+```typescript
 import React, { useMemo } from 'react';
 import { StyleProp, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
-import RenderHTML, { MixedStyleDeclaration, TNode } from 'react-native-render-html';
+import RenderHTML, {
+  CustomRendererProps,
+  MixedStyleDeclaration,
+  TNode,
+  isTElementNode,
+  TElementNode,
+} from 'react-native-render-html';
 
 import { discourseHost } from '../constants';
 import { Text } from '../core-ui/Text';
@@ -40,21 +60,22 @@ export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Pr
   };
 
   const renderers = useMemo(() => ({
-    a: ({ TDefaultRenderer, tnode, ...props }: any) => {
+    a: (props: CustomRendererProps<TNode>) => {
+      const { TDefaultRenderer, tnode } = props;
+      if (!isTElementNode(tnode)) {
+        return <TDefaultRenderer {...props} />;
+      }
       const { href } = tnode.attributes;
       const isMention = tnode.classes.includes('mention');
 
       if (isMention && !nonClickable) {
-        // Safely access the text data
-        const firstChild = tnode.children[0];
-        const mentionText = firstChild && firstChild.type === 'text' ? firstChild.data : '';
-        const username = mentionText.substring(1);
+        const username = tnode.children[0].data.substring(1);
         return (
           <Text
             style={styles.mention}
             onPress={() => navigate('UserInformation', { username })}
           >
-            {mentionText}
+            {tnode.children[0].data}
           </Text>
         );
       }
@@ -78,28 +99,30 @@ export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Pr
 
       return (
         <Text style={styles.link} onPress={handlePress}>
-          <TDefaultRenderer tnode={tnode} {...props} />
+          <TDefaultRenderer {...props} />
         </Text>
       );
     },
-    details: ({ TDefaultRenderer, tnode, ...props }: any) => {
+    details: (props: CustomRendererProps<TNode>) => {
+      const { TDefaultRenderer, tnode } = props;
+      if (!isTElementNode(tnode)) {
+        return <TDefaultRenderer {...props} />;
+      }
+      
       const summaryNode = tnode.children.find(
-        (c: TNode) => c.type === 'element' && c.tagName === 'summary'
+        (c): c is TElementNode => isTElementNode(c) && c.tagName === 'summary'
       );
       
-      let title = 'Details';
-      if (summaryNode && summaryNode.children[0] && summaryNode.children[0].type === 'text') {
-        title = summaryNode.children[0].data;
-      }
+      const title = summaryNode?.children[0]?.data || 'Details';
 
       const contentTNode = {
         ...tnode,
-        children: tnode.children.filter((c: TNode) => c !== summaryNode),
+        children: tnode.children.filter((c) => c !== summaryNode),
       };
 
       return (
         <Collapsible title={title}>
-          <TDefaultRenderer tnode={contentTNode} {...props} />
+          <TDefaultRenderer {...props} tnode={contentTNode} />
         </Collapsible>
       );
     },
@@ -128,3 +151,8 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     textDecorationLine: 'underline',
   },
 }));
+```
+
+## 4. Next Steps
+
+This plan is now documented correctly. The next action would be to execute this file replacement.
