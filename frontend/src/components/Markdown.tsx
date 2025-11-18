@@ -31,7 +31,9 @@ export type MarkdownProps = Omit<BaseMarkdownProps, 'rules' | 'style'> & {
   mentionColor?: string;
   mentions?: Array<string>;
   nonClickable?: boolean;
-  onImagePress?: (uri: string) => void; // Add onImagePress to props
+
+  //removing all image parts
+  //onImagePress?: (uri: string) => void; // Add onImagePress to props
 };
 
 const ios = Platform.OS === 'ios';
@@ -46,7 +48,7 @@ export function Markdown(props: MarkdownProps) {
     mentionColor,
     style,
     nonClickable,
-    onImagePress = () => {}, // Provide a default no-op function
+    //onImagePress = () => {}, // Provide a default no-op function
     ...otherProps
   } = props;
 
@@ -60,9 +62,10 @@ export function Markdown(props: MarkdownProps) {
     navigate('UserInformation', { username });
   };
 
+
   // --- THIS IS THE CRITICAL FIX ---
   // The 'key' prop must be destructured from the arguments and applied to the root <View>.
-  const renderImage = ({ key, attributes }: ASTNode) => (
+ /* const renderImage = ({ key, attributes }: ASTNode) => (
     <View key={key}>
       {isEmojiImage(attributes.alt) ? (
         <Image
@@ -78,7 +81,7 @@ export function Markdown(props: MarkdownProps) {
         />
       )}
     </View>
-  );
+  ); */
 
   const renderMention = ({ key, content }: ASTNode) => (
     <View key={key}>
@@ -138,7 +141,7 @@ export function Markdown(props: MarkdownProps) {
   };
 
   const rules: RenderRules = {
-    image: renderImage,
+    // image: renderImage,
     mention: renderMention,
     hashtag: renderHashtag,
     link: renderLink,
@@ -176,7 +179,7 @@ const useStyles = makeStyles(
     table: { borderColor: colors.border },
     tr: { borderColor: colors.border },
     paragraph: { marginTop: 0, marginBottom: spacing.m },
-    image: { paddingVertical: spacing.l },
+    //image: { paddingVertical: spacing.l },
     bullet_list_icon: {
       flex: 1,
       fontSize: ios ? 52 : 28,
