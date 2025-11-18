@@ -6,10 +6,11 @@ import { ScrollView, View } from 'react-native';
 import {
   CustomHeader,
   LoadingOrError,
-  Markdown,
+  //Markdown,
   ShowImageModal,
   UserStatus,
 } from '../../components';
+import { MarkdownRenderer } from '../../components/MarkdownRenderer';
 import { currentScreenVar } from '../../constants';
 import { Avatar, Button, Divider, IconWithLabel, Text } from '../../core-ui';
 import { getImage, navigateInProfile, useStorage } from '../../helpers';
@@ -236,7 +237,7 @@ export default function Profile() {
                   {profileUser.email}
                 </Text>
               </View>
-              <Markdown
+              <MarkdownRenderer
                 content={
                   (splittedBio && splittedBio.length > 3
                     ? `${splittedBio.slice(0, 3).join('\n')}...`

@@ -20,12 +20,12 @@ import {
 import { Color, makeStyles, useTheme } from '../../theme';
 import { Channel, Poll, PollsVotes, StackNavProp } from '../../types';
 import { Author } from '../Author';
-import { SimpleMarkdown } from '../SimpleMarkdown';
 import { PollPreview } from '../Poll';
 
 import { PostGroupings } from './PostGroupings';
 import { PostHidden } from './PostHidden';
 import { ImageCarousel } from '../ImageCarousel';
+import { MarkdownRenderer } from '../MarkdownRenderer';
 
 type Props = ViewProps & {
   topicId: number;
@@ -196,7 +196,7 @@ function BasePostItem(props: Props) {
         />
       ) : (
         <View style={previewContainerStyle}>
-          <SimpleMarkdown
+          <MarkdownRenderer
             content={replaceTagsInContent(unescapeHTML(contentWithoutImages))}
             style={styles.markdown}
             fontColor={colors[color]}

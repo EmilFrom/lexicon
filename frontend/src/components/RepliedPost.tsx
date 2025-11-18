@@ -17,7 +17,7 @@ import { makeStyles } from '../theme';
 
 import { Author } from './Author';
 import { LoadingOrError } from './LoadingOrError';
-import { Markdown } from './Markdown';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 type GeneralRepliedPostProps = {
   hideAuthor?: boolean;
@@ -36,7 +36,7 @@ function BaseRepliedPost(props: BaseRepliedPostProps) {
       <Divider vertical />
       <View style={styles.nestedCommentContainer}>
         {!hideAuthor && <Author image={getImage(avatar)} title={username} />}
-        <Markdown
+        <MarkdownRenderer
           style={styles.nestedContent}
           content={handleUnsupportedMarkdown(markdownContent ?? undefined)}
           mentions={mentions ?? undefined}

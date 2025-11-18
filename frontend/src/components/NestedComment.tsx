@@ -21,7 +21,7 @@ import { Metrics, MetricsProp } from './Metrics/Metrics';
 import { PollPreview } from './Poll';
 import { PostHidden } from './PostItem';
 import { RepliedPost } from './RepliedPost';
-import { SimpleMarkdown } from './SimpleMarkdown';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 type PressReplyParams = {
   replyToPostId?: number;
@@ -209,7 +209,7 @@ function BaseNestedComment(props: Props) {
         ) : (
           <>
             {renderPolls()}
-            <SimpleMarkdown
+            <MarkdownRenderer
               content={
                 replyToPostId
                   ? handleUnsupportedMarkdown(

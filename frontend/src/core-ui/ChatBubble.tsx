@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { StyleProp, TextStyle, View, ViewProps } from 'react-native';
 
-import { Markdown } from '../components/Markdown';
+import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { automaticFontColor } from '../helpers';
 import { Color, makeStyles, useTheme } from '../theme';
 
@@ -40,7 +40,7 @@ const ChatBubble = memo((props: Props) => {
       ]}
       {...otherProps}
     >
-      <Markdown
+      <MarkdownRenderer
         fontColor={automaticFontColor(colors[bgColor])}
         mentionColor={bgColor}
         content={message}

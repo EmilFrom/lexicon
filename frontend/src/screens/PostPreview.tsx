@@ -12,10 +12,11 @@ import {
   CustomHeader,
   HeaderItem,
   LocalRepliedPost,
-  MarkdownContent,
+//  MarkdownContent,
   ModalHeader,
   PostGroupings,
 } from '../components';
+import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { PollPostPreview } from '../components/Poll';
 import { FORM_DEFAULT_VALUES, refetchQueriesPostDraft } from '../constants';
 import { AuthenticatedImage, Divider, IconWithLabel, Text } from '../core-ui';
@@ -23,7 +24,7 @@ import { FullScreenImageModal } from '../components/FullScreenImageModal';
 import {
   combineContentWithPollContent,
   errorHandlerAlert,
-  generateMarkdownContent,
+  //generateMarkdownContent,
   getImage,
   getPostShortUrl,
   sortImageUrl,
@@ -314,8 +315,8 @@ export default function PostPreview() {
           <LocalRepliedPost replyToPostId={postData.replyToPostId} />
         )}
         {renderPolls()}
-        <MarkdownContent
-          content={generateMarkdownContent(content, imageUrls)}
+        <MarkdownRenderer
+          content={MarkdownRenderer(content, imageUrls)}
           style={styles.markdown}
           nonClickable={true}
         />
