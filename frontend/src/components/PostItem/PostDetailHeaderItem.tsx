@@ -104,6 +104,14 @@ function BasePostDetailHeaderItem(props: Props) {
   }
 
   const { postItemProps, postItemFooterProps } = resolvedPostItemPropsResult;
+  // DEBUG LOG
+  if (__DEV__) {
+      console.log('[PostDetailHeaderItem] Rendering:', { 
+          imagesCount: images.length, 
+          firstImage: images[0],
+          topicId 
+      });
+  }
   return (
     <PostItem
       topicId={topicId}

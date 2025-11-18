@@ -1,3 +1,14 @@
+# Implementation Guide: Fix Image Carousel Layout
+
+This guide makes the `ImageCarousel` component more robust by ensuring the width calculation is safe and correct. This is the most likely cause for images not appearing despite data being present.
+
+## Step 1: Update `ImageCarousel.tsx`
+
+**File:** `src/components/ImageCarousel.tsx`
+
+**Action:** Update the component to safely calculate `contentWidth` and add debug logging.
+
+```typescript
 import React, { useState } from 'react';
 import {
   View,
@@ -23,26 +34,22 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
   const { width: windowWidth } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // 1. Calculate Width
+  // Calculate the width of the content area, accounting for padding
+  // Safety check: ensure paddingHorizontal is treated as a number
   const paddingHorizontal = typeof styles.container.paddingHorizontal === 'number'
     ? styles.container.paddingHorizontal
-    : 24; 
+    : 24; // Default fallback if theme value is not a number
+    
   const contentWidth = windowWidth - (paddingHorizontal * 2);
 
-  // 2. Calculate Height
-  // Use server dimensions if available, otherwise default to 16:9 (1.77)
-  let aspectRatio = 1.77;
-  if (serverDimensions) {
-    if (serverDimensions.aspectRatio) {
-      aspectRatio = serverDimensions.aspectRatio;
-    } else if (serverDimensions.width && serverDimensions.height) {
-      aspectRatio = serverDimensions.width / serverDimensions.height;
-    }
+  if (__DEV__) {
+    console.log('[ImageCarousel] Layout:', { 
+      windowWidth, 
+      paddingHorizontal, 
+      contentWidth, 
+      imagesCount: images?.length 
+    });
   }
-  
-  // Calculate height based on width and aspect ratio
-  // Clamp to a minimum of 200 to prevent collapse
-  const carouselHeight = Math.max(contentWidth / aspectRatio, 200);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
@@ -57,24 +64,21 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
   }
 
   return (
-    <View style={[styles.container, { height: carouselHeight, backgroundColor: 'blue' }]}>
+    <View style={styles.container}>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScroll}
-        style={[styles.scrollView, { width: contentWidth, height: carouselHeight, backgroundColor: 'yellow' }]}
-        contentContainerStyle={{ width: contentWidth * images.length, height: carouselHeight }}
+        style={[styles.scrollView, { width: contentWidth }]}
+        contentContainerStyle={{ width: contentWidth * images.length }} // Explicit content size
       >
         {images.map((url, index) => (
-          <View key={index} style={[styles.imageContainer, { width: contentWidth, height: carouselHeight }]}>
+          <View key={index} style={[styles.imageContainer, { width: contentWidth }]}>
             <AuthenticatedImage
               url={url}
               onPress={() => onImagePress(url)}
-              // Pass 0 or Infinity to prevent AuthenticatedImage from recalculating/clamping height again
-              // We want it to just fill the container we made for it
-              maxHeightRatio={Infinity} 
-              style={{ width: '100%', height: '100%' }}
+              maxHeightRatio={0.6} // Give it a nice default aspect ratio
               serverDimensions={index === 0 ? serverDimensions : undefined}
             />
           </View>
@@ -119,3 +123,10 @@ const useStyles = makeStyles(({ spacing, fontSizes, colors }) => ({
     fontWeight: 'bold',
   },
 }));
+```
+
+## Step 2: Verify
+
+1.  Restart `yarn start`.
+2.  Check the logs for `[ImageCarousel] Layout`. Ensure `contentWidth` is a positive number (e.g., ~350 on iPhone).
+3.  Check the Post Detail screen. Images should now appear.

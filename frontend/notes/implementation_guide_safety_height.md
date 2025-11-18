@@ -1,3 +1,14 @@
+# Implementation Guide: Fix Post Detail Layout Collapse
+
+This guide addresses the "blank image" issue on the PostDetail screen by enforcing a minimum height in the `AuthenticatedImage` component. This prevents the image container from collapsing to 0 height if dimension calculations fail.
+
+## Step 1: Update `AuthenticatedImage.tsx`
+
+**File:** `src/core-ui/AuthenticatedImage.tsx`
+
+**Action:** Update the `calculateImageHeight` function to include a safe fallback.
+
+```typescript
 import { Image } from 'expo-image';
 import React, { useState, useMemo } from 'react';
 import {
@@ -155,3 +166,35 @@ const styles = StyleSheet.create({
     color: '#D32F2F',
   },
 });
+```
+
+## Step 2: Debug Logging (Optional but Recommended)
+
+**File:** `src/components/PostItem/PostDetailHeaderItem.tsx`
+
+**Action:** Add this log before the return statement to verify data is reaching the component.
+
+```typescript
+// ... inside BasePostDetailHeaderItem ...
+
+  const { postItemProps, postItemFooterProps } = resolvedPostItemPropsResult;
+  
+  // DEBUG LOG
+  if (__DEV__) {
+      console.log('[PostDetailHeaderItem] Rendering:', { 
+          imagesCount: images.length, 
+          firstImage: images[0],
+          topicId 
+      });
+  }
+
+  return (
+    <PostItem 
+      // ... props
+```
+
+## Step 3: Verify
+
+1.  Restart `yarn start`.
+2.  Open a Post Detail page.
+3.  The image should now be visible, even if dimension calculation fails (it will be 300px tall).

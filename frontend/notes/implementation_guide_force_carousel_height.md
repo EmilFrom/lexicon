@@ -1,3 +1,14 @@
+# Implementation Guide: Force Carousel Height
+
+This guide fixes the invisible image carousel by explicitly calculating and setting the height of the carousel container.
+
+## Step 1: Update `ImageCarousel.tsx`
+
+**File:** `src/components/ImageCarousel.tsx`
+
+**Action:** Replace the file content with the following robust implementation. This version calculates `carouselHeight` and ensures the ScrollView has explicit dimensions.
+
+```typescript
 import React, { useState } from 'react';
 import {
   View,
@@ -57,13 +68,13 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
   }
 
   return (
-    <View style={[styles.container, { height: carouselHeight, backgroundColor: 'blue' }]}>
+    <View style={[styles.container, { height: carouselHeight }]}>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScroll}
-        style={[styles.scrollView, { width: contentWidth, height: carouselHeight, backgroundColor: 'yellow' }]}
+        style={[styles.scrollView, { width: contentWidth, height: carouselHeight }]}
         contentContainerStyle={{ width: contentWidth * images.length, height: carouselHeight }}
       >
         {images.map((url, index) => (
@@ -119,3 +130,10 @@ const useStyles = makeStyles(({ spacing, fontSizes, colors }) => ({
     fontWeight: 'bold',
   },
 }));
+```
+
+## Step 2: Verify
+
+1.  Restart `yarn start`.
+2.  Navigate to Post Detail.
+3.  The carousel should now occupy exactly the calculated height, and images should be visible.

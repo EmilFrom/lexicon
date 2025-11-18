@@ -1,3 +1,16 @@
+# Implementation Guide: Fix Post Detail Images
+
+This guide fixes the issue where images were missing on the Post Detail screen because the `PostItem` component was ignoring the image data passed from its parent.
+
+## Step 1: Update `PostItem.tsx`
+
+**File:** `src/components/PostItem/PostItem.tsx`
+
+**Action:** Replace the content of `PostItem.tsx` with the following corrected code. The key changes are:
+1.  Destructuring `images` from props (aliased as `propImages`).
+2.  Using `propImages` if available, instead of re-extracting from content.
+
+```typescript
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback } from 'react';
 import {
@@ -344,3 +357,4 @@ const areEqual = (prevProps: Props, nextProps: Props) => {
 
 const PostItem = React.memo(BasePostItem, areEqual);
 export { PostItem, Props as PostItemProps };
+```
