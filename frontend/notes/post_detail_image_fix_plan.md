@@ -1,65 +1,19 @@
-# Plan: Fix Missing Images on Post Detail
+# Fix Plan: Post Detail Images Not Showing
 
-## 1. Analysis
+## Analysis
+The user reported that images are not showing in the Topic Detail view, despite logs indicating that `PostDetailHeaderItem` successfully extracted image URLs. The `ImageCarousel` component was expected to render (even with debug colors) but nothing was visible.
 
-**Issue:** Images are not rendering on the `PostDetail` screen, even though the "white screen" flickering issue is resolved.
+Investigation revealed:
+1.  `PostDetailHeaderItem` extracts images correctly and passes them to `PostItem` via the `images` prop.
+2.  `PostDetailHeaderItem` sets the `nonclickable={true}` prop on `PostItem`.
+3.  Inside `PostItem.tsx`, the rendering logic splits based on the `nonclickable` prop.
+4.  **The Bug:** In the `nonclickable` branch (which renders the detail view content), the `{imageContent}` (which contains the `ImageCarousel`) is explicitly omitted.
 
-**Root Cause:**
-1.  `PostDetailHeaderItem` (the wrapper) correctly extracts images from the raw HTML and strips them from the text content to avoid duplication. It passes two props to the child component:
-    *   `content`: The text *without* images.
-    *   `images`: The array of extracted image URLs.
-2.  `PostItem` (the child component) **ignores the `images` prop**. It attempts to re-extract images from the `content` prop.
-3.  Since `PostDetailHeaderItem` already removed the images from `content`, `PostItem` finds nothing, resulting in an empty image carousel.
+## Proposed Changes
+1.  Modify `src/components/PostItem/PostItem.tsx`.
+2.  Locate the `wrappedMainContent` definition.
+3.  In the `else` block (where `nonclickable` is true), add `{imageContent}` to the rendered fragment, typically after `mainContent` and `pollsContent`, to match the layout of the clickable version.
 
-**Verification:**
-In `src/components/PostItem/PostItem.tsx`:
-```typescript
-function BasePostItem(props: Props) {
-  const {
-    content,
-    // 'images' is NOT destructured here!
-    ...otherProps 
-  } = props;
-
-  // PostItem re-runs extraction on 'content', which is empty of images by now
-  const images = getCompleteImageVideoUrls(htmlContent)... 
-```
-
-## 2. Plan
-
-**Objective:** Update `PostItem` to respect the `images` prop passed from its parent.
-
-**File:** `src/components/PostItem/PostItem.tsx`
-
-**Implementation Details:**
-1.  Destructure `images` (aliased as `propImages` to avoid naming conflict) from `props`.
-2.  Update the "Content Processing Pattern" logic:
-    *   If `propImages` exists, use it directly and treat `content` as already processed (or process strictly for formatting).
-    *   If `propImages` does not exist (legacy behavior or other screens), continue extracting images from `content`.
-
-**Proposed Code Change:**
-```typescript
-  const {
-    // ... existing props
-    content,
-    images: propImages, // <--- Add this
-    // ...
-  } = props;
-
-  // ...
-
-  // --- NEW CONTENT PROCESSING PATTERN ---
-  const htmlContent = markdownToHtml(content);
-  
-  // Prefer passed images, otherwise extract them
-  const images = propImages ?? (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || []);
-  
-  // If propImages was passed, we assume content is already cleaned OR we clean it again.
-  // PostDetailHeaderItem passes cleaned content, so cleaning it again is harmless (regex won't match).
-  const imageTagRegex = /<img[^>]*>/g;
-  const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
-  // --- END OF PATTERN ---
-```
-
-## 3. Approval
-This change is low-risk and directly addresses the data flow issue identified in the investigation.
+## Verification
+-   The user's visual debugging (Red/Blue/Yellow backgrounds) should become visible once `ImageCarousel` is actually rendered.
+-   The images should appear in the Post Detail header.

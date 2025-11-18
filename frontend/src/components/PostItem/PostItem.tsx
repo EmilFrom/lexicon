@@ -97,7 +97,7 @@ function BasePostItem(props: Props) {
     images: propImages, // Destructure images prop
     ...otherProps
   } = props;
-
+  
   const time =
     createdAt === ''
       ? t('Loading...')
@@ -128,6 +128,15 @@ function BasePostItem(props: Props) {
   
   // Use passed images if available, otherwise extract them
   const images = propImages ?? (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || []);
+
+   // DEBUG LOG
+  if (__DEV__) {
+      console.log('[PostItem] Render:', { 
+          hasPropImages: !!propImages, 
+          finalImagesCount: images.length,
+          firstImage: images[0]
+      });
+  }
   
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
@@ -202,11 +211,13 @@ function BasePostItem(props: Props) {
   );
 
   const imageContent = (
-    <ImageCarousel
-      images={images}
-      onImagePress={(uri) => setFullScreenImage(uri)}
-      serverDimensions={imageDimensions}
-    />
+    <View style={{ backgroundColor: 'red', minHeight: images.length ? 20 : 0 }}>
+      <ImageCarousel
+        images={images}
+        onImagePress={(uri) => setFullScreenImage(uri)}
+        serverDimensions={imageDimensions}
+      />
+    </View>
   );
   const pollsContent = renderPolls();
 
@@ -261,6 +272,7 @@ function BasePostItem(props: Props) {
       {author}
       {mainContent}
       {pollsContent}
+      {imageContent}
     </>
   );
 
