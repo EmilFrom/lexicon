@@ -20,7 +20,7 @@ import {
 import { Color, makeStyles, useTheme } from '../../theme';
 import { Channel, Poll, PollsVotes, StackNavProp } from '../../types';
 import { Author } from '../Author';
-import { MarkdownContent } from '../MarkdownContent';
+import { SimpleMarkdown } from '../SimpleMarkdown';
 import { PollPreview } from '../Poll';
 
 import { PostGroupings } from './PostGroupings';
@@ -196,12 +196,11 @@ function BasePostItem(props: Props) {
         />
       ) : (
         <View style={previewContainerStyle}>
-          <MarkdownContent
+          <SimpleMarkdown
             content={replaceTagsInContent(unescapeHTML(contentWithoutImages))}
             style={styles.markdown}
             fontColor={colors[color]}
             mentions={mentionedUsers}
-            disableImages={true}
           />
         </View>
       )}

@@ -28,6 +28,7 @@ export * from './SearchBar';
 export * from './SegmentedControl';
 export { default as SelectImagePreviewEdit } from './SelectImagePreviewEdit';
 export * from './ShowImageModal';
+export * from './SimpleMarkdown';
 export * from './StackedAvatars';
 export * from './TextArea';
 export * from './Toast';
