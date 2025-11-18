@@ -6,7 +6,7 @@ import {
 import React, { useState } from 'react';
 import { Platform, TouchableOpacity, View } from 'react-native';
 
-import { Markdown, UserStatus } from '../components';
+import { MarkdownRenderer, UserStatus } from '../components'; //
 import { Avatar, Divider, IconWithLabel, Text } from '../core-ui';
 import { getImage, navigateInProfile, useStorage } from '../helpers';
 import { useLogout, useProfile, useSiteSettings } from '../hooks';
@@ -73,7 +73,7 @@ function DrawerItem(props: DrawerItemProps) {
 function DrawerContent({ state }: DrawerContentComponentProps) {
   const styles = useStyles();
   const { colors } = useTheme();
-
+  
   const storage = useStorage();
   const username = storage.getItem('user')?.username || '';
 
@@ -100,6 +100,10 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
     },
   });
   const [splittedBio, setSplittedBio] = useState<Array<string>>();
+
+  const bioContent = (splittedBio && splittedBio.length > 3
+    ? `${splittedBio.slice(0, 3).join('\n')}...`
+    : user.bioRaw) || '';
 
   const { allowUserStatus, enableLexiconPushNotifications } = useSiteSettings({
     fetchPolicy: 'network-only',
@@ -157,12 +161,8 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
         >
           {user.email}
         </Text>
-        <Markdown
-          content={
-            (splittedBio && splittedBio.length > 3
-              ? `${splittedBio.slice(0, 3).join('\n')}...`
-              : user.bioRaw) || ''
-          }
+       <MarkdownRenderer
+          content={bioContent}
           style={styles.bioContainer}
         />
         {allowUserStatus &&

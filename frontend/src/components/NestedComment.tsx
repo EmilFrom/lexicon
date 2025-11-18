@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { memo, useCallback, useEffect, useState } from 'react';
-import { StyleProp, View, ViewProps } from 'react-native';
+import React, { memo, useEffect, useState } from 'react';
+import { View, ViewProps } from 'react-native';
 
 import {
   deleteQuoteBbCode,
@@ -8,6 +8,7 @@ import {
   handleUnsupportedMarkdown,
   useStorage,
 } from '../helpers';
+import { markdownToHtml } from '../helpers/markdownToHtml';
 import { getCompleteImageVideoUrls } from '../helpers/api/processRawContent';
 import { usePostRaw } from '../hooks';
 import { Color, makeStyles, useTheme } from '../theme';
@@ -17,7 +18,7 @@ import { ActivityIndicator, Divider, Icon } from '../core-ui';
 import { Author } from './Author';
 import { FullScreenImageModal } from './FullScreenImageModal';
 import { ImageCarousel } from './ImageCarousel';
-import { Metrics, MetricsProp } from './Metrics/Metrics';
+import { Metrics } from './Metrics/Metrics';
 import { PollPreview } from './Poll';
 import { PostHidden } from './PostItem';
 import { RepliedPost } from './RepliedPost';
@@ -46,7 +47,6 @@ type Props = ViewProps &
     | 'isLiked'
     | 'username'
     | 'createdAt'
-    | 'mentionedUsers'
     | 'avatar'
     | 'canFlag'
     | 'canEdit'
@@ -73,7 +73,6 @@ function BaseNestedComment(props: Props) {
   const storage = useStorage();
   const styles = useStyles();
   const { colors } = useTheme();
-  const { navigate } = useNavigation<RootStackNavProp<'PostDetail'>>();
 
   const {
     id,
@@ -83,7 +82,6 @@ function BaseNestedComment(props: Props) {
     isLiked,
     username,
     createdAt,
-    mentionedUsers,
     avatar,
     canFlag,
     canEdit,
@@ -120,11 +118,12 @@ function BaseNestedComment(props: Props) {
     },
   });
 
-  const images = content
-    ? (getCompleteImageVideoUrls(content)?.filter(Boolean) as string[])
-    : [];
+  // --- NEW CONTENT PROCESSING PATTERN ---
+  const htmlContent = markdownToHtml(content);
+  const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
   const imageTagRegex = /<img[^>]*>/g;
-  const contentWithoutImages = content ? content.replace(imageTagRegex, '') : '';
+  const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
+  // --- END OF PATTERN ---
 
   useEffect(() => {
     if (onLayout) {
@@ -144,12 +143,10 @@ function BaseNestedComment(props: Props) {
     if (!polls) {
       return null;
     }
-
     return polls?.map((poll, index) => {
       const pollVotes = pollsVotes?.find(
         (pollVotes) => pollVotes.pollName === poll.name,
       );
-
       return (
         <PollPreview
           key={index}
@@ -218,10 +215,9 @@ function BaseNestedComment(props: Props) {
                   : handleUnsupportedMarkdown(contentWithoutImages)
               }
               fontColor={colors[color]}
-              mentions={mentionedUsers}
             />
             <ImageCarousel
-              images={images || []}
+              images={images}
               onImagePress={(uri) => setFullScreenImage(uri)}
             />
           </>

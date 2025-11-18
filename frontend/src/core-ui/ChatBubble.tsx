@@ -23,7 +23,6 @@ const ChatBubble = memo((props: Props) => {
     bgColor = 'background',
     noBorder = false,
     fontStyle: _fontStyle,
-    mentions,
     nonClickable,
     style,
     ...otherProps

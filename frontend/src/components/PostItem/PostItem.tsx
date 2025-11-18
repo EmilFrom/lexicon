@@ -8,8 +8,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-import { NO_EXCERPT_WORDING } from '../../constants';
-import { AuthenticatedImage, Icon, Text } from '../../core-ui';
+import { Icon, Text } from '../../core-ui';
 import { FullScreenImageModal } from '../FullScreenImageModal';
 import {
   formatRelativeTime,
@@ -17,6 +16,8 @@ import {
   unescapeHTML,
   useStorage,
 } from '../../helpers';
+import { markdownToHtml } from '../../helpers/markdownToHtml';
+import { getCompleteImageVideoUrls } from '../../helpers/api/processRawContent';
 import { Color, makeStyles, useTheme } from '../../theme';
 import { Channel, Poll, PollsVotes, StackNavProp } from '../../types';
 import { Author } from '../Author';
@@ -43,11 +44,9 @@ type Props = ViewProps & {
   showImageRow?: boolean;
   nonclickable?: boolean;
   prevScreen?: string;
-  images?: Array<string>;
   imageDimensions?: { width: number; height: number; aspectRatio?: number };
   isHidden?: boolean;
   footer?: React.ReactNode;
-  mentionedUsers?: Array<string>;
   onPressViewIgnoredContent?: () => void;
   showStatus?: boolean;
   emojiCode?: string;
@@ -59,16 +58,11 @@ type Props = ViewProps & {
 };
 
 function BasePostItem(props: Props) {
-  //console.log('--- Props received by BasePostItem ---', props);
-
   const { navigate } = useNavigation<StackNavProp<'TabNav'>>();
   const storage = useStorage();
-  const styles = useStyles()
+  const styles = useStyles();
   const { colors } = useTheme();
-  const { height: windowHeight } = useWindowDimensions();
-  const [fullScreenImage, setFullScreenImage] = React.useState<string | null>(
-    null,
-  );
+  const [fullScreenImage, setFullScreenImage] = React.useState<string | null>(null);
 
   const {
     topicId,
@@ -87,9 +81,7 @@ function BasePostItem(props: Props) {
     style,
     showImageRow = false,
     nonclickable = false,
-    images,
     imageDimensions,
-    mentionedUsers,
     isHidden = false,
     footer,
     onPressViewIgnoredContent = () => {},
@@ -110,7 +102,6 @@ function BasePostItem(props: Props) {
         formatRelativeTime(createdAt);
 
   const isCreator = username === storage.getItem('user')?.username;
-
   const color: Color = hidden ? 'textLight' : 'textNormal';
 
   const onPressPost = () => {
@@ -129,12 +120,15 @@ function BasePostItem(props: Props) {
     [navigate],
   );
 
+  // --- NEW CONTENT PROCESSING PATTERN ---
+  const htmlContent = markdownToHtml(content);
+  const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+  const imageTagRegex = /<img[^>]*>/g;
+  const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
+  // --- END OF PATTERN ---
+
   const contentTitle = (
-    <Text
-      style={[styles.spacingBottom, styles.flex]}
-      variant="semiBold"
-      size="l"
-    >
+    <Text style={[styles.spacingBottom, styles.flex]} variant="semiBold" size="l">
       {title}
     </Text>
   );
@@ -158,12 +152,10 @@ function BasePostItem(props: Props) {
     if (!polls) {
       return null;
     }
-
     return polls?.map((poll, index) => {
       const pollVotes = pollsVotes?.find(
         (pollVotes) => pollVotes.pollName === poll.name,
       );
-
       return (
         <PollPreview
           key={index}
@@ -180,9 +172,6 @@ function BasePostItem(props: Props) {
 
   const previewContainerStyle =
     prevScreen === 'Home' ? styles.contentPreview : undefined;
-  
-  const imageTagRegex = /<img[^>]*>/g;
-  const contentWithoutImages = content.replace(imageTagRegex, '');
 
   const mainContent = (
     <>
@@ -200,32 +189,26 @@ function BasePostItem(props: Props) {
             content={replaceTagsInContent(unescapeHTML(contentWithoutImages))}
             style={styles.markdown}
             fontColor={colors[color]}
-            mentions={mentionedUsers}
           />
         </View>
       )}
     </>
   );
 
-   const imageContent = (
-      <ImageCarousel
-        images={images || []}
-        onImagePress={(uri) => setFullScreenImage(uri)}
-        serverDimensions={imageDimensions}
-      />
-    );
+  const imageContent = (
+    <ImageCarousel
+      images={images}
+      onImagePress={(uri) => setFullScreenImage(uri)}
+      serverDimensions={imageDimensions}
+    />
+  );
   const pollsContent = renderPolls();
 
   const wrappedMainContent = !nonclickable ? (
     <>
       {showLabel && isLiked && (
         <View>
-          <Text
-            style={styles.label}
-            variant="bold"
-            color="primary"
-            numberOfLines={3}
-          >
+          <Text style={styles.label} variant="bold" color="primary" numberOfLines={3}>
             {currentUser === storage.getItem('user')?.username
               ? t(`You liked this post`)
               : t(`{currentUser} liked this post`, { currentUser })}
@@ -322,35 +305,8 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
     marginBottom: spacing.l,
     textTransform: 'capitalize',
   },
-  imageWrapper: {
-    marginVertical: spacing.s,
-    borderRadius: spacing.m,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  imageGrid: { // Add this style
-        marginTop: spacing.m,
-      },
-  imageCountBadge: {
-    position: 'absolute',
-    bottom: spacing.m,
-    right: spacing.m,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.xs,
-    borderRadius: spacing.s,
-  },
-  imageCountText: {
-    color: colors.pureWhite,
-    fontSize: fontSizes.xs,
-    fontWeight: '600',
-  },
   spacingBottom: {
     marginBottom: spacing.xl,
-  },
-  text: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.m,
   },
   textTime: {
     fontSize: fontSizes.s,
@@ -364,8 +320,6 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
   },
 }));
 
-// Custom comparison function for React.memo
-// Compare key props that affect rendering
 const areEqual = (prevProps: Props, nextProps: Props) => {
   return (
     prevProps.topicId === nextProps.topicId &&
@@ -377,9 +331,7 @@ const areEqual = (prevProps: Props, nextProps: Props) => {
     prevProps.isHidden === nextProps.isHidden &&
     prevProps.prevScreen === nextProps.prevScreen &&
     prevProps.pinned === nextProps.pinned &&
-    // Compare arrays by length and content
     prevProps.tags?.length === nextProps.tags?.length &&
-    prevProps.images?.length === nextProps.images?.length &&
     prevProps.polls?.length === nextProps.polls?.length
   );
 };

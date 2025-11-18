@@ -1,7 +1,9 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
 
-import { Markdown } from '../../../components';
+import { MarkdownRenderer } from '../../../components/MarkdownRenderer';
+import { ImageCarousel } from '../../../components/ImageCarousel';
+import { FullScreenImageModal } from '../../../components/FullScreenImageModal';
 import { MetricItem } from '../../../components/Metrics/MetricItem';
 import { Avatar, Icon, Text } from '../../../core-ui';
 import {
@@ -12,6 +14,7 @@ import {
   getImage,
   handleUnsupportedMarkdown,
 } from '../../../helpers';
+import { getCompleteImageVideoUrls } from '../../../helpers/api/processRawContent';
 import { makeStyles, useTheme } from '../../../theme';
 import {
   ChatMessageContent,
@@ -36,7 +39,6 @@ type Props = {
 export function ChatMessageItem(props: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
-
   const {
     content,
     sender,
@@ -51,12 +53,16 @@ export function ChatMessageItem(props: Props) {
     isLoading,
   } = props;
 
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+
   const { id, time, markdownContent } = content;
 
-  const filteredMessage = filterMarkdownContentPoll(
-    markdownContent || '',
-  ).filteredMarkdown;
-  const markdownContentScene = handleUnsupportedMarkdown(filteredMessage);
+  const { filteredMarkdown } = filterMarkdownContentPoll(markdownContent || '');
+  const images = getCompleteImageVideoUrls(filteredMarkdown)?.filter(Boolean) as string[] || [];
+  const imageTagRegex = /<img[^>]*>/g;
+  const contentWithoutImages = filteredMarkdown.replace(imageTagRegex, '');
+  const markdownContentScene = handleUnsupportedMarkdown(contentWithoutImages);
+
   const unsupported = 'uploads' in content ? content.uploads.length > 0 : false;
 
   const renderUnsupported = () => {
@@ -78,6 +84,22 @@ export function ChatMessageItem(props: Props) {
     );
   };
 
+  const renderMessageContent = () => (
+    <>
+      <MarkdownRenderer
+        fontColor={automaticFontColor(colors.backgroundDarker)}
+        content={markdownContentScene}
+      />
+      {images.length > 0 && (
+        <ImageCarousel
+          images={images}
+          onImagePress={(uri) => setFullScreenImage(uri)}
+        />
+      )}
+      {unsupported && renderUnsupported()}
+    </>
+  );
+
   const renderFirstChatBubble = () => {
     return (
       <View style={[styles.firstItem, firstChatBubbleStyle]}>
@@ -94,30 +116,19 @@ export function ChatMessageItem(props: Props) {
               time: formatTime({ dateString: time, hour12: true }),
             })}
           </Text>
-          <Markdown
-            fontColor={automaticFontColor(colors.backgroundDarker)}
-            mentionColor="backgroundDarker"
-            content={markdownContentScene}
-          />
-          {unsupported ? renderUnsupported() : null}
+          {renderMessageContent()}
         </View>
       </View>
     );
   };
 
   const renderChatBubble = () => {
-    if (!filteredMessage) {
+    if (!markdownContentScene && images.length === 0) {
       return null;
     }
-
     return (
       <View style={styles.nextItem}>
-        <Markdown
-          fontColor={automaticFontColor(colors.backgroundDarker)}
-          mentionColor="backgroundDarker"
-          content={markdownContentScene}
-        />
-        {unsupported ? renderUnsupported() : null}
+        {renderMessageContent()}
       </View>
     );
   };
@@ -163,6 +174,12 @@ export function ChatMessageItem(props: Props) {
           </View>
         )}
       </Fragment>
+
+      <FullScreenImageModal
+        visible={!!fullScreenImage}
+        imageUri={fullScreenImage || ''}
+        onClose={() => setFullScreenImage(null)}
+      />
     </View>
   );
 }

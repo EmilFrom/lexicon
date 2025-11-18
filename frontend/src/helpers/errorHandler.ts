@@ -31,11 +31,14 @@ export function errorHandler(
   if (error.networkError) {
     const networkError = error.networkError;
     if (
+      typeof networkError === 'object' &&
       'result' in networkError &&
+      networkError.result && // It's better to check networkError.result for truthiness directly
+      typeof networkError.result === 'object' &&
       'errors' in networkError.result &&
       Array.isArray(networkError.result.errors) &&
       networkError.result.errors.length > 0
-    ) {
+) {
       message = networkError.result.errors[0];
     } else if (
       'response' in networkError &&

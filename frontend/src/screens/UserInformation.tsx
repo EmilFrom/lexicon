@@ -6,7 +6,6 @@ import { View } from 'react-native';
 import {
   CustomHeader,
   LoadingOrError,
-  Markdown,
   PostList,
   ShowImageModal,
   UserInformationPostItem,
@@ -17,6 +16,7 @@ import { errorHandler, getImage, useStorage } from '../helpers';
 import { useActivity, useProfile } from '../hooks';
 import { makeStyles } from '../theme';
 import { NewPostForm, StackNavProp, StackRouteProp } from '../types';
+import { MarkdownRenderer } from '../components';
 
 const useStyles = makeStyles(({ colors, spacing }) => ({
   container: {
@@ -98,7 +98,7 @@ function UserInformationHeader({
             {username}
           </Text>
         </View>
-        <Markdown content={bioPreview} style={styles.bioContainer} />
+        <MarkdownRenderer content={bioPreview} style={styles.bioContainer} />
         {statusUser && (statusUser.emoji || statusUser.description) && (
           <UserStatus
             emojiCode={statusUser.emoji ?? ''}

@@ -28,6 +28,9 @@ type BaseRepliedPostProps = GeneralRepliedPostProps &
 
 function BaseRepliedPost(props: BaseRepliedPostProps) {
   const styles = useStyles();
+  
+  const imageTagRegex = /<img[^>]*>/g;
+const contentWithoutImages = markdownContent ? markdownContent.replace(imageTagRegex, '') : '';
 
   const { avatar, username, markdownContent, mentions, hideAuthor } = props;
 
@@ -38,8 +41,7 @@ function BaseRepliedPost(props: BaseRepliedPostProps) {
         {!hideAuthor && <Author image={getImage(avatar)} title={username} />}
         <MarkdownRenderer
           style={styles.nestedContent}
-          content={handleUnsupportedMarkdown(markdownContent ?? undefined)}
-          mentions={mentions ?? undefined}
+          content={handleUnsupportedMarkdown(contentWithoutImages ?? '')}
         />
       </View>
     </View>

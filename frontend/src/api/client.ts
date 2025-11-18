@@ -343,7 +343,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
      * In the future, all API error handling from errorHandler at folder api should be consolidated here.
      */
 
-    if (networkError.result && 'error_type' in networkError.result) {
+    if (networkError.result && typeof networkError.result === 'object' && 'error_type' in networkError.result) {
       const invalidAccess =
         operation.operationName !== 'GetTopicDetail' &&
         operation.operationName !== 'GetMessageDetail' &&

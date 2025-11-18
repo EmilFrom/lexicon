@@ -21,6 +21,8 @@ import { PollPostPreview } from '../components/Poll';
 import { FORM_DEFAULT_VALUES, refetchQueriesPostDraft } from '../constants';
 import { AuthenticatedImage, Divider, IconWithLabel, Text } from '../core-ui';
 import { FullScreenImageModal } from '../components/FullScreenImageModal';
+import { getCompleteImageVideoUrls } from '../helpers/api/processRawContent';
+import { ImageCarousel } from '../components';
 import {
   combineContentWithPollContent,
   errorHandlerAlert,
@@ -48,15 +50,16 @@ import { useModal } from '../utils';
 const ios = Platform.OS === 'ios';
 
 export default function PostPreview() {
-  const { setModal } = useModal();
+ const { setModal } = useModal();
   const styles = useStyles();
   const { colors } = useTheme();
 
   const navigation = useNavigation<RootStackNavProp<'PostPreview'>>();
   const { goBack } = navigation;
+  
+  // State declaration is now at the top
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
-
-  // Manual lock for listener effect – no extra state/ref needed anymore.
+  const [imageUrls, setImageUrls] = useState<Array<string>>();
 
   const {
     params: { reply, postData, editPostId, editTopicId, editedUser },
@@ -65,14 +68,18 @@ export default function PostPreview() {
   const storage = useStorage();
   const channels = storage.getItem('channels');
 
+  // Hooks are called before they are used
   const { reset: resetForm, getValues, watch } = useFormContext();
 
-  const [imageUrls, setImageUrls] = useState<Array<string>>();
-
+  // Variables are now declared after the hook that provides them
   const { title, raw: content, tags, channelId, isDraft } = getValues();
   const draftKey: string | undefined = watch('draftKey');
   const shortUrls = getPostShortUrl(content) ?? [];
   const images = postData.images;
+
+  const imageTagRegex = /<img[^>]*>/g;
+const imagesFromContent = getCompleteImageVideoUrls(content)?.filter(Boolean) as string[] || [];
+  const contentWithoutImages = content ? content.replace(imageTagRegex, '') : '';
 
   const { getImageUrls } = useLookupUrls({
     variables: { lookupUrlInput: { shortUrls } },
@@ -241,6 +248,8 @@ export default function PostPreview() {
     ));
   };
 
+  
+
   return (
     <SafeAreaView style={styles.container}>
       <CustomHeader
@@ -315,10 +324,19 @@ export default function PostPreview() {
           <LocalRepliedPost replyToPostId={postData.replyToPostId} />
         )}
         {renderPolls()}
-        <MarkdownRenderer
-          content={MarkdownRenderer(content, imageUrls)}
+       <MarkdownRenderer
+          content={contentWithoutImages}
           style={styles.markdown}
           nonClickable={true}
+        />
+        <ImageCarousel
+          images={imagesFromContent}
+          onImagePress={(uri) => setFullScreenImage(uri)}
+        />
+        <FullScreenImageModal
+          visible={!!fullScreenImage}
+          imageUri={fullScreenImage || ''}
+          onClose={() => setFullScreenImage(null)}
         />
         {!reply &&
           images?.map((image, index) => (
