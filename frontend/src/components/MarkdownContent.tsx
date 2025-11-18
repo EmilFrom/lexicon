@@ -13,11 +13,10 @@ import { makeStyles, useTheme } from '../theme';
 
 type Props = MarkdownProps & {
   renderPollsInCollapsible?: () => React.ReactNode;
-  disableImages?: boolean;
 };
 
 export function MarkdownContent(props: Props) {
-  const { content, renderPollsInCollapsible, disableImages, ...otherProps } = props;
+  const { content, renderPollsInCollapsible, ...otherProps } = props;
   const splittedContent = separateCollapsibleInContent(content);
 
   return splittedContent.map((content, index) => {
@@ -34,7 +33,7 @@ export function MarkdownContent(props: Props) {
       );
     } else {
       return (
-        <Markdown key={`content-${index}`} content={content} disableImages={disableImages} {...otherProps} />
+        <Markdown key={`content-${index}`} content={content} {...otherProps} />
       );
     }
   });

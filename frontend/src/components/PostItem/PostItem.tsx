@@ -25,6 +25,7 @@ import { PollPreview } from '../Poll';
 
 import { PostGroupings } from './PostGroupings';
 import { PostHidden } from './PostHidden';
+import { ImageCarousel } from '../ImageCarousel';
 
 type Props = ViewProps & {
   topicId: number;
@@ -179,6 +180,9 @@ function BasePostItem(props: Props) {
 
   const previewContainerStyle =
     prevScreen === 'Home' ? styles.contentPreview : undefined;
+  
+  const imageTagRegex = /<img[^>]*>/g;
+  const contentWithoutImages = content.replace(imageTagRegex, '');
 
   const mainContent = (
     <>
@@ -193,7 +197,7 @@ function BasePostItem(props: Props) {
       ) : (
         <View style={previewContainerStyle}>
           <MarkdownContent
-            content={replaceTagsInContent(unescapeHTML(content))}
+            content={replaceTagsInContent(unescapeHTML(contentWithoutImages))}
             style={styles.markdown}
             fontColor={colors[color]}
             mentions={mentionedUsers}
@@ -204,25 +208,13 @@ function BasePostItem(props: Props) {
     </>
   );
 
-  const imageContent =
-      (showImageRow || (images && images.length > 0)) && images && images.length > 0 ? (
-        <View style={styles.imageGrid}>
-          {/* This .map() loop iterates over every image URL.
-              For each one, it provides the 'imageUrl' and its 'index'. */}
-          {images.map((imageUrl, index) => (
-            <View key={index} style={styles.imageWrapper}>
-              <AuthenticatedImage
-                url={imageUrl} // Use the imageUrl for the current item in the loop
-                testID={`PostItem:${topicId}-image-${index}`}
-                onPress={(uri) => setFullScreenImage(uri)}
-                maxHeightRatio={0.5}
-                // The 'index' variable is now correctly defined within this loop
-                serverDimensions={index === 0 ? imageDimensions : undefined}
-              />
-            </View>
-          ))}
-        </View>
-      ) : null;
+   const imageContent = (
+      <ImageCarousel
+        images={images || []}
+        onImagePress={(uri) => setFullScreenImage(uri)}
+        serverDimensions={imageDimensions}
+      />
+    );
   const pollsContent = renderPolls();
 
   const wrappedMainContent = !nonclickable ? (

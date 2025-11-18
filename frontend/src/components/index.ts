@@ -10,6 +10,7 @@ export * from './ErrorBoundary';
 export * from './FooterLoadingIndicator';
 export * from './FullScreenImageModal';
 export * from './Header';
+export * from './ImageCarousel'; 
 export * from './KeyboardTextAreaScrollView';
 export * from './LoadingOrError';
 export * from './LoadingOverlay';

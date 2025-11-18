@@ -14,6 +14,7 @@ import {
   transformTopicToPost,
   useStorage,
 } from '../../helpers';
+import { getCompleteImageVideoUrls } from '../../helpers/api/processRawContent'; 
 import { makeStyles } from '../../theme';
 import { Channel } from '../../types';
 import { MetricsProp } from '../Metrics/Metrics';
@@ -38,6 +39,7 @@ type Props = Required<
 function BasePostDetailHeaderItem(props: Props) {
   const storage = useStorage();
   const styles = useStyles();
+  
 
   const {
     topicId,
@@ -180,11 +182,14 @@ const resolvePostItemProps = ({
     }
 
     if (firstPost) {
+      const rawImages = getCompleteImageVideoUrls(firstPost.content ??'');
+      const images = rawImages?.filter(Boolean) as string[] | undefined;
       const isCreator = firstPost?.username === username;
       return {
         postItemProps: {
           title: topic.title,
           content: firstPost.content,
+          images: images,
           avatar: firstPost.avatar,
           channel: firstPost.channel,
           tags: topic.selectedTag,
