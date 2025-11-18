@@ -1,12 +1,15 @@
+// src/components/Markdown.tsx
+
 import { useNavigation } from '@react-navigation/core';
 import * as Linking from 'expo-linking';
 import mentionFlowDock from 'markdown-it-flowdock';
 import React from 'react';
-import { Platform, StyleProp, View, ViewStyle } from 'react-native';
+import { Platform, StyleProp, View, ViewStyle, Image } from 'react-native'; // Import Image
 import BaseMarkdown, {
   ASTNode,
   MarkdownIt,
   MarkdownProps as BaseMarkdownProps,
+  RenderRules, // Import RenderRules
 } from 'react-native-markdown-display';
 
 import { discourseHost } from '../constants';
@@ -28,20 +31,55 @@ export type MarkdownProps = Omit<BaseMarkdownProps, 'rules' | 'style'> & {
   mentionColor?: string;
   mentions?: Array<string>;
   nonClickable?: boolean;
+  onImagePress?: (uri: string) => void; // Add onImagePress to props
 };
 
 const ios = Platform.OS === 'ios';
-export function Markdown(props: MarkdownProps) {
-  // ... (hooks and other logic)
 
-  // FIX: Apply key to a wrapper View
+export function Markdown(props: MarkdownProps) {
+  const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
+  const styles = useStyles();
+
+  const {
+    content,
+    fontColor,
+    mentionColor,
+    style,
+    nonClickable,
+    onImagePress = () => {}, // Provide a default no-op function
+    ...otherProps
+  } = props;
+
+  const filteredContent = filterMarkdownContentPoll(content).filteredMarkdown;
+  const markdownItInstance = MarkdownIt({ typographer: true }).use(
+    mentionFlowDock,
+    { containerClassName: 'mention' },
+  );
+
+  const onPressMention = (username: string) => {
+    navigate('UserInformation', { username });
+  };
+
+  // --- THIS IS THE CRITICAL FIX ---
+  // The 'key' prop must be destructured from the arguments and applied to the root <View>.
   const renderImage = ({ key, attributes }: ASTNode) => (
     <View key={key}>
-      <Image source={{ uri: attributes.src }} style={styles.emojiImage} />
+      {isEmojiImage(attributes.alt) ? (
+        <Image
+          source={{ uri: attributes.src }}
+          style={styles.emojiImage}
+        />
+      ) : (
+        <AuthenticatedImage
+          url={attributes.src}
+          style={styles.image}
+          onPress={(uri: string) => onImagePress(uri)}
+          maxHeightRatio={Infinity}
+        />
+      )}
     </View>
   );
 
-  // FIX: Apply key to a wrapper View
   const renderMention = ({ key, content }: ASTNode) => (
     <View key={key}>
       <Text
@@ -58,16 +96,38 @@ export function Markdown(props: MarkdownProps) {
     </View>
   );
 
-  // FIX: Apply key to a wrapper View
   const renderHashtag = ({ key, content }: ASTNode) => (
     <View key={key}>
       <Text>{t('#{content}', { content })}</Text>
     </View>
   );
 
-  // FIX: Apply key to a wrapper View
   const renderLink = ({ key, attributes }: ASTNode) => {
-    // ... (same internal logic as before)
+    if (typeof attributes.href !== 'string') {
+      return null;
+    }
+    let url = attributes.href;
+    const isSameHost = url.startsWith(discourseHost);
+    const pathname = isSameHost ? extractPathname(url) : '';
+    if (isSameHost && pathname) {
+      url = `/${pathname.replace(/t\//, 'topics/')}`;
+    }
+    const onLinkPress = () => {
+      const detailParams = getValidDetailParams(pathname.split('/'));
+      if (!detailParams) {
+        Linking.openURL(url);
+        return;
+      }
+      const { topicId, postNumber } = detailParams;
+      push('PostDetail', { topicId, postNumber });
+    };
+    const handleLinkPress = () => {
+      if (!isSameHost || !pathname) {
+        Linking.openURL(url);
+        return;
+      }
+      onLinkPress();
+    };
     return (
       <View key={key}>
         <Text onPress={handleLinkPress} style={styles.link}>
