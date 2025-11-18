@@ -93,3 +93,11 @@ NOTE: If in plan mode, do not implement the plan. You are only allowed to plan. 
 
 Last step:
 Your complete and detailed plan needs to be written to a .md file in a folder ./notes
+
+## Standard Operating Procedure for Code Changes
+
+When the user requests code changes, bug fixes, or new features:
+
+1.  **Analyze & Plan (Notes):** First, investigate the codebase and formulate a strategy. Write this analysis and high-level plan into a new markdown file in the `notes/` directory (e.g., `notes/plan_bugfix_xyz.md`). Present this to the user for review.
+2.  **Create Implementation Guide (Notes):** Once the strategy is confirmed (or if the path is clear and the user has requested it), create a detailed, step-by-step implementation guide in a **separate** markdown file (e.g., `notes/implementation_guide_xyz.md`). This file should contain the exact code blocks and shell commands the user needs to execute to complete the task.
+3.  **Execute (Optional):** If the user asks you to perform the changes, follow the implementation guide you created.

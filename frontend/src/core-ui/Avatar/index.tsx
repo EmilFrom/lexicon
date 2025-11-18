@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import {
-  ImageBackground,
   ImageBackgroundProps,
   TouchableOpacity,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { useReactiveVar } from '@apollo/client'; // Added
 
 import {
   AVATAR_ICON_SIZES,
@@ -13,7 +13,8 @@ import {
 } from '../../constants';
 import { makeStyles, useTheme } from '../../theme';
 import { convertUrl } from '../../helpers';
-import { useAuthenticatedImage } from '../../hooks';
+import { tokenVar } from '../../reactiveVars'; // Added
+// import { useAuthenticatedImage } from '../../hooks'; // Removed
 
 import { LetterAvatar } from './LetterAvatar';
 
@@ -31,6 +32,7 @@ export { Props as AvatarProps };
 export function Avatar(props: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
+  const token = useReactiveVar(tokenVar); // Added
 
   const {
     src = '',
@@ -50,12 +52,15 @@ export function Avatar(props: Props) {
 
   const normalizedSrc = src ? convertUrl(src) : undefined;
 
-  // Use authenticated image hook for remote avatars
-  const { localUri, isLoading: isDownloading } =
-    useAuthenticatedImage(normalizedSrc);
+  // Removed useAuthenticatedImage hook logic
 
-  const loadChild = src === '' || error || isDownloading;
-  const imgSource = localUri ? { uri: localUri } : { uri: normalizedSrc };
+  const loadChild = src === '' || error; // Simplified loading logic, rely on Image to show empty/loading
+  
+  // Construct source with headers
+  const imgSource = normalizedSrc ? {
+    uri: normalizedSrc,
+    headers: { Authorization: token ? `Bearer ${token}` : '' }
+  } : undefined;
 
   const letterAvatar = (
     <LetterAvatar
@@ -68,7 +73,7 @@ export function Avatar(props: Props) {
   );
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} disabled={!onPress}>
       {loadChild ? (
         letterAvatar
       ) : (
@@ -79,8 +84,10 @@ export function Avatar(props: Props) {
             style,
           ]}
           onError={() => setError(true)}
+          onLoadStart={() => setLoading(true)}
           onLoadEnd={() => setLoading(false)}
           contentFit="cover"
+          cachePolicy="disk"
           {...otherProps}
         />
       )}

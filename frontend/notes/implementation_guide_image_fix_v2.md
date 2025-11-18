@@ -1,3 +1,46 @@
+# Implementation Guide: Final Image Fix V2
+
+This guide implements the changes required to fix missing images on the Post Detail screen and prevent images from blanking out during scroll.
+
+## Step 1: Fix `markdownToHtml.ts`
+
+**Objective:** Enable HTML tag parsing so that `<img>` tags from the server are not escaped.
+
+**File:** `src/helpers/markdownToHtml.ts`
+
+**Action:** Replace the file content with the following:
+
+```typescript
+import MarkdownIt from 'markdown-it';
+
+// Initialize the parser once and reuse it for better performance.
+// html: true is required to allow server-sent <img> tags to be rendered
+const md = new MarkdownIt({ html: true });
+
+/**
+ * Converts a Markdown string to an HTML string.
+ * @param markdown The raw Markdown content.
+ * @returns An HTML string.
+ */
+export function markdownToHtml(markdown: string): string {
+  if (!markdown) {
+    return '';
+  }
+  return md.render(markdown);
+}
+```
+
+---
+
+## Step 2: Optimize `AuthenticatedImage.tsx`
+
+**Objective:** Stabilize image rendering during scroll by memoizing the source and improving cache policy.
+
+**File:** `src/core-ui/AuthenticatedImage.tsx`
+
+**Action:** Replace the file content with the following:
+
+```typescript
 import { Image } from 'expo-image';
 import React, { useState, useMemo } from 'react';
 import {
@@ -157,3 +200,12 @@ const styles = StyleSheet.create({
     color: '#D32F2F',
   },
 });
+```
+
+---
+
+## Step 3: Verification
+
+1.  **Restart the app:** Run `yarn start` to ensure clean bundling.
+2.  **Check Post Detail:** Navigate to a post that previously had missing images. They should now appear.
+3.  **Check Scrolling:** Scroll rapidly through a list of images. They should remain visible and not flicker to white/blank.

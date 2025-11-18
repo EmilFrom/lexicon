@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import {
   ImageBackgroundProps,
   StyleProp,
-  StyleSheet,
   TouchableOpacity,
   View,
   ViewStyle,
   useWindowDimensions,
 } from 'react-native';
+import { useReactiveVar } from '@apollo/client';
 
 import { DEFAULT_IMAGE } from '../../assets/images';
 import { Text } from '../core-ui/Text';
 import { ShowImageModal } from '../components/ShowImageModal';
 import { makeStyles } from '../theme';
 import { convertUrl, resolveUploadUrl } from '../helpers';
-import { useAuthenticatedImage } from '../hooks';
+import { tokenVar } from '../reactiveVars';
 
 import CachedImage from './CachedImage';
 
@@ -30,48 +30,39 @@ const DEBUG_IMAGES = __DEV__;
 
 export function CustomImage(props: Props) {
   const styles = useStyles();
+  const token = useReactiveVar(tokenVar);
 
   const { src, style, debugLabel, maxHeightRatio = 0.7 } = props;
 
   const [show, setShow] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
+  // Local loading state
+  const [isDownloading, setIsDownloading] = useState(!!src);
+  const [hasError, setHasError] = useState(false);
+  
   const { height: windowHeight } = useWindowDimensions();
 
   const containerHeight = Math.max(200, windowHeight * maxHeightRatio);
   const normalizedSrc = src ? resolveUploadUrl(convertUrl(src)) : undefined;
 
-  // Use authenticated image hook for remote Discourse images
-  const {
-    localUri,
-    isLoading: isDownloading,
-    error: downloadError,
-    retry: retryDownload,
-  } = useAuthenticatedImage(normalizedSrc);
-
-  // Determine the actual image source to use
-  const imgSource = localUri
-    ? { uri: localUri }
-    : normalizedSrc
-    ? { uri: normalizedSrc }
+  // Construct source with headers
+  const imgSource = normalizedSrc
+    ? { 
+        uri: normalizedSrc,
+        headers: { Authorization: token ? `Bearer ${token}` : '' }
+      }
     : { uri: DEFAULT_IMAGE };
-
-  const hasError = !!downloadError;
 
   if (DEBUG_IMAGES) {
     console.log('[CustomImage]', debugLabel ?? '', {
       src,
       normalizedSrc,
-      localUri,
       isDownloading,
       hasError,
       containerHeight,
-      imgSource,
     });
   }
 
-  const hideImage = !normalizedSrc;
-
-  const onPress = () => {
+  const onPressImage = () => {
     if (!normalizedSrc) {
       return;
     }
@@ -86,107 +77,62 @@ export function CustomImage(props: Props) {
     height: containerHeight,
   };
 
-  const handleImageError = () => {
+  const handleImageError = (e: any) => {
+    setHasError(true);
+    setIsDownloading(false);
     if (DEBUG_IMAGES) {
-      console.warn('[CustomImage] error loading image', {
-        label: debugLabel,
-        src,
-        normalizedSrc,
-        localUri,
-      });
+      console.warn('[CustomImage] error:', e);
     }
   };
 
   const handleImageLoad = () => {
-    if (DEBUG_IMAGES) {
-      console.log('[CustomImage] Image loaded successfully:', {
-        label: debugLabel,
-        localUri,
-        normalizedSrc,
-      });
-    }
+    setIsDownloading(false);
   };
 
   const handleImageLoadStart = () => {
-    // Image started loading
+    setIsDownloading(true);
+    setHasError(false);
   };
 
-  const retryLoad = () => {
-    retryDownload();
-    setReloadKey((prev) => prev + 1);
-  };
-
-  const renderFallback = (message: string, actionLabel?: string) => (
-    <TouchableOpacity
-      accessibilityRole="button"
-      onPress={actionLabel ? retryLoad : undefined}
-      disabled={!actionLabel}
-      style={styles.fallback}
-    >
+  const renderFallback = (message: string) => (
+    <View style={styles.fallback}>
       <Text variant="semibold" size="s" style={styles.fallbackTitle}>
         {message}
       </Text>
-      {actionLabel ? (
-        <Text size="xs" color="textLight">
-          {actionLabel}
-        </Text>
-      ) : null}
-    </TouchableOpacity>
+    </View>
   );
 
   const content = (
     <View style={[styles.imageContainer, calculatedSizeStyle, style]}>
-      {isDownloading ? (
-        <View
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'yellow',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>LOADING...</Text>
-        </View>
-      ) : hasError ? (
-        <View
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'red',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>ERROR</Text>
-        </View>
-      ) : !normalizedSrc ? (
-        <View
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'gray',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>NO IMAGE</Text>
-        </View>
-      ) : (
-        <View
-          style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
-        >
-          <CachedImage
-            key={reloadKey}
-            source={imgSource}
-            style={{ width: '100%', height: '100%' }}
-            contentFit="cover"
-            onLoadStart={handleImageLoadStart}
-            onError={handleImageError}
-            onLoad={handleImageLoad}
-          />
+      {/* Loading State */}
+      {isDownloading && (
+        <View style={[styles.centered, styles.loadingBg]}>
+           <Text>Loading...</Text>
         </View>
       )}
+      
+      {/* Error State */}
+      {hasError && (
+        <View style={[styles.centered, styles.errorBg]}>
+           <Text style={{color: 'white'}}>Failed to load</Text>
+        </View>
+      )}
+
+      {/* Image */}
+      {(!hasError && normalizedSrc) && (
+         <View style={{ width: '100%', height: '100%', position: 'absolute' }}>
+            <CachedImage
+              source={imgSource}
+              style={{ width: '100%', height: '100%' }}
+              contentFit="cover"
+              onLoadStart={handleImageLoadStart}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+            />
+         </View>
+      )}
+      
+      {!normalizedSrc && renderFallback('No image available')}
     </View>
   );
 
@@ -195,7 +141,7 @@ export function CustomImage(props: Props) {
       <TouchableOpacity
         delayPressIn={100}
         style={[styles.container, style]}
-        onPress={onPress}
+        onPress={onPressImage}
       >
         {content}
       </TouchableOpacity>
@@ -208,7 +154,7 @@ export function CustomImage(props: Props) {
     </>
   ) : (
     <View style={[styles.imageContainer, calculatedSizeStyle, style]}>
-      {renderFallback(t('No image available'))}
+      {renderFallback('No image available')}
     </View>
   );
 }
@@ -226,9 +172,19 @@ const useStyles = makeStyles(({ spacing }) => ({
     alignItems: 'center',
     position: 'relative',
   },
-  image: {
+  centered: {
     width: '100%',
     height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    zIndex: 1,
+  },
+  loadingBg: {
+    backgroundColor: '#f0f0f0',
+  },
+  errorBg: {
+    backgroundColor: '#ffebee',
   },
   fallback: {
     justifyContent: 'center',
