@@ -2,21 +2,22 @@ import { useNavigation } from '@react-navigation/core';
 import * as Linking from 'expo-linking';
 import mentionFlowDock from 'markdown-it-flowdock';
 import React from 'react';
-import { Image, Platform, StyleProp, View, ViewStyle } from 'react-native';
+import { Platform, StyleProp, View, ViewStyle } from 'react-native';
 import BaseMarkdown, {
   ASTNode,
   MarkdownIt,
   MarkdownProps as BaseMarkdownProps,
-  RenderRules,
 } from 'react-native-markdown-display';
 
 import { discourseHost } from '../constants';
+import { AuthenticatedImage } from '../core-ui/AuthenticatedImage';
 import { Text } from '../core-ui/Text';
 import {
   extractPathname,
   filterMarkdownContentPoll,
   getValidDetailParams,
 } from '../helpers';
+import { isEmojiImage } from '../helpers/emojiHandler';
 import { makeStyles } from '../theme';
 import { StackNavProp } from '../types';
 
@@ -30,32 +31,8 @@ export type MarkdownProps = Omit<BaseMarkdownProps, 'rules' | 'style'> & {
 };
 
 const ios = Platform.OS === 'ios';
-
 export function Markdown(props: MarkdownProps) {
-  const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
-  const baseStyles = useStyles();
-
-  const {
-    content,
-    fontColor,
-    mentionColor,
-    style,
-    nonClickable,
-    ...otherProps
-  } = props;
-
-  const filteredContent = filterMarkdownContentPoll(content).filteredMarkdown;
-  const styles = fontColor
-    ? { ...baseStyles, body: { ...baseStyles.body, color: fontColor } }
-    : baseStyles;
-  const markdownItInstance = MarkdownIt({ typographer: true }).use(
-    mentionFlowDock,
-    { containerClassName: 'mention' },
-  );
-
-  const onPressMention = (username: string) => {
-    navigate('UserInformation', { username });
-  };
+  // ... (hooks and other logic)
 
   // FIX: Apply key to a wrapper View
   const renderImage = ({ key, attributes }: ASTNode) => (

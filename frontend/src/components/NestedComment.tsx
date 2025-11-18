@@ -1,37 +1,80 @@
-import React, { useEffect, useState } from 'react';
-import { View, ViewProps } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { StyleProp, View, ViewProps } from 'react-native';
 
-import { ActivityIndicator, Divider, Icon } from '../core-ui';
 import {
   deleteQuoteBbCode,
   formatRelativeTime,
   handleUnsupportedMarkdown,
   useStorage,
 } from '../helpers';
-import { getCompleteImageVideoUrls } from '../helpers/api/processRawContent'; // Keep this import
+import { getCompleteImageVideoUrls } from '../helpers/api/processRawContent';
 import { usePostRaw } from '../hooks';
 import { Color, makeStyles, useTheme } from '../theme';
-import { Post } from '../types';
+import { Post, RootStackNavProp } from '../types';
 
+import { ActivityIndicator, Divider, Icon } from '../core-ui';
 import { Author } from './Author';
-import { FullScreenImageModal } from './FullScreenImageModal'; // 1. FIX: Add missing import
+import { FullScreenImageModal } from './FullScreenImageModal';
 import { ImageCarousel } from './ImageCarousel';
-import { SimpleMarkdown } from './SimpleMarkdown';
-import { Metrics } from './Metrics/Metrics';
+import { Metrics, MetricsProp } from './Metrics/Metrics';
 import { PollPreview } from './Poll';
 import { PostHidden } from './PostItem';
-import {
-  LocalRepliedPostProps,
-  RepliedPost,
-  RepliedPostProps,
-} from './RepliedPost';
+import { RepliedPost } from './RepliedPost';
+import { SimpleMarkdown } from './SimpleMarkdown';
 
-// ... (Props types remain the same)
+type PressReplyParams = {
+  replyToPostId?: number;
+};
+
+type PressMoreParams = {
+  id: number;
+  canFlag?: boolean;
+  canEdit?: boolean;
+  flaggedByCommunity?: boolean;
+  fromPost: boolean;
+  author: string;
+};
+
+type Props = ViewProps &
+  Pick<
+    Post,
+    | 'id'
+    | 'topicId'
+    | 'likeCount'
+    | 'replyCount'
+    | 'isLiked'
+    | 'username'
+    | 'createdAt'
+    | 'mentionedUsers'
+    | 'avatar'
+    | 'canFlag'
+    | 'canEdit'
+    | 'content'
+    | 'hidden'
+    | 'postNumber'
+    | 'replyToPostNumber'
+    | 'emojiStatus'
+    | 'polls'
+    | 'pollsVotes'
+  > & {
+    hasMetrics?: boolean;
+    showOptions?: boolean;
+    isLoading?: boolean;
+    replyToPostId?: number;
+    onPressReply?: (params: PressReplyParams) => void;
+    onPressMore?: (params: PressMoreParams) => void;
+    onPressAuthor?: (username: string) => void;
+    onLayout?: () => void;
+    testIDStatus?: string;
+  };
 
 function BaseNestedComment(props: Props) {
   const storage = useStorage();
   const styles = useStyles();
   const { colors } = useTheme();
+  const { navigate } = useNavigation<RootStackNavProp<'PostDetail'>>();
+
   const {
     id,
     topicId,
@@ -77,9 +120,8 @@ function BaseNestedComment(props: Props) {
     },
   });
 
-  // 2. FIX: Add a null check for 'content' before processing.
   const images = content
-    ? (getCompleteImageVideoUrls(content).filter(Boolean) as string[])
+    ? (getCompleteImageVideoUrls(content)?.filter(Boolean) as string[])
     : [];
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = content ? content.replace(imageTagRegex, '') : '';
@@ -99,13 +141,65 @@ function BaseNestedComment(props: Props) {
   };
 
   const renderPolls = () => {
-    // ... (renderPolls function remains the same)
+    if (!polls) {
+      return null;
+    }
+
+    return polls?.map((poll, index) => {
+      const pollVotes = pollsVotes?.find(
+        (pollVotes) => pollVotes.pollName === poll.name,
+      );
+
+      return (
+        <PollPreview
+          key={index}
+          poll={poll}
+          pollVotes={pollVotes?.pollOptionIds}
+          isCreator={isTopicOwner}
+          postId={id}
+          topicId={topicId}
+          postCreatedAt={createdAt}
+        />
+      );
+    });
   };
 
   return (
     <View style={style} {...otherProps}>
       <View style={{ position: 'relative' }}>
-        {/* ... (Author and RepliedPost sections remain the same) */}
+        <View style={styles.authorContainer}>
+          <Author
+            image={avatar}
+            title={username}
+            subtitle={time}
+            style={styles.author}
+            subtitleStyle={styles.textTime}
+            onPressAuthor={onPressAuthor}
+            showStatus={true}
+            emojiCode={emojiStatus}
+            testIDStatus={testIDStatus}
+          >
+            {showOptions && (
+              <Icon
+                name="More"
+                color={colors.textLighter}
+                onPress={() =>
+                  onPressMore?.({
+                    id,
+                    canFlag,
+                    canEdit,
+                    flaggedByCommunity: hidden,
+                    fromPost: false,
+                    author: username,
+                  })
+                }
+                hitSlop={{ top: 15, right: 15, bottom: 15, left: 15 }}
+                testID={`NestedComment:Icon:More:${id}`}
+              />
+            )}
+          </Author>
+        </View>
+        {replyToPostId && <RepliedPost postId={id} replyToPostId={replyToPostId} />}
         {isHidden ? (
           <PostHidden
             loading={loading}
@@ -132,10 +226,25 @@ function BaseNestedComment(props: Props) {
             />
           </>
         )}
-        {/* ... (Metrics and Loading sections remain the same) */}
+        {hasMetrics && !isHidden && (
+          <Metrics
+            topicId={topicId}
+            postId={id}
+            replyCount={replyCount}
+            likeCount={likeCount}
+            isLiked={isLiked}
+            isCreator={isTopicOwner}
+            style={styles.metricSpacing}
+            onPressReply={({ postId }) => onPressReply?.({ replyToPostId: postId })}
+          />
+        )}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator />
+          </View>
+        )}
       </View>
       <Divider />
-      {/* 3. FIX: Add the missing FullScreenImageModal component */}
       <FullScreenImageModal
         visible={!!fullScreenImage}
         imageUri={fullScreenImage || ''}
@@ -144,8 +253,6 @@ function BaseNestedComment(props: Props) {
     </View>
   );
 }
-
-export const NestedComment = React.memo(BaseNestedComment);
 
 const useStyles = makeStyles(({ fontSizes, spacing, colors }) => ({
   authorContainer: {
@@ -171,3 +278,5 @@ const useStyles = makeStyles(({ fontSizes, spacing, colors }) => ({
     fontSize: fontSizes.s,
   },
 }));
+
+export const NestedComment = memo(BaseNestedComment);
