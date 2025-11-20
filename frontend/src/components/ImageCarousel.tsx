@@ -10,6 +10,7 @@ import { AuthenticatedImage } from '../core-ui/AuthenticatedImage';
 import { Text } from '../core-ui/Text';
 import { makeStyles, useTheme } from '../theme';
 import { ImageDimension } from '../helpers/api/lexicon';
+import { getOriginalImageUrl } from '../helpers/convertUrl';
 
 type Props = {
   images: string[];
@@ -84,7 +85,10 @@ export function ImageCarousel({ images, onImagePress, imageDimensionsMap }: Prop
             <View key={index} style={[styles.imageContainer, { width: contentWidth, height: carouselHeight }]}>
               <AuthenticatedImage
                 url={url}
-                onPress={() => onImagePress(url)}
+                onPress={() => {
+                const originalUrl = getOriginalImageUrl(url);
+                onImagePress(originalUrl);
+                }}
                 // Set max height ratio to infinity so the AuthenticatedImage fills our calculated container
                 maxHeightRatio={Infinity} 
                 style={{ width: '100%', height: '100%' }}

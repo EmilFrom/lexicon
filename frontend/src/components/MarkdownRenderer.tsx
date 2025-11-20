@@ -18,13 +18,14 @@ type Props = {
   nonClickable?: boolean;
 };
 
-export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Props) {
+function BaseMarkdownRenderer({ content, fontColor, style, nonClickable }: Props) {
   const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
   const { colors, fontSizes } = useTheme();
   const { width } = useWindowDimensions();
   const styles = useStyles();
 
-  const tagsStyles: Readonly<Record<string, MixedStyleDeclaration>> = {
+  // 1. Memoize tagsStyles so it doesn't recreate on every render
+  const tagsStyles: Readonly<Record<string, MixedStyleDeclaration>> = useMemo(() => ({
     body: { color: fontColor || colors.textNormal, fontSize: fontSizes.m },
     p: { marginTop: 0, marginBottom: 0 },
     blockquote: {
@@ -37,7 +38,10 @@ export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Pr
     strong: { fontWeight: 'bold' },
     em: { fontStyle: 'italic' },
     a: { color: colors.primary, textDecorationLine: 'none' },
-  };
+  }), [fontColor, colors, fontSizes]);
+
+  // 2. Memoize the source object
+  const source = useMemo(() => ({ html: content }), [content]);
 
   const renderers = useMemo(() => ({
     a: ({ TDefaultRenderer, tnode, ...props }: any) => {
@@ -84,7 +88,6 @@ export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Pr
     },
     details: ({ TDefaultRenderer, tnode, ...props }: any) => {
       const summaryNode = tnode.children.find(
-        // FIX: Use 'tagName' in c as the type guard
         (c: TNode) => 'tagName' in c && c.tagName === 'summary'
       );
       
@@ -111,7 +114,7 @@ export function MarkdownRenderer({ content, fontColor, style, nonClickable }: Pr
     <View style={style}>
       <RenderHTML
         contentWidth={width}
-        source={{ html: content }}
+        source={source}
         tagsStyles={tagsStyles}
         renderers={renderers}
       />
@@ -129,3 +132,8 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     textDecorationLine: 'underline',
   },
 }));
+
+// 3. Export as Memoized Component
+// This prevents the renderer from updating if the props (content/styles) haven't changed,
+// even if the parent (PostItem) re-renders.
+export const MarkdownRenderer = React.memo(BaseMarkdownRenderer);

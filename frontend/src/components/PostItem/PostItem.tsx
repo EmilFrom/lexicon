@@ -127,16 +127,18 @@ function BasePostItem(props: Props) {
     [navigate],
   );
 
-  // --- NEW CONTENT PROCESSING PATTERN ---
-  const htmlContent = markdownToHtml(content);
-  // 1. EXTRACT IMAGES
-  // Use passed images if available, otherwise extract them from HTML
+  // 1. Memoize the HTML conversion so it only happens if 'content' text changes
+  const htmlContent = React.useMemo(() => 
+    markdownToHtml(content), 
+    [content]
+  );
+
+  // 2. Memoize the image extraction
   const images = React.useMemo(() => {
       return propImages ?? (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || []);
   }, [propImages, htmlContent]);
 
-  // 2. FETCH DIMENSIONS DYNAMICALLY
-  // This hook automatically handles caching and only fetches if images array isn't empty
+  // 3. This hook is now safe because 'images' is a stable array
   const { dimensions: fetchedDimensions } = useImageDimensions(images);
 
   // 3. MERGE DIMENSIONS
@@ -153,6 +155,28 @@ function BasePostItem(props: Props) {
     }
     return combined;
   }, [fetchedDimensions, imageDimensions, images]);
+
+  // DEBUG LOG
+  // Only log if we have images but the map is empty, or if we have data
+  if (__DEV__) {
+    const firstImg = images[0];
+    const hasData = finalDimensionsMap && Object.keys(finalDimensionsMap).length > 0;
+    const hasMatch = finalDimensionsMap && finalDimensionsMap[firstImg];
+    
+    if (images.length > 0) {
+       if (!hasData) {
+         // This is normal while loading
+         // console.log('[PostItem] Waiting for dimensions...');
+       } else if (!hasMatch) {
+         console.warn('[PostItem] Data loaded, but KEY MISMATCH.', {
+           lookingFor: firstImg,
+           availableKeys: Object.keys(finalDimensionsMap)
+         });
+       } else {
+         console.log('[PostItem] Success! Dimension found for:', firstImg, finalDimensionsMap[firstImg]);
+       }
+    }
+  }
   
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
