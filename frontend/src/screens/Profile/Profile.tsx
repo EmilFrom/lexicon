@@ -7,7 +7,7 @@ import {
   CustomHeader,
   LoadingOrError,
   //Markdown,
-  ShowImageModal,
+  FullScreenImageModal,
   UserStatus,
 } from '../../components';
 import { MarkdownRenderer } from '../../components/MarkdownRenderer';
@@ -355,10 +355,11 @@ export default function Profile() {
           </View>
         )}
       </View>
-      <ShowImageModal
-        show={show}
-        userImage={{ uri: userImage }}
-        onPressCancel={onPressCancel}
+      {/* --- CHANGED: Replaced ShowImageModal with FullScreenImageModal --- */}
+      <FullScreenImageModal
+        visible={show}
+        imageUri={userImage}
+        onClose={onPressCancel}
       />
     </>
   );

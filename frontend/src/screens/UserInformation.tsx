@@ -7,7 +7,7 @@ import {
   CustomHeader,
   LoadingOrError,
   PostList,
-  ShowImageModal,
+  FullScreenImageModal,
   UserInformationPostItem,
   UserStatus,
 } from '../components';
@@ -262,10 +262,10 @@ export default function UserInformation() {
   return (
     <View style={styles.container}>
       {content}
-      <ShowImageModal
-        show={show || false}
-        userImage={{ uri: userImage }}
-        onPressCancel={onPressCancel}
+       <FullScreenImageModal
+        visible={show || false}
+        imageUri={userImage}
+        onClose={onPressCancel}
       />
     </View>
   );

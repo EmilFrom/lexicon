@@ -18,7 +18,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Controller, useForm } from 'react-hook-form';
 
-import { CustomHeader, ShowImageModal } from '../components';
+import { CustomHeader, FullScreenImageModal } from '../components';
+
 import {
   ActivityIndicator,
   Avatar,
@@ -578,10 +579,10 @@ export default function EditProfile(props: ProfileProps) {
               )}
             /> */}
 
-            <ShowImageModal
-              show={show}
-              userImage={{ uri: userImage }}
-              onPressCancel={onPressCancel}
+            <FullScreenImageModal
+              visible={show}
+              imageUri={userImage}
+              onClose={onPressCancel}
             />
           </View>
         )}
