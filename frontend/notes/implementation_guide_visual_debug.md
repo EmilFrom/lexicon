@@ -1,85 +1,19 @@
-# Implementation Guide: Visual Debugging for PostItem
+# Debug Analysis: Homescreen Image Rendering
 
-This guide adds visual markers (red/blue backgrounds) and logs to `PostItem` and `ImageCarousel` to pinpoint why images are invisible on the Post Detail screen.
+## What the Colors Tell Us
+Looking at `@notes/images/homescreen_debug_01.PNG`:
+1.  **Red (PostItem Wrapper):** This confirms the `PostItem` is rendering its content.
+2.  **Blue (ImageCarousel Container):** The visible blue bar on the left (and presumably right) represents the **padding** of the `ImageCarousel` container.
+    *   **Finding:** The `ImageCarousel` has `paddingHorizontal: spacing.xxl`.
+    *   **Context:** The parent `PostItem` *also* has `padding: spacing.xxl`.
+    *   **Result:** The image is being "double padded" (indented twice), which is why it looks narrow and why you see the blue background of the container.
+3.  **Yellow (ScrollView):** The image is inside this, but it's constrained by the blue padding.
 
-## Step 1: Update `PostItem.tsx`
+## Fix for "Fill the Whole Screen"
+To make the carousel fill the available width and behave as desired:
 
-**File:** `src/components/PostItem/PostItem.tsx`
+1.  **Remove Horizontal Padding:** We must remove `paddingHorizontal` from the `ImageCarousel` styles. It should inherit the width constraint from the parent `PostItem` (or use negative margins if you want it truly edge-to-edge, ignoring the text alignment). Assuming you want it aligned with the text but filling that width, removing the extra padding is the fix.
+2.  **Dynamic Height (The 1.5 Rule):** We will implement the logic where the image takes its natural height *up to* a ratio of 1.5 (height is 1.5x width). This ensures tall images are big (filling more of the screen) but don't break the layout or scrolling flow completely.
 
-**Action:** Add debug logs and a background color to the image container.
-
-```typescript
-// ... imports
-
-function BasePostItem(props: Props) {
-  // ... existing hooks
-
-  const {
-    // ... other props
-    images: propImages,
-    // ...
-  } = props;
-
-  // ... existing logic
-
-  // --- NEW CONTENT PROCESSING PATTERN ---
-  const htmlContent = markdownToHtml(content);
-  const images = propImages ?? (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || []);
-  // ...
-  
-  // DEBUG LOG
-  if (__DEV__) {
-      console.log('[PostItem] Render:', { 
-          hasPropImages: !!propImages, 
-          finalImagesCount: images.length,
-          firstImage: images[0]
-      });
-  }
-
-  // ... 
-
-  const imageContent = (
-    <View style={{ backgroundColor: 'red', minHeight: images.length ? 20 : 0 }}>
-      <ImageCarousel
-        images={images}
-        onImagePress={(uri) => setFullScreenImage(uri)}
-        serverDimensions={imageDimensions}
-      />
-    </View>
-  );
-  
-  // ... rest of component
-```
-
-## Step 2: Update `ImageCarousel.tsx`
-
-**File:** `src/components/ImageCarousel.tsx`
-
-**Action:** Add a blue background to the carousel container to see its layout.
-
-```typescript
-// ... imports
-
-export function ImageCarousel({ images, onImagePress, serverDimensions }: Props) {
-  // ... calculations
-  const carouselHeight = Math.max(contentWidth / aspectRatio, 200);
-
-  // ... 
-
-  return (
-    <View style={[styles.container, { height: carouselHeight, backgroundColor: 'blue' }]}>
-      <ScrollView
-         // ... props
-         style={[styles.scrollView, { width: contentWidth, height: carouselHeight, backgroundColor: 'yellow' }]}
-         // ...
-```
-
-## Step 3: Verify
-
-1.  Restart `yarn start`.
-2.  Navigate to Post Detail.
-3.  **Look for Colors:**
-    *   **Red:** `PostItem` wrapper. If you see this but no blue/yellow, `ImageCarousel` isn't rendering.
-    *   **Blue:** `ImageCarousel` container. If you see this, the container has size.
-    *   **Yellow:** `ScrollView`. If you see this, the scrollview has size.
-4.  **Check Logs:** Confirm `[PostItem] Render` shows a count > 0.
+## Updated Implementation Plan
+I will update the `implementation_guide_carousel_layout.md` to include removing the padding.

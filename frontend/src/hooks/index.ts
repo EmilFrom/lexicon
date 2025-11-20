@@ -8,9 +8,11 @@ export * from './useKeyboardListener';
 export * from './useLoadMorePost';
 export * from './usePolling';
 export * from './usePrefetchVisibleTopics';
+export * from './useImageDimensions';
 
 export * from './rest/auth/useLogout';
 export * from './rest/auth/usePushNotifications';
+
 
 export * from './rest/chat/useChatChannelDetail';
 export * from './rest/chat/useChatChannelMessages';

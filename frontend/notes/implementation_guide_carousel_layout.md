@@ -1,132 +1,56 @@
-# Implementation Guide: Fix Image Carousel Layout
+# Implementation Guide: Control ImageCarousel Height
 
-This guide makes the `ImageCarousel` component more robust by ensuring the width calculation is safe and correct. This is the most likely cause for images not appearing despite data being present.
+## Goal
+Restrict the maximum height of the `ImageCarousel` so that images do not become excessively tall. The goal is to render the image's natural height unless it exceeds a height-to-width ratio of 1.5.
 
-## Step 1: Update `ImageCarousel.tsx`
+## File Location
+`src/components/ImageCarousel.tsx`
 
-**File:** `src/components/ImageCarousel.tsx`
-
-**Action:** Update the component to safely calculate `contentWidth` and add debug logging.
+## Current Logic
+The current logic calculates the height based on the aspect ratio derived from `serverDimensions` (or defaults to 16:9). It allows the height to grow indefinitely if the aspect ratio is small (i.e., for tall images).
 
 ```typescript
-import React, { useState } from 'react';
-import {
-  View,
-  ScrollView,
-  useWindowDimensions,
-  StyleSheet,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from 'react-native';
-import { AuthenticatedImage } from '../core-ui/AuthenticatedImage';
-import { Text } from '../core-ui/Text';
-import { makeStyles } from '../theme';
-
-type Props = {
-  images: string[];
-  onImagePress: (uri: string) => void;
-  // This prop is passed through from PostItem for the first image
-  serverDimensions?: { width: number; height: number; aspectRatio?: number };
-};
-
-export function ImageCarousel({ images, onImagePress, serverDimensions }: Props) {
-  const styles = useStyles();
-  const { width: windowWidth } = useWindowDimensions();
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  // Calculate the width of the content area, accounting for padding
-  // Safety check: ensure paddingHorizontal is treated as a number
-  const paddingHorizontal = typeof styles.container.paddingHorizontal === 'number'
-    ? styles.container.paddingHorizontal
-    : 24; // Default fallback if theme value is not a number
-    
-  const contentWidth = windowWidth - (paddingHorizontal * 2);
-
-  if (__DEV__) {
-    console.log('[ImageCarousel] Layout:', { 
-      windowWidth, 
-      paddingHorizontal, 
-      contentWidth, 
-      imagesCount: images?.length 
-    });
-  }
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const scrollPosition = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(scrollPosition / contentWidth);
-    if (newIndex !== activeIndex) {
-      setActiveIndex(newIndex);
-    }
-  };
-
-  if (!images || images.length === 0) {
-    return null;
-  }
-
-  return (
-    <View style={styles.container}>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScroll}
-        style={[styles.scrollView, { width: contentWidth }]}
-        contentContainerStyle={{ width: contentWidth * images.length }} // Explicit content size
-      >
-        {images.map((url, index) => (
-          <View key={index} style={[styles.imageContainer, { width: contentWidth }]}>
-            <AuthenticatedImage
-              url={url}
-              onPress={() => onImagePress(url)}
-              maxHeightRatio={0.6} // Give it a nice default aspect ratio
-              serverDimensions={index === 0 ? serverDimensions : undefined}
-            />
-          </View>
-        ))}
-      </ScrollView>
-      {images.length > 1 && (
-        <View style={styles.counterBadge}>
-          <Text style={styles.counterText}>
-            {activeIndex + 1} / {images.length}
-          </Text>
-        </View>
-      )}
-    </View>
-  );
-}
-
-const useStyles = makeStyles(({ spacing, fontSizes, colors }) => ({
-  container: {
-    marginTop: spacing.m,
-    paddingHorizontal: spacing.xxl, // Match PostItem's padding
-  },
-  scrollView: {
-    borderRadius: spacing.m,
-  },
-  imageContainer: {
-    borderRadius: spacing.m,
-    overflow: 'hidden',
-    backgroundColor: colors.backgroundDarker, // Placeholder color
-  },
-  counterBadge: {
-    position: 'absolute',
-    top: spacing.m,
-    right: spacing.xxl + spacing.m, // Adjust for container padding
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.xs,
-    borderRadius: spacing.l,
-  },
-  counterText: {
-    color: colors.pureWhite,
-    fontSize: fontSizes.s,
-    fontWeight: 'bold',
-  },
-}));
+// Lines 36-40 in src/components/ImageCarousel.tsx
+const carouselHeight = Math.max(contentWidth / aspectRatio, 200);
 ```
 
-## Step 2: Verify
+## Proposed Change
 
-1.  Restart `yarn start`.
-2.  Check the logs for `[ImageCarousel] Layout`. Ensure `contentWidth` is a positive number (e.g., ~350 on iPhone).
-3.  Check the Post Detail screen. Images should now appear.
+We need to clamp the calculated height so it doesn't exceed `contentWidth * 1.5`.
+
+1.  **Calculate Natural Height:** Determine the height the image *wants* to be based on its aspect ratio.
+2.  **Define Max Height:** Calculate the maximum allowed height (`contentWidth * 1.5`).
+3.  **Apply Limit:** Use the smaller of the two values (but keep the safety minimum of 200px).
+
+### Code Snippet
+
+Replace the existing height calculation logic (around lines 28-40) with:
+
+```typescript
+  // 2. Calculate Height
+  // Use server dimensions if available, otherwise default to 16:9 (1.77)
+  let aspectRatio = 1.77;
+  if (serverDimensions) {
+    if (serverDimensions.aspectRatio) {
+      aspectRatio = serverDimensions.aspectRatio;
+    } else if (serverDimensions.width && serverDimensions.height) {
+      aspectRatio = serverDimensions.width / serverDimensions.height;
+    }
+  }
+  
+  // Calculate the natural height based on width and aspect ratio
+  const naturalHeight = contentWidth / aspectRatio;
+
+  // Define the maximum allowed height ratio (e.g., 1.5 means height can be 1.5x the width)
+  const MAX_HEIGHT_RATIO = 5;
+  const maxHeight = contentWidth * MAX_HEIGHT_RATIO;
+
+  // Use the natural height, but cap it at maxHeight. 
+  // Also keep a safety minimum of 200 to prevent collapse.
+  const carouselHeight = Math.max(Math.min(naturalHeight, maxHeight), 200);
+```
+
+## Next Steps
+1.  Open `src/components/ImageCarousel.tsx`.
+2.  Apply the code change above.
+3.  Verify that tall images are now constrained to the 1.5 ratio, while landscape/square images still render at their natural aspect ratio.

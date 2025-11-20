@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { AuthenticatedImage } from '../core-ui/AuthenticatedImage';
 import { Text } from '../core-ui/Text';
-import { makeStyles } from '../theme';
+import { makeStyles, useTheme } from '../theme';
 
 type Props = {
   images: string[];
@@ -20,19 +20,21 @@ type Props = {
 
 export function ImageCarousel({ images, onImagePress, serverDimensions }: Props) {
   const styles = useStyles();
+   const { spacing } = useTheme(); // Get spacing from theme
   const { width: windowWidth } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
 
   // 1. Calculate Width
-  const paddingHorizontal = typeof styles.container.paddingHorizontal === 'number'
-    ? styles.container.paddingHorizontal
-    : 24; 
-  const contentWidth = windowWidth - (paddingHorizontal * 2);
+  // The parent PostItem has horizontal padding of spacing.xxl.
+  // The carousel itself has 0 horizontal padding now.
+  // So the available width for the content is Window Width - (Parent Padding * 2)
+  const contentWidth = windowWidth - (spacing.xxl * 2);
 
   // 2. Calculate Height
   // Use server dimensions if available, otherwise default to 16:9 (1.77)
-  let aspectRatio = 1.77;
+  let aspectRatio = 1.0; // Default
   if (serverDimensions) {
+    // The server returns 'aspectRatio' directly now
     if (serverDimensions.aspectRatio) {
       aspectRatio = serverDimensions.aspectRatio;
     } else if (serverDimensions.width && serverDimensions.height) {
@@ -40,10 +42,18 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
     }
   }
   
-  // Calculate height based on width and aspect ratio
-  // Clamp to a minimum of 200 to prevent collapse
-  const carouselHeight = Math.max(contentWidth / aspectRatio, 200);
+  // Calculate the natural height based on width and aspect ratio
+  // (Width / AspectRatio = Height)
+  const naturalHeight = contentWidth / aspectRatio;
 
+  // Define the maximum allowed height ratio (e.g., 1.5 means height can be 1.5x the width)
+  const MAX_HEIGHT_RATIO = 1.5;
+  const maxHeight = contentWidth * MAX_HEIGHT_RATIO;
+
+  // Use the natural height, but cap it at maxHeight. 
+  // Also keep a safety minimum of 200 to prevent collapse.
+  const carouselHeight = Math.max(Math.min(naturalHeight, maxHeight), 200);
+  
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(scrollPosition / contentWidth);
@@ -57,13 +67,13 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
   }
 
   return (
-    <View style={[styles.container, { height: carouselHeight, backgroundColor: 'blue' }]}>
+    <View style={[styles.container, { height: carouselHeight }]}>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScroll}
-        style={[styles.scrollView, { width: contentWidth, height: carouselHeight, backgroundColor: 'yellow' }]}
+        style={[styles.scrollView, { width: contentWidth, height: carouselHeight }]}
         contentContainerStyle={{ width: contentWidth * images.length, height: carouselHeight }}
       >
         {images.map((url, index) => (
@@ -94,7 +104,7 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
 const useStyles = makeStyles(({ spacing, fontSizes, colors }) => ({
   container: {
     marginTop: spacing.m,
-    paddingHorizontal: spacing.xxl, // Match PostItem's padding
+    // paddingHorizontal removed to avoid double-padding
   },
   scrollView: {
     borderRadius: spacing.m,

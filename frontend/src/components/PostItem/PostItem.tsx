@@ -22,6 +22,7 @@ import { Color, makeStyles, useTheme } from '../../theme';
 import { Channel, Poll, PollsVotes, StackNavProp } from '../../types';
 import { Author } from '../Author';
 import { PollPreview } from '../Poll';
+import { ImageDimension } from '../../helpers/api/lexicon'; 
 
 import { PostGroupings } from './PostGroupings';
 import { PostHidden } from './PostHidden';
@@ -46,6 +47,7 @@ type Props = ViewProps & {
   prevScreen?: string;
   images?: Array<string>;
   imageDimensions?: { width: number; height: number; aspectRatio?: number };
+  imageDimensionsMap?: Record<string, ImageDimension>;
   isHidden?: boolean;
   footer?: React.ReactNode;
   mentionedUsers?: Array<string>;
@@ -84,6 +86,7 @@ function BasePostItem(props: Props) {
     showImageRow = false,
     nonclickable = false,
     imageDimensions,
+    imageDimensionsMap, 
     isHidden = false,
     footer,
     onPressViewIgnoredContent = () => {},
@@ -211,13 +214,16 @@ function BasePostItem(props: Props) {
   );
 
   const imageContent = (
-    <View style={{ backgroundColor: 'red', minHeight: images.length ? 20 : 0 }}>
-      <ImageCarousel
-        images={images}
-        onImagePress={(uri) => setFullScreenImage(uri)}
-        serverDimensions={imageDimensions}
-      />
-    </View>
+  <View style={{ minHeight: images.length ? 20 : 0 }}>
+    <ImageCarousel
+      images={images}
+      onImagePress={(uri) => setFullScreenImage(uri)}
+      // If we have dimensions for the first image, pass them.
+      // Or pass the whole map if ImageCarousel handles multiple images deeper.
+      // For now, keeping with current pattern of passing "serverDimensions" for the active/first one.
+      serverDimensions={images.length > 0 && imageDimensionsMap ? imageDimensionsMap[images[0]] : imageDimensions}
+    />
+  </View>
   );
   const pollsContent = renderPolls();
 
