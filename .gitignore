@@ -7,3 +7,5 @@ debugging/
 /frontend/@notes
 /frontend/_notes
 frontend/logs
+frontend/eas.json
+frontend/config.ts
