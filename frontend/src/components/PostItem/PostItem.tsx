@@ -23,6 +23,7 @@ import { Channel, Poll, PollsVotes, StackNavProp } from '../../types';
 import { Author } from '../Author';
 import { PollPreview } from '../Poll';
 import { ImageDimension } from '../../helpers/api/lexicon'; 
+import { useImageDimensions } from '../../hooks/useImageDimensions';
 
 import { PostGroupings } from './PostGroupings';
 import { PostHidden } from './PostHidden';
@@ -128,18 +129,30 @@ function BasePostItem(props: Props) {
 
   // --- NEW CONTENT PROCESSING PATTERN ---
   const htmlContent = markdownToHtml(content);
-  
-  // Use passed images if available, otherwise extract them
-  const images = propImages ?? (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || []);
+  // 1. EXTRACT IMAGES
+  // Use passed images if available, otherwise extract them from HTML
+  const images = React.useMemo(() => {
+      return propImages ?? (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || []);
+  }, [propImages, htmlContent]);
 
-   // DEBUG LOG
-  if (__DEV__) {
-      console.log('[PostItem] Render:', { 
-          hasPropImages: !!propImages, 
-          finalImagesCount: images.length,
-          firstImage: images[0]
-      });
-  }
+  // 2. FETCH DIMENSIONS DYNAMICALLY
+  // This hook automatically handles caching and only fetches if images array isn't empty
+  const { dimensions: fetchedDimensions } = useImageDimensions(images);
+
+  // 3. MERGE DIMENSIONS
+  // Combine the fetched dimensions with the prop dimension (usually the thumbnail)
+  const finalDimensionsMap = React.useMemo(() => {
+    const combined = { ...fetchedDimensions };
+    // If parent passed specific dimensions for the first image (common in Home feed), populate it
+    if (images.length > 0 && imageDimensions && !combined[images[0]]) {
+        combined[images[0]] = {
+            url: images[0],
+            ...imageDimensions,
+            aspectRatio: imageDimensions.aspectRatio || (imageDimensions.width / imageDimensions.height)
+        };
+    }
+    return combined;
+  }, [fetchedDimensions, imageDimensions, images]);
   
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
@@ -214,17 +227,16 @@ function BasePostItem(props: Props) {
   );
 
   const imageContent = (
-  <View style={{ minHeight: images.length ? 20 : 0 }}>
-    <ImageCarousel
-      images={images}
-      onImagePress={(uri) => setFullScreenImage(uri)}
-      // If we have dimensions for the first image, pass them.
-      // Or pass the whole map if ImageCarousel handles multiple images deeper.
-      // For now, keeping with current pattern of passing "serverDimensions" for the active/first one.
-      serverDimensions={images.length > 0 && imageDimensionsMap ? imageDimensionsMap[images[0]] : imageDimensions}
-    />
-  </View>
+    <View style={{ minHeight: images.length ? 20 : 0 }}>
+      <ImageCarousel
+        images={images}
+        onImagePress={(uri) => setFullScreenImage(uri)}
+        // Pass the full map instead of single serverDimensions
+        imageDimensionsMap={finalDimensionsMap} 
+      />
+    </View>
   );
+
   const pollsContent = renderPolls();
 
   const wrappedMainContent = !nonclickable ? (

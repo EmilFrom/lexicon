@@ -1,59 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   ScrollView,
   useWindowDimensions,
-  StyleSheet,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
 import { AuthenticatedImage } from '../core-ui/AuthenticatedImage';
 import { Text } from '../core-ui/Text';
 import { makeStyles, useTheme } from '../theme';
+import { ImageDimension } from '../helpers/api/lexicon';
 
 type Props = {
   images: string[];
   onImagePress: (uri: string) => void;
-  // This prop is passed through from PostItem for the first image
-  serverDimensions?: { width: number; height: number; aspectRatio?: number };
+  // We replace the single serverDimensions prop with the full map
+  imageDimensionsMap?: Record<string, ImageDimension>;
 };
 
-export function ImageCarousel({ images, onImagePress, serverDimensions }: Props) {
+export function ImageCarousel({ images, onImagePress, imageDimensionsMap }: Props) {
   const styles = useStyles();
-   const { spacing } = useTheme(); // Get spacing from theme
+  const { spacing } = useTheme();
   const { width: windowWidth } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
 
   // 1. Calculate Width
-  // The parent PostItem has horizontal padding of spacing.xxl.
-  // The carousel itself has 0 horizontal padding now.
-  // So the available width for the content is Window Width - (Parent Padding * 2)
   const contentWidth = windowWidth - (spacing.xxl * 2);
 
-  // 2. Calculate Height
-  // Use server dimensions if available, otherwise default to 16:9 (1.77)
-  let aspectRatio = 1.0; // Default
-  if (serverDimensions) {
-    // The server returns 'aspectRatio' directly now
-    if (serverDimensions.aspectRatio) {
-      aspectRatio = serverDimensions.aspectRatio;
-    } else if (serverDimensions.width && serverDimensions.height) {
-      aspectRatio = serverDimensions.width / serverDimensions.height;
+  // 2. Calculate Height based on the FIRST image
+  // We use the first image to define the height of the carousel row to prevent jumping
+  const carouselHeight = useMemo(() => {
+    const firstImageUri = images[0];
+    const dimensions = imageDimensionsMap?.[firstImageUri];
+    
+    // Default aspect ratio (16:9) if nothing is found
+    let aspectRatio = 1.0; 
+
+    if (dimensions) {
+      if (dimensions.aspectRatio) {
+        aspectRatio = dimensions.aspectRatio;
+      } else if (dimensions.width && dimensions.height) {
+        aspectRatio = dimensions.width / dimensions.height;
+      }
     }
-  }
-  
-  // Calculate the natural height based on width and aspect ratio
-  // (Width / AspectRatio = Height)
-  const naturalHeight = contentWidth / aspectRatio;
 
-  // Define the maximum allowed height ratio (e.g., 1.5 means height can be 1.5x the width)
-  const MAX_HEIGHT_RATIO = 1.5;
-  const maxHeight = contentWidth * MAX_HEIGHT_RATIO;
+    const calculatedHeight = contentWidth / aspectRatio;
+    
+    // Safety limits: Min 200px, Max 1.5x the width (portrait images)
+    const MAX_HEIGHT_RATIO = 5;
+    const maxHeight = contentWidth * MAX_HEIGHT_RATIO;
 
-  // Use the natural height, but cap it at maxHeight. 
-  // Also keep a safety minimum of 200 to prevent collapse.
-  const carouselHeight = Math.max(Math.min(naturalHeight, maxHeight), 200);
-  
+    // Return calculated height clamped between 200 and maxHeight
+    return Math.max(Math.min(calculatedHeight, maxHeight), 200);
+  }, [images, imageDimensionsMap, contentWidth]);
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(scrollPosition / contentWidth);
@@ -76,19 +76,23 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
         style={[styles.scrollView, { width: contentWidth, height: carouselHeight }]}
         contentContainerStyle={{ width: contentWidth * images.length, height: carouselHeight }}
       >
-        {images.map((url, index) => (
-          <View key={index} style={[styles.imageContainer, { width: contentWidth, height: carouselHeight }]}>
-            <AuthenticatedImage
-              url={url}
-              onPress={() => onImagePress(url)}
-              // Pass 0 or Infinity to prevent AuthenticatedImage from recalculating/clamping height again
-              // We want it to just fill the container we made for it
-              maxHeightRatio={Infinity} 
-              style={{ width: '100%', height: '100%' }}
-              serverDimensions={index === 0 ? serverDimensions : undefined}
-            />
-          </View>
-        ))}
+        {images.map((url, index) => {
+          // Pass specific dimensions for this image if available
+          const specificDims = imageDimensionsMap?.[url];
+          
+          return (
+            <View key={index} style={[styles.imageContainer, { width: contentWidth, height: carouselHeight }]}>
+              <AuthenticatedImage
+                url={url}
+                onPress={() => onImagePress(url)}
+                // Set max height ratio to infinity so the AuthenticatedImage fills our calculated container
+                maxHeightRatio={Infinity} 
+                style={{ width: '100%', height: '100%' }}
+                serverDimensions={specificDims}
+              />
+            </View>
+          );
+        })}
       </ScrollView>
       {images.length > 1 && (
         <View style={styles.counterBadge}>
@@ -104,7 +108,6 @@ export function ImageCarousel({ images, onImagePress, serverDimensions }: Props)
 const useStyles = makeStyles(({ spacing, fontSizes, colors }) => ({
   container: {
     marginTop: spacing.m,
-    // paddingHorizontal removed to avoid double-padding
   },
   scrollView: {
     borderRadius: spacing.m,
@@ -112,12 +115,12 @@ const useStyles = makeStyles(({ spacing, fontSizes, colors }) => ({
   imageContainer: {
     borderRadius: spacing.m,
     overflow: 'hidden',
-    backgroundColor: colors.backgroundDarker, // Placeholder color
+    backgroundColor: colors.backgroundDarker,
   },
   counterBadge: {
     position: 'absolute',
     top: spacing.m,
-    right: spacing.xxl + spacing.m, // Adjust for container padding
+    right: spacing.m, 
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.xs,

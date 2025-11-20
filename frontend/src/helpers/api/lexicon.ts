@@ -1,4 +1,6 @@
 import { discourseHost } from '../../constants';
+import { decodeToken } from '../';
+import { tokenVar } from '../../reactiveVars';
 
 export type ImageDimension = {
   url: string;
@@ -19,14 +21,27 @@ export const fetchImageDimensions = async (urls: string[]): Promise<Record<strin
     const queryString = urls
       .map((url) => `urls[]=${encodeURIComponent(url)}`)
       .join('&');
+
+      const token = tokenVar();
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = token;
+      
+      // decodeToken extracts the "User-Api-Key" needed by Discourse
+      const apiKey = decodeToken(token);
+      if (apiKey) {
+        headers['User-Api-Key'] = apiKey;
+      }
+    }
     
     const response = await fetch(`${discourseHost}/lexicon/image-dimensions?${queryString}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any necessary auth headers if the endpoint requires them, 
-        // though usually cookies/session handle this for the app.
-      },
+      headers, // <--- This is the fix! We use the variable 'headers' we made earlier.
     });
 
     if (!response.ok) {

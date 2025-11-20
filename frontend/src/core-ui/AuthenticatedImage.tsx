@@ -32,7 +32,7 @@ export function AuthenticatedImage({
   testID,
   onPress,
   showSkeleton = true,
-  maxHeightRatio = 1.5,
+  maxHeightRatio = 5,
   serverDimensions,
 }: Props) {
   const token = useReactiveVar(tokenVar);
@@ -49,7 +49,7 @@ export function AuthenticatedImage({
   }), [url, token]);
 
   const calculateImageHeight = () => {
-    let aspectRatio = 1.77; // Default 16:9
+    let aspectRatio = 1.0; // Default 16:9
 
     if (serverDimensions && serverDimensions.width && serverDimensions.height) {
       aspectRatio = serverDimensions.width / serverDimensions.height;
