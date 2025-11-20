@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react'; // Added useMemo
 import { useFormContext } from 'react-hook-form';
 import { Platform } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -37,6 +37,7 @@ import {
   useLookupUrls,
   useNewTopic,
   useReplyTopic,
+  useImageDimensions, // Import the dimension hook
 } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
 import {
@@ -64,6 +65,10 @@ export default function PostPreview() {
   const channels = storage.getItem('channels');
   const { reset: resetForm, getValues, watch } = useFormContext();
   const [imageUrls, setImageUrls] = useState<Array<string>>();
+  
+  // Map to store resolved URLs (upload:// -> https://)
+  const [resolvedUrlMap, setResolvedUrlMap] = useState<Record<string, string>>({});
+
   const { title, raw: content, tags, channelId, isDraft } = getValues();
   const draftKey: string | undefined = watch('draftKey');
   const shortUrls = getPostShortUrl(content) ?? [];
@@ -78,9 +83,32 @@ export default function PostPreview() {
   const { getImageUrls } = useLookupUrls({
     variables: { lookupUrlInput: { shortUrls } },
     onCompleted: ({ lookupUrls }) => {
+      // Populate the map with resolved URLs
+      const newMap: Record<string, string> = {};
+      lookupUrls.forEach((item) => {
+        newMap[item.shortUrl] = item.url;
+      });
+      setResolvedUrlMap(newMap);
+
+      // Maintain existing state logic just in case
       setImageUrls(sortImageUrl(shortUrls, lookupUrls));
     },
   });
+
+  // Filter and resolve images for the carousel
+  // This ensures we don't pass "upload://" URLs to AuthenticatedImage
+  const displayImages = useMemo(() => {
+    return imagesFromContent.map((url) => {
+      if (url.startsWith('upload://')) {
+        // Return the https version if available in our map
+        return resolvedUrlMap[url] || null;
+      }
+      return url;
+    }).filter((url): url is string => !!url);
+  }, [imagesFromContent, resolvedUrlMap]);
+
+  // Fetch dimensions for the resolved images
+  const { dimensions } = useImageDimensions(displayImages);
 
   const refetchQueries = isDraft ? refetchQueriesPostDraft : [];
 
@@ -276,10 +304,14 @@ export default function PostPreview() {
           style={styles.markdown}
           nonClickable={true}
         />
+        
+        {/* Updated ImageCarousel with resolved images and dimensions */}
         <ImageCarousel
-          images={imagesFromContent}
+          images={displayImages}
           onImagePress={(uri) => setFullScreenImage(uri)}
+          imageDimensionsMap={dimensions}
         />
+        
         <FullScreenImageModal
           visible={!!fullScreenImage}
           imageUri={fullScreenImage || ''}
