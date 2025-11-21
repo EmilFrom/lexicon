@@ -2214,14 +2214,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@config-plugins/detox@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "@config-plugins/detox@npm:8.0.0"
+"@config-plugins/detox@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "@config-plugins/detox@npm:11.0.0"
   dependencies:
-    expo-build-properties: "npm:~0.12.1"
+    expo-build-properties: "npm:^0.13.1"
   peerDependencies:
-    expo: ^51
-  checksum: 10c0/fe97792daf4b77aff6f98c824c217f02ad8ee7eee2c095a9600e2c06bc980aa82c9e6de27956b0bfaf64985341f4a3d3d96f76b114d59233fd05165e85e5e571
+    expo: ^53
+  checksum: 10c0/d042524ec3f87c1b5fd4028177106a05c15a5e0abf5e5f85fc5e52c6f836e4e6ce550ae003ba0268795f7df50466bdab0c3a34683efdb5fad4858d9e771a4c92
   languageName: node
   linkType: hard
 
@@ -10017,15 +10017,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-build-properties@npm:~0.12.1":
-  version: 0.12.4
-  resolution: "expo-build-properties@npm:0.12.4"
+"expo-build-properties@npm:^0.13.1":
+  version: 0.13.3
+  resolution: "expo-build-properties@npm:0.13.3"
   dependencies:
     ajv: "npm:^8.11.0"
     semver: "npm:^7.6.0"
   peerDependencies:
     expo: "*"
-  checksum: 10c0/ee4b466ce9983915fe0f250724f409066a149e030641a4737c0625f73ece692457aca26b89745300ad68902aa9d7915e9846a5142c7b6b2d08b556e2a6bd2a22
+  checksum: 10c0/7302ac2403e0cd5d95d0f31c15dcf29a634f716cac022bc17e9ac2e405f577b4d0e2b45cb19b5659472e248824dfcf54250bebf309976a3ef308bc85c6f5d2b1
   languageName: node
   linkType: hard
 
@@ -10931,7 +10931,7 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@babel/plugin-proposal-nullish-coalescing-operator": "npm:^7.18.6"
     "@babel/plugin-proposal-optional-chaining": "npm:^7.21.0"
-    "@config-plugins/detox": "npm:^8.0.0"
+    "@config-plugins/detox": "npm:^11.0.0"
     "@dev-plugins/apollo-client": "npm:^0.4.0"
     "@eslint/js": "npm:^9.39.1"
     "@expo-google-fonts/courier-prime": "npm:^0.2.2"

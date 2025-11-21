@@ -1,5 +1,5 @@
 if (__DEV__) {
-    require("./ReactotronConfig.js");
+    require("./reactotronConfig.js");
   }
 import { registerRootComponent } from 'expo';
 
