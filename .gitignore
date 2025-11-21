@@ -8,3 +8,4 @@ debugging/
 /frontend/_notes
 frontend/logs
 frontend/android/app/my-upload-key.keystore
+frontend/android/gradle.properties
