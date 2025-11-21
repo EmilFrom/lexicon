@@ -35,7 +35,14 @@
           "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
         }
       ],
-      "expo-build-properties"
+     [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.9.23"
+          }
+        }
+      ]
     ],
     "userInterfaceStyle": "automatic",
     "updates": {
