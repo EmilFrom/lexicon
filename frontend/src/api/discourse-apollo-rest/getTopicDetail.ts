@@ -7,7 +7,12 @@ export const TOPIC_FRAGMENT = gql`
   fragment TopicFragment on Topic {
     id
     title
-    imageUrl
+    imageUrl {    # <--- Changed from just "imageUrl"
+      url
+      width
+      height
+      aspectRatio
+    }
     postsCount
     replyCount
     createdAt

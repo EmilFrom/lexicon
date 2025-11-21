@@ -20,6 +20,7 @@ import { MetricsProp } from '../Metrics/Metrics';
 
 import { getCompleteImageVideoUrls } from '../../helpers/api/processRawContent';
 import { markdownToHtml } from '../../helpers/markdownToHtml';
+import { useImageDimensions } from '../../hooks/useImageDimensions';
 
 import { PostItem, PostItemProps } from './PostItem';
 import { PostItemFooter, PostItemFooterProps } from './PostItemFooter';
@@ -60,6 +61,7 @@ function BasePostDetailHeaderItem(props: Props) {
   const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
+  const { dimensions } = useImageDimensions(images);
   // --- END OF PATTERN ---
 
   const cacheTopicResult = useFragment_experimental<
@@ -118,6 +120,7 @@ function BasePostDetailHeaderItem(props: Props) {
       title={postItemProps.title}
       content={contentWithoutImages} // Pass the processed content
       images={images} // Pass the extracted images
+      imageDimensionsMap={dimensions}
       avatar={postItemProps.avatar}
       channel={postItemProps.channel}
       tags={postItemProps.tags}

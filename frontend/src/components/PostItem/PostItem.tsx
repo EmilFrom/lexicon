@@ -141,11 +141,39 @@ function BasePostItem(props: Props) {
   // 3. This hook is now safe because 'images' is a stable array
   const { dimensions: fetchedDimensions } = useImageDimensions(images);
 
-  // 3. MERGE DIMENSIONS
-  // Combine the fetched dimensions with the prop dimension (usually the thumbnail)
+  // --- FIX: ROBUST DIMENSION MATCHING ---
   const finalDimensionsMap = React.useMemo(() => {
-    const combined = { ...fetchedDimensions };
-    // If parent passed specific dimensions for the first image (common in Home feed), populate it
+    const combined: Record<string, ImageDimension> = {};
+    
+    // Helper: Removes Discourse resolution suffix (e.g. "_2_690x388" or "_2_1024x768")
+    // Regex looks for: _DIGIT_DIGITSxDIGITS before the extension
+    const normalizeUrl = (u: string) => u.replace(/_\d+_\d+x\d+(?=\.[a-zA-Z]+$)/, '');
+
+    // 1. Create a lookup map of [Normalized URL] -> [Dimension Object]
+    // This allows us to match even if the resolution suffix differs
+    const normalizedLookup: Record<string, ImageDimension> = {};
+    Object.values(fetchedDimensions).forEach(dim => {
+        if (dim && dim.url) {
+            normalizedLookup[normalizeUrl(dim.url)] = dim;
+        }
+    });
+
+    // 2. Iterate through the images we want to display
+    images.forEach(imgUrl => {
+        // Try exact match first
+        if (fetchedDimensions[imgUrl]) {
+            combined[imgUrl] = fetchedDimensions[imgUrl];
+        } 
+        // Try normalized match
+        else {
+            const norm = normalizeUrl(imgUrl);
+            if (normalizedLookup[norm]) {
+                combined[imgUrl] = normalizedLookup[norm];
+            }
+        }
+    });
+
+    // 3. Fallback to props dimensions (thumbnails) for the first image if still missing
     if (images.length > 0 && imageDimensions && !combined[images[0]]) {
         combined[images[0]] = {
             url: images[0],

@@ -791,6 +791,8 @@ input EmptyInput {
 type ChatMessageUpload {
   id: Int!
   url: String!
+  extension: String!
+  originalFilename: String!
 }
 
 type ChatMessage {

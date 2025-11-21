@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useMemo } from 'react'; // Added useMemo
 import { StyleProp, View, ViewStyle } from 'react-native';
 
 import { MarkdownRenderer } from '../../../components/MarkdownRenderer';
@@ -21,8 +21,11 @@ import {
   ThreadDetailFirstContent,
   User,
 } from '../../../types';
+import { useImageDimensions } from '../../../hooks/useImageDimensions';
+import { discourseHost } from '../../../constants'; // Import discourseHost
 
 type Props = {
+  // ... existing props
   content: ChatMessageContent | ThreadDetailFirstContent;
   sender: User;
   newTimestamp: boolean;
@@ -39,6 +42,7 @@ type Props = {
 export function ChatMessageItem(props: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
+  // ... destructure props
   const {
     content,
     sender,
@@ -57,13 +61,54 @@ export function ChatMessageItem(props: Props) {
 
   const { id, time, markdownContent } = content;
 
+  // 1. Get images from Markdown (if any)
   const { filteredMarkdown } = filterMarkdownContentPoll(markdownContent || '');
-  const images = getCompleteImageVideoUrls(filteredMarkdown)?.filter(Boolean) as string[] || [];
+  
+  // 2. COMBINE IMAGES (Markdown + Uploads Array)
+  const images = useMemo(() => {
+    // A. From Markdown text
+    const markdownImages = getCompleteImageVideoUrls(filteredMarkdown)?.filter(Boolean) as string[] || [];
+
+    // B. From Uploads metadata (common in Chat)
+    const uploads = 'uploads' in content ? content.uploads : [];
+    
+    const uploadImages = uploads.filter(u => {
+        // Check extension
+        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
+        if (u.extension && allowedExtensions.includes(u.extension.toLowerCase())) return true;
+        // Check URL pattern if extension missing
+        if (u.url && u.url.match(/\.(jpeg|jpg|gif|png|webp|heic|heif)($|\?)/i)) return true;
+        return false;
+    }).map(u => {
+        // Normalize to Absolute URL
+        if (u.url.startsWith('http')) return u.url;
+        if (u.url.startsWith('//')) return `https:${u.url}`;
+        return `${discourseHost}${u.url}`;
+    });
+
+    // Combine and Deduplicate
+    return Array.from(new Set([...markdownImages, ...uploadImages]));
+  }, [filteredMarkdown, content]);
+
+  // 3. Fetch Dimensions
+  const { dimensions } = useImageDimensions(images);
+
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = filteredMarkdown.replace(imageTagRegex, '');
   const markdownContentScene = handleUnsupportedMarkdown(contentWithoutImages);
 
-  const unsupported = 'uploads' in content ? content.uploads.length > 0 : false;
+  // 4. Unsupported Logic (Check if there are NON-image uploads)
+  const unsupported = 'uploads' in content
+    ? content.uploads.some(u => {
+        // If this upload's URL is NOT in our approved image list, it's an unsupported file (pdf, zip, etc)
+        // We construct the full URL to match against our 'images' array
+        let fullUrl = u.url;
+        if (fullUrl.startsWith('//')) fullUrl = `https:${fullUrl}`;
+        else if (!fullUrl.startsWith('http')) fullUrl = `${discourseHost}${fullUrl}`;
+
+        return !images.includes(fullUrl);
+      })
+    : false;
 
   const renderUnsupported = () => {
     return (
@@ -90,15 +135,22 @@ export function ChatMessageItem(props: Props) {
         fontColor={automaticFontColor(colors.backgroundDarker)}
         content={markdownContentScene}
       />
+      {/* 
+         This will now render because 'images' includes the uploads 
+         even if they weren't in the markdown text 
+      */}
       {images.length > 0 && (
         <ImageCarousel
           images={images}
           onImagePress={(uri) => setFullScreenImage(uri)}
+          imageDimensionsMap={dimensions}
+          maxHeight={250} // <--- Specific size limit for Chat
         />
       )}
       {unsupported && renderUnsupported()}
     </>
   );
+
 
   const renderFirstChatBubble = () => {
     return (

@@ -10,6 +10,9 @@ export type Thread = z.infer<typeof Thread>;
 
 const ChatMessageUpload = z.object({
   id: z.number(),
+  url: z.string(),
+  extension: z.string().optional().nullable(),
+  originalFilename: z.string().optional().nullable(),
 });
 
 export type ChatMessageUpload = z.infer<typeof ChatMessageUpload>;

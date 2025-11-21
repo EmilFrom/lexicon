@@ -17,13 +17,15 @@ type Props = {
   onImagePress: (uri: string) => void;
   // We replace the single serverDimensions prop with the full map
   imageDimensionsMap?: Record<string, ImageDimension>;
+  maxHeight?: number;
 };
 
-export function ImageCarousel({ images, onImagePress, imageDimensionsMap }: Props) {
+export function ImageCarousel({ images, onImagePress, imageDimensionsMap, maxHeight: explicitMaxHeight }: Props) {
   const styles = useStyles();
   const { spacing } = useTheme();
   const { width: windowWidth } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
+  
 
   // 1. Calculate Width
   const contentWidth = windowWidth - (spacing.xxl * 2);
@@ -46,14 +48,17 @@ export function ImageCarousel({ images, onImagePress, imageDimensionsMap }: Prop
     }
 
     const calculatedHeight = contentWidth / aspectRatio;
-    
-    // Safety limits: Min 200px, Max 1.5x the width (portrait images)
-    const MAX_HEIGHT_RATIO = 5;
-    const maxHeight = contentWidth * MAX_HEIGHT_RATIO;
 
-    // Return calculated height clamped between 200 and maxHeight
-    return Math.max(Math.min(calculatedHeight, maxHeight), 200);
-  }, [images, imageDimensionsMap, contentWidth]);
+    
+    // DETERMINE MAX HEIGHT
+    // If specific maxHeight is passed (e.g. for Chat), use it.
+    // Otherwise, default to 1.5x width (for Feed).
+    const limitHeight = explicitMaxHeight ?? (contentWidth * 1.5);
+
+    // Clamp: Min 100, Max limitHeight
+    // We lowered min from 200 to 100 to allow for smaller chat images if needed
+    return Math.max(Math.min(calculatedHeight, limitHeight), 100);
+  }, [images, imageDimensionsMap, contentWidth, explicitMaxHeight]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
