@@ -34,7 +34,10 @@
         "corepack": "true",
         "gradleCommand": ":app:assembleRelease",
         "distribution": "internal"
-      }
+      },
+      "env": {
+            "ANDROID_SDK_ROOT": "/Users/emil/Library/Android/sdk"
+        }
     },
     "production": {
       "autoIncrement": true,
@@ -45,6 +48,7 @@
       "ios": {
         "simulator": false
       }
+      
     }
   },
   "submit": {
