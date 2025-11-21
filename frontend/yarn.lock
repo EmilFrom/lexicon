@@ -11021,6 +11021,7 @@ __metadata:
     react-native-console-time-polyfill: "npm:^1.2.3"
     react-native-dotenv: "npm:^3.3.1"
     react-native-gesture-handler: "npm:~2.28.0"
+    react-native-gradle-plugin: "npm:^0.71.19"
     react-native-image-viewing: "npm:^0.2.2"
     react-native-image-zoom-viewer: "npm:^3.0.1"
     react-native-keyboard-accessory: "npm:^0.1.16"
@@ -16953,6 +16954,13 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/4240c8eedca69eb36b5d3e375b71867251cf8b87a755ba7066b3f73cfdbc80574042dbd4ff821041fd1539c4cd90dbf7ee34586f5a0ea6cc38052375b3169f2e
+  languageName: node
+  linkType: hard
+
+"react-native-gradle-plugin@npm:^0.71.19":
+  version: 0.71.19
+  resolution: "react-native-gradle-plugin@npm:0.71.19"
+  checksum: 10c0/c4f6bfa4486aec2233793bc4a9049647616d5c20200d9fbd9de37576d601c6a3fcdb7fa39d6efe9fb38e2ea7faff46629494cd4d86e0f3f6cb8c893f6b191db5
   languageName: node
   linkType: hard
 
