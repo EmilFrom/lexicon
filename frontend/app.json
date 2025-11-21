@@ -91,7 +91,7 @@
     "android": {
       "permissions": [],
       "versionCode": 1,
-      "package": "com.emilfrom.tt-uturn"
+      "package": "com.emilfrom.tt.uturn"
     },
     "web": {
       "favicon": "./assets/favicon.png"
