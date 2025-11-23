@@ -1,4 +1,4 @@
-import { useFragment_experimental, OperationVariables } from '@apollo/client';
+import { useFragment, OperationVariables } from '@apollo/client';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -29,7 +29,7 @@ export function useFirstPostContent(
   const [stableContent, setStableContent] = useState<string | null>(null);
 
   // Try to read from cache first
-  const cacheResult = useFragment_experimental<
+  const cacheResult = useFragment<
     TopicDetailOutput,
     OperationVariables
   >({

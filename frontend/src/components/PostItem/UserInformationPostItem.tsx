@@ -1,4 +1,4 @@
-import { OperationVariables, useFragment_experimental } from '@apollo/client';
+import { OperationVariables, useFragment } from '@apollo/client';
 import React from 'react';
 
 import {
@@ -20,7 +20,7 @@ function BaseUserInformationPostItem(props: Props) {
 
   const { topicId, postId, actionType, currentUser, style } = props;
 
-  const cacheUserActionResult = useFragment_experimental<
+  const cacheUserActionResult = useFragment<
     UserActionFragment,
     OperationVariables
   >({
