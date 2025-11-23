@@ -115,7 +115,18 @@ export default function PostPreview() {
   // Fetch dimensions for the resolved images
   const { dimensions } = useImageDimensions(displayImages);
 
-  const refetchQueries = isDraft ? refetchQueriesPostDraft : [];
+  // --- START OF CHANGES ---
+  // Define which queries to refetch.
+  // 'Topics': Updates the Home screen list.
+  // 'GetTopicDetail': Updates the Post Detail screen (if you are replying).
+  // 'Profile': Updates post counts on the profile.
+  // 'UserActivity': Updates the activity tab.
+  const activeRefetchQueries = ['Topics', 'GetTopicDetail', 'Profile', 'UserActivity'];
+
+  // If it's a draft, use the draft-specific queries.
+  // If it's a PUBLISHED post, refetch the active app data.
+  const refetchQueries = isDraft ? refetchQueriesPostDraft : activeRefetchQueries;
+  // --- END OF CHANGES ---
 
   const { newTopic, loading: newTopicLoading } = useNewTopic({
     onCompleted: () => {
@@ -145,6 +156,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
+    refetchQueries,
     onError: (error) => errorHandlerAlert(error),
   });
 
@@ -155,6 +167,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
+    refetchQueries,
     onError: (error) => errorHandlerAlert(error),
   });
 
@@ -165,6 +178,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
+    refetchQueries,
     onError: (error) => errorHandlerAlert(error),
   });
 

@@ -183,16 +183,37 @@ export default function ChatChannelDetail() {
   });
 
   const { replyChat, loading: replyLoading } = useReplyChat({
-    onCompleted: () => {
+   onCompleted: async (data) => { // <--- Make this async to await refetch
       setMessage('');
-      // 1. Refetch the messages to get the one we just sent
-      refetch().then(() => {
-        // 2. Force scroll to the bottom (offset 0 because the list is Inverted)
-        // to ensure the user sees their new message immediately.
+      
+      /* ---------------------------------------------------------
+         FIX: AUTO-REFRESH LOGIC
+         1. Get the new message ID from the mutation response.
+         2. Call refetch() with this ID to force the list to update.
+         3. Scroll to offset 0 (bottom) after refresh.
+      --------------------------------------------------------- */
+      const newMessageId = data.replyChat.messageId;
+
+      try {
+        // Explicitly fetch the chunk containing our new message
+        await refetch({
+          channelId,
+          pageSize: CHAT_CHANNEL_DETAIL_PAGE_SIZE,
+          targetMessageId: newMessageId,
+          // Ensure we aren't passing leftover pagination parameters
+          direction: undefined, 
+          isPolling: false
+        });
+
+        // Scroll to bottom (Inverted List: Offset 0 is the bottom)
+        // A small timeout ensures the React render cycle has finished updating the list
         setTimeout(() => {
           virtualListRef.current?.scrollToOffset({ offset: 0, animated: true });
-        }, 200);
-      });
+        }, 300);
+
+      } catch (error) {
+        console.error("Failed to refresh chat after reply", error);
+      }
     },
   });
 
@@ -411,8 +432,10 @@ export default function ChatChannelDetail() {
 
   const onReply = (message: string) => {
     if (message.trim() !== '') {
-      // 1. Hide the software keyboard immediately when sending
-      Keyboard.dismiss();
+      // 1. Keyboard hides immediately here (from previous step)
+      Keyboard.dismiss(); 
+
+      // 2. We send the mutation
       replyChat({
         variables: {
           channelId,

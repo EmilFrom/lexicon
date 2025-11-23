@@ -25,10 +25,26 @@ import { useApolloClientDevTools } from '@dev-plugins/apollo-client';
 if (__DEV__) {
   void import('react-native-console-time-polyfill');
   void import('../reactotronConfig.js');
+
+  // --- START OF CHANGES ---
+  // Override console.warn to suppress specific Apollo warnings in the terminal
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    const msg = args[0];
+    // Check if the warning starts with the Apollo error prefix
+    if (typeof msg === 'string' && msg.includes('An error occurred! For more details')) {
+      return; // Silently ignore this warning
+    }
+    // Otherwise, pass it through to the original handler
+    originalWarn(...args);
+  };
+  // --- END OF CHANGES ---
+
   // Based on react-native-reanimated documentation about warning https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device
   LogBox.ignoreLogs([
     '[Reanimated] Reduced motion setting is enabled on this device.',
     'An error occurred in a responseTransformer:',
+    'An error occurred! For more details,', 
   ]);
 }
 
