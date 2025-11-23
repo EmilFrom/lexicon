@@ -1,4 +1,4 @@
-import { OperationVariables, useFragment_experimental } from '@apollo/client';
+import { OperationVariables, useFragment } from '@apollo/client';
 import React from 'react';
 
 import {
@@ -20,7 +20,7 @@ function BaseSearchPostItem(props: Props) {
 
   const { topicId, postId } = props;
 
-  const cachedSearchTopicResult = useFragment_experimental<
+  const cachedSearchTopicResult = useFragment<
     SearchTopicFragment,
     OperationVariables
   >({
@@ -31,7 +31,7 @@ function BaseSearchPostItem(props: Props) {
       id: topicId,
     },
   });
-  const cacheSearchPostResult = useFragment_experimental<
+  const cacheSearchPostResult = useFragment<
     SearchPostFragment,
     OperationVariables
   >({

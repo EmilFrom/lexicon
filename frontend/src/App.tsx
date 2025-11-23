@@ -24,7 +24,7 @@ import { useApolloClientDevTools } from '@dev-plugins/apollo-client';
 
 if (__DEV__) {
   void import('react-native-console-time-polyfill');
-  void import('../ReactotronConfig.js');
+  void import('../reactotronConfig.js');
   // Based on react-native-reanimated documentation about warning https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device
   LogBox.ignoreLogs([
     '[Reanimated] Reduced motion setting is enabled on this device.',

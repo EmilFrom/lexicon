@@ -1,4 +1,4 @@
-import { OperationVariables, useFragment_experimental } from '@apollo/client';
+import { OperationVariables, useFragment } from '@apollo/client';
 import React from 'react';
 
 import {
@@ -64,7 +64,7 @@ function BasePostDetailHeaderItem(props: Props) {
   const { dimensions } = useImageDimensions(images);
   // --- END OF PATTERN ---
 
-  const cacheTopicResult = useFragment_experimental<
+  const cacheTopicResult = useFragment<
     TopicFragment,
     OperationVariables
   >({
@@ -75,7 +75,7 @@ function BasePostDetailHeaderItem(props: Props) {
       id: topicId,
     },
   });
-  const cacheFirstPostResult = useFragment_experimental<
+  const cacheFirstPostResult = useFragment<
     PostFragment,
     OperationVariables
   >({

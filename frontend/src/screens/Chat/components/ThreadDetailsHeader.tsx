@@ -1,4 +1,4 @@
-import { OperationVariables, useFragment_experimental } from '@apollo/client';
+import { OperationVariables, useFragment } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View } from 'react-native';
@@ -21,7 +21,7 @@ function BaseThreadDetailsHeader(props: Props) {
   const { colors } = useTheme();
   const { navigate } = useNavigation<StackNavProp<'ThreadDetail'>>();
 
-  const cacheMessageFragment = useFragment_experimental<
+  const cacheMessageFragment = useFragment<
     ChatFragment,
     OperationVariables
   >({

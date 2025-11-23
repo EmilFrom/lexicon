@@ -1,4 +1,4 @@
-import { OperationVariables, useFragment_experimental } from '@apollo/client';
+import { OperationVariables, useFragment } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback } from 'react';
 
@@ -25,7 +25,7 @@ function BaseHomePostItem(props: Props) {
 
   const { topicId, prevScreen, isHidden = false, onPressReply, style } = props;
 
-  const cacheTopicResult = useFragment_experimental<
+  const cacheTopicResult = useFragment<
     TopicFragment,
     OperationVariables
   >({

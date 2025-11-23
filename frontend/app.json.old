@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Tænketanken U-Turn",
+    "name": "TaenketankenUTurn",
     "slug": "tt-uturn",
     "scheme": "your-scheme-here",
     "version": "1.0.0",
@@ -33,6 +33,19 @@
         "expo-secure-store",
         {
           "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
+      ],
+     [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "2.0.21",
+            "buildToolsVersion": "35.0.0",
+            "minSdkVersion": 24,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "ndkVersion": "26.1.10909125"
+          }
         }
       ]
     ],
@@ -91,7 +104,7 @@
     "android": {
       "permissions": [],
       "versionCode": 1,
-      "package": "com.emilfrom.tt-uturn"
+      "package": "com.emilfrom.tt.uturn"
     },
     "web": {
       "favicon": "./assets/favicon.png"
