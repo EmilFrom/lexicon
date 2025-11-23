@@ -18,9 +18,12 @@ api/lib
 /documentation
 
 .yarn
-frontend/old_patches
+/frontend/old_patches
 
-backup_files/
-debugging/
+/backup_files/
+/debugging/
 
-frontend/notes
+/frontend/notes
+
+/frontend/ios
+/frontend/android
