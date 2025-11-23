@@ -65,9 +65,11 @@ export default function PostPreview() {
   const channels = storage.getItem('channels');
   const { reset: resetForm, getValues, watch } = useFormContext();
   const [imageUrls, setImageUrls] = useState<Array<string>>();
-  
+
   // Map to store resolved URLs (upload:// -> https://)
-  const [resolvedUrlMap, setResolvedUrlMap] = useState<Record<string, string>>({});
+  const [resolvedUrlMap, setResolvedUrlMap] = useState<Record<string, string>>(
+    {},
+  );
 
   const { title, raw: content, tags, channelId, isDraft } = getValues();
   const draftKey: string | undefined = watch('draftKey');
@@ -75,7 +77,8 @@ export default function PostPreview() {
 
   // --- NEW CONTENT PROCESSING PATTERN ---
   const htmlContent = markdownToHtml(content);
-  const imagesFromContent = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+  const imagesFromContent =
+    (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || [];
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
   // --- END OF PATTERN ---
@@ -98,13 +101,15 @@ export default function PostPreview() {
   // Filter and resolve images for the carousel
   // This ensures we don't pass "upload://" URLs to AuthenticatedImage
   const displayImages = useMemo(() => {
-    return imagesFromContent.map((url) => {
-      if (url.startsWith('upload://')) {
-        // Return the https version if available in our map
-        return resolvedUrlMap[url] || null;
-      }
-      return url;
-    }).filter((url): url is string => !!url);
+    return imagesFromContent
+      .map((url) => {
+        if (url.startsWith('upload://')) {
+          // Return the https version if available in our map
+          return resolvedUrlMap[url] || null;
+        }
+        return url;
+      })
+      .filter((url): url is string => !!url);
   }, [imagesFromContent, resolvedUrlMap]);
 
   // Fetch dimensions for the resolved images
@@ -160,7 +165,7 @@ export default function PostPreview() {
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-   onError: (error) => errorHandlerAlert(error),
+    onError: (error) => errorHandlerAlert(error),
   });
 
   const loading = reply
@@ -260,8 +265,21 @@ export default function PostPreview() {
       {ios && (
         <ModalHeader
           title={t('Preview')}
-          left={<HeaderItem label={t('Cancel')} onPressItem={goBack} disabled={loading} left />}
-          right={<HeaderItem label={t('Post')} onPressItem={postToServer} loading={loading} />}
+          left={
+            <HeaderItem
+              label={t('Cancel')}
+              onPressItem={goBack}
+              disabled={loading}
+              left
+            />
+          }
+          right={
+            <HeaderItem
+              label={t('Post')}
+              onPressItem={postToServer}
+              loading={loading}
+            />
+          }
         />
       )}
       <ScrollView contentContainerStyle={styles.contentContainer}>
@@ -283,15 +301,25 @@ export default function PostPreview() {
           </Text>
         )}
         <Author
-          image={editedUser ? editedUser.avatar : getImage(storage.getItem('user')?.avatar || '')}
-          title={editedUser ? editedUser.username : storage.getItem('user')?.username || ''}
+          image={
+            editedUser
+              ? editedUser.avatar
+              : getImage(storage.getItem('user')?.avatar || '')
+          }
+          title={
+            editedUser
+              ? editedUser.username
+              : storage.getItem('user')?.username || ''
+          }
           size="s"
           style={styles.spacingBottom}
         />
         {!reply && channelId && (
           <PostGroupings
             style={styles.spacingBottom}
-            channel={channels?.find(({ id }) => id === channelId) || mock.channels[0]}
+            channel={
+              channels?.find(({ id }) => id === channelId) || mock.channels[0]
+            }
             tags={tags}
           />
         )}
@@ -304,14 +332,14 @@ export default function PostPreview() {
           style={styles.markdown}
           nonClickable={true}
         />
-        
+
         {/* Updated ImageCarousel with resolved images and dimensions */}
         <ImageCarousel
           images={displayImages}
           onImagePress={(uri) => setFullScreenImage(uri)}
           imageDimensionsMap={dimensions}
         />
-        
+
         <FullScreenImageModal
           visible={!!fullScreenImage}
           imageUri={fullScreenImage || ''}

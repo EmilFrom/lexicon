@@ -185,13 +185,13 @@ export default function ChatChannelDetail() {
   const { replyChat, loading: replyLoading } = useReplyChat({
     onCompleted: () => {
       setMessage('');
-       // 1. Refetch the messages to get the one we just sent
+      // 1. Refetch the messages to get the one we just sent
       refetch().then(() => {
-         // 2. Force scroll to the bottom (offset 0 because the list is Inverted)
-         // to ensure the user sees their new message immediately.
-         setTimeout(() => {
-            virtualListRef.current?.scrollToOffset({ offset: 0, animated: true });
-         }, 200); 
+        // 2. Force scroll to the bottom (offset 0 because the list is Inverted)
+        // to ensure the user sees their new message immediately.
+        setTimeout(() => {
+          virtualListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 200);
       });
     },
   });
@@ -411,7 +411,7 @@ export default function ChatChannelDetail() {
 
   const onReply = (message: string) => {
     if (message.trim() !== '') {
-       // 1. Hide the software keyboard immediately when sending
+      // 1. Hide the software keyboard immediately when sending
       Keyboard.dismiss();
       replyChat({
         variables: {

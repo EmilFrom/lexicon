@@ -262,7 +262,7 @@ export default function UserInformation() {
   return (
     <View style={styles.container}>
       {content}
-       <FullScreenImageModal
+      <FullScreenImageModal
         visible={show || false}
         imageUri={userImage}
         onClose={onPressCancel}

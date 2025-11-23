@@ -58,16 +58,14 @@ function BasePostDetailHeaderItem(props: Props) {
 
   // --- NEW CONTENT PROCESSING PATTERN ---
   const htmlContent = markdownToHtml(content);
-  const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+  const images =
+    (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || [];
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
   const { dimensions } = useImageDimensions(images);
   // --- END OF PATTERN ---
 
-  const cacheTopicResult = useFragment<
-    TopicFragment,
-    OperationVariables
-  >({
+  const cacheTopicResult = useFragment<TopicFragment, OperationVariables>({
     fragment: TopicFragmentDoc,
     fragmentName: 'TopicFragment',
     from: {
@@ -75,10 +73,7 @@ function BasePostDetailHeaderItem(props: Props) {
       id: topicId,
     },
   });
-  const cacheFirstPostResult = useFragment<
-    PostFragment,
-    OperationVariables
-  >({
+  const cacheFirstPostResult = useFragment<PostFragment, OperationVariables>({
     fragment: PostFragmentDoc,
     fragmentName: 'PostFragment',
     from: {
@@ -108,11 +103,11 @@ function BasePostDetailHeaderItem(props: Props) {
   const { postItemProps, postItemFooterProps } = resolvedPostItemPropsResult;
   // DEBUG LOG
   if (__DEV__) {
-      console.log('[PostDetailHeaderItem] Rendering:', { 
-          imagesCount: images.length, 
-          firstImage: images[0],
-          topicId 
-      });
+    console.log('[PostDetailHeaderItem] Rendering:', {
+      imagesCount: images.length,
+      firstImage: images[0],
+      topicId,
+    });
   }
   return (
     <PostItem

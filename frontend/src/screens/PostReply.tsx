@@ -90,7 +90,7 @@ type LocalImage = {
 export default function PostReply() {
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const handleImagePress = useCallback((uri: string) => {
-      setFullScreenImage(uri);
+    setFullScreenImage(uri);
   }, []);
   const { modal, setModal } = useModal();
   const styles = useStyles();
@@ -533,15 +533,18 @@ export default function PostReply() {
         <Divider style={styles.spacingBottom} horizontalSpacing="xxl" />
         {!loadingRepliedPost && repliedPost}
         <View style={styles.localImagesContainer}>
-        {localImages.map((image, index) => (
-          <TouchableOpacity key={index} onPress={() => handleImagePress(image.uri)}>
-            <View style={styles.localImageWrapper}>
-              <Image source={{ uri: image.uri }} style={styles.localImage} />
-              {/* ... remove button and uploading overlay ... */}
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
+          {localImages.map((image, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => handleImagePress(image.uri)}
+            >
+              <View style={styles.localImageWrapper}>
+                <Image source={{ uri: image.uri }} style={styles.localImage} />
+                {/* ... remove button and uploading overlay ... */}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
         <ListCreatePoll
           polls={polls || []}
           setValue={setValue}

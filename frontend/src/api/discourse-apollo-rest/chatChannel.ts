@@ -20,8 +20,8 @@ export const CHAT_FRAGMENT = gql`
     replyCount
     uploads {
       id
-      url          # <--- ADD THIS
-      extension    # <--- ADD THIS (useful for checking file type)
+      url # <--- ADD THIS
+      extension # <--- ADD THIS (useful for checking file type)
       originalFilename # <--- ADD THIS
     }
   }

@@ -120,7 +120,8 @@ function BaseNestedComment(props: Props) {
 
   // --- NEW CONTENT PROCESSING PATTERN ---
   const htmlContent = markdownToHtml(content);
-  const images = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+  const images =
+    (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || [];
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
   // --- END OF PATTERN ---
@@ -196,7 +197,9 @@ function BaseNestedComment(props: Props) {
             )}
           </Author>
         </View>
-        {replyToPostId && <RepliedPost postId={id} replyToPostId={replyToPostId} />}
+        {replyToPostId && (
+          <RepliedPost postId={id} replyToPostId={replyToPostId} />
+        )}
         {isHidden ? (
           <PostHidden
             loading={loading}
@@ -231,7 +234,9 @@ function BaseNestedComment(props: Props) {
             isLiked={isLiked}
             isCreator={isTopicOwner}
             style={styles.metricSpacing}
-            onPressReply={({ postId }) => onPressReply?.({ replyToPostId: postId })}
+            onPressReply={({ postId }) =>
+              onPressReply?.({ replyToPostId: postId })
+            }
           />
         )}
         {isLoading && (

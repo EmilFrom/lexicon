@@ -38,7 +38,7 @@ export function CustomImage(props: Props) {
   // Local loading state
   const [isDownloading, setIsDownloading] = useState(!!src);
   const [hasError, setHasError] = useState(false);
-  
+
   const { height: windowHeight } = useWindowDimensions();
 
   const containerHeight = Math.max(200, windowHeight * maxHeightRatio);
@@ -46,9 +46,9 @@ export function CustomImage(props: Props) {
 
   // Construct source with headers
   const imgSource = normalizedSrc
-    ? { 
+    ? {
         uri: normalizedSrc,
-        headers: { Authorization: token ? `Bearer ${token}` : '' }
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
       }
     : { uri: DEFAULT_IMAGE };
 
@@ -107,31 +107,31 @@ export function CustomImage(props: Props) {
       {/* Loading State */}
       {isDownloading && (
         <View style={[styles.centered, styles.loadingBg]}>
-           <Text>Loading...</Text>
+          <Text>Loading...</Text>
         </View>
       )}
-      
+
       {/* Error State */}
       {hasError && (
         <View style={[styles.centered, styles.errorBg]}>
-           <Text style={{color: 'white'}}>Failed to load</Text>
+          <Text style={{ color: 'white' }}>Failed to load</Text>
         </View>
       )}
 
       {/* Image */}
-      {(!hasError && normalizedSrc) && (
-         <View style={{ width: '100%', height: '100%', position: 'absolute' }}>
-            <CachedImage
-              source={imgSource}
-              style={{ width: '100%', height: '100%' }}
-              contentFit="cover"
-              onLoadStart={handleImageLoadStart}
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-            />
-         </View>
+      {!hasError && normalizedSrc && (
+        <View style={{ width: '100%', height: '100%', position: 'absolute' }}>
+          <CachedImage
+            source={imgSource}
+            style={{ width: '100%', height: '100%' }}
+            contentFit="cover"
+            onLoadStart={handleImageLoadStart}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+          />
+        </View>
       )}
-      
+
       {!normalizedSrc && renderFallback('No image available')}
     </View>
   );

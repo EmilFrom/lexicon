@@ -27,7 +27,7 @@ const chatSegmentedOption = [
   { index: 2, name: ChatChannelStatus.Closed, label: t('Closed') },
 ];
 
-type ChatOption = typeof chatSegmentedOption[number];
+type ChatOption = (typeof chatSegmentedOption)[number];
 
 const FIRST_OFFSET = 0;
 

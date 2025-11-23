@@ -38,7 +38,7 @@ export function errorHandler(
       'errors' in networkError.result &&
       Array.isArray(networkError.result.errors) &&
       networkError.result.errors.length > 0
-) {
+    ) {
       message = networkError.result.errors[0];
     } else if (
       'response' in networkError &&

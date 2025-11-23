@@ -13,7 +13,6 @@ export * from './useImageDimensions';
 export * from './rest/auth/useLogout';
 export * from './rest/auth/usePushNotifications';
 
-
 export * from './rest/chat/useChatChannelDetail';
 export * from './rest/chat/useChatChannelMessages';
 export * from './rest/chat/useChatChannelNotifications';

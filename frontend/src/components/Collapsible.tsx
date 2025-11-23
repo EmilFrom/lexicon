@@ -25,11 +25,7 @@ export function Collapsible({ title, children }: PropsWithChildren<Props>) {
           />
         </View>
       </TouchableOpacity>
-      {isOpen && (
-        <View style={styles.contentContainer}>
-          {children}
-        </View>
-      )}
+      {isOpen && <View style={styles.contentContainer}>{children}</View>}
     </View>
   );
 }

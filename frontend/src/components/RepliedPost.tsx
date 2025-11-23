@@ -28,11 +28,12 @@ type BaseRepliedPostProps = GeneralRepliedPostProps &
 
 function BaseRepliedPost(props: BaseRepliedPostProps) {
   const styles = useStyles();
-  
+
   const { avatar, username, markdownContent, mentions, hideAuthor } = props;
   const imageTagRegex = /<img[^>]*>/g;
-  const contentWithoutImages = markdownContent ? markdownContent.replace(imageTagRegex, '') : '';
-
+  const contentWithoutImages = markdownContent
+    ? markdownContent.replace(imageTagRegex, '')
+    : '';
 
   return (
     <View style={styles.nestedRowContainer}>

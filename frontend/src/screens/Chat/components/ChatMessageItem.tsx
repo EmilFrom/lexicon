@@ -62,28 +62,48 @@ export function ChatMessageItem(props: Props) {
 
   // 1. Extract Polls from Markdown
   const { filteredMarkdown } = filterMarkdownContentPoll(markdownContent || '');
-  
+
   // 2. Convert Markdown to HTML (Fixes raw text issue)
-  const htmlContent = useMemo(() => markdownToHtml(filteredMarkdown), [filteredMarkdown]);
-  
+  const htmlContent = useMemo(
+    () => markdownToHtml(filteredMarkdown),
+    [filteredMarkdown],
+  );
+
   // 3. COMBINE IMAGES (HTML + Uploads Array)
   const images = useMemo(() => {
     // A. From Converted HTML
-    const markdownImages = getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || [];
+    const markdownImages =
+      (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) ||
+      [];
 
     // B. From Uploads metadata
     const uploads = 'uploads' in content ? content.uploads : [];
-    
-    const uploadImages = uploads.filter(u => {
-        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
-        if (u.extension && allowedExtensions.includes(u.extension.toLowerCase())) return true;
-        if (u.url && u.url.match(/\.(jpeg|jpg|gif|png|webp|heic|heif)($|\?)/i)) return true;
+
+    const uploadImages = uploads
+      .filter((u) => {
+        const allowedExtensions = [
+          'jpg',
+          'jpeg',
+          'png',
+          'gif',
+          'webp',
+          'heic',
+          'heif',
+        ];
+        if (
+          u.extension &&
+          allowedExtensions.includes(u.extension.toLowerCase())
+        )
+          return true;
+        if (u.url && u.url.match(/\.(jpeg|jpg|gif|png|webp|heic|heif)($|\?)/i))
+          return true;
         return false;
-    }).map(u => {
+      })
+      .map((u) => {
         if (u.url.startsWith('http')) return u.url;
         if (u.url.startsWith('//')) return `https:${u.url}`;
         return `${discourseHost}${u.url}`;
-    });
+      });
 
     // Combine and Deduplicate
     return Array.from(new Set([...markdownImages, ...uploadImages]));
@@ -99,15 +119,17 @@ export function ChatMessageItem(props: Props) {
   const markdownContentScene = handleUnsupportedMarkdown(contentWithoutImages);
 
   // 6. Unsupported Logic
-  const unsupported = 'uploads' in content
-    ? content.uploads.some(u => {
-        let fullUrl = u.url;
-        if (fullUrl.startsWith('//')) fullUrl = `https:${fullUrl}`;
-        else if (!fullUrl.startsWith('http')) fullUrl = `${discourseHost}${fullUrl}`;
+  const unsupported =
+    'uploads' in content
+      ? content.uploads.some((u) => {
+          let fullUrl = u.url;
+          if (fullUrl.startsWith('//')) fullUrl = `https:${fullUrl}`;
+          else if (!fullUrl.startsWith('http'))
+            fullUrl = `${discourseHost}${fullUrl}`;
 
-        return !images.includes(fullUrl);
-      })
-    : false;
+          return !images.includes(fullUrl);
+        })
+      : false;
 
   const renderUnsupported = () => (
     <View style={styles.unsupported}>
@@ -168,11 +190,7 @@ export function ChatMessageItem(props: Props) {
     if (!markdownContentScene && images.length === 0 && !unsupported) {
       return null;
     }
-    return (
-      <View style={styles.nextItem}>
-        {renderMessageContent()}
-      </View>
-    );
+    return <View style={styles.nextItem}>{renderMessageContent()}</View>;
   };
 
   return (

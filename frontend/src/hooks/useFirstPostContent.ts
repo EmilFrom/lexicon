@@ -29,10 +29,7 @@ export function useFirstPostContent(
   const [stableContent, setStableContent] = useState<string | null>(null);
 
   // Try to read from cache first
-  const cacheResult = useFragment<
-    TopicDetailOutput,
-    OperationVariables
-  >({
+  const cacheResult = useFragment<TopicDetailOutput, OperationVariables>({
     fragment: TopicDetailFragmentDoc,
     fragmentName: 'TopicDetailFragment',
     from: {

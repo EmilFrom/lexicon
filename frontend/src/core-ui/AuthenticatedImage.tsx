@@ -37,16 +37,19 @@ export function AuthenticatedImage({
 }: Props) {
   const token = useReactiveVar(tokenVar);
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  const source = useMemo(() => ({
-    uri: url,
-    headers: {
-      Authorization: token ? `Bearer ${token}` : '',
-    },
-  }), [url, token]);
+  const source = useMemo(
+    () => ({
+      uri: url,
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    }),
+    [url, token],
+  );
 
   const calculateImageHeight = () => {
     let aspectRatio = 1.0; // Default 16:9
@@ -57,12 +60,12 @@ export function AuthenticatedImage({
         aspectRatio = serverDimensions.aspectRatio;
       }
     }
-    
+
     const calculatedHeight = screenWidth / aspectRatio;
-    
+
     // --- FIX START: Safety fallback ---
     if (!calculatedHeight || isNaN(calculatedHeight) || calculatedHeight <= 0) {
-        return 300; // Safe default height
+      return 300; // Safe default height
     }
     // --- FIX END ---
 
@@ -94,7 +97,10 @@ export function AuthenticatedImage({
   };
 
   const imageContent = (
-    <View style={[styles.imageContainer, { height: imageHeight }, style]} testID={testID}>
+    <View
+      style={[styles.imageContainer, { height: imageHeight }, style]}
+      testID={testID}
+    >
       <Image
         source={source}
         style={styles.image}
@@ -111,8 +117,8 @@ export function AuthenticatedImage({
       )}
       {hasError && (
         <View style={[styles.container, styles.error, StyleSheet.absoluteFill]}>
-           <Text style={styles.errorIcon}>⚠️</Text>
-           <Text style={styles.retryText}>Failed to load</Text>
+          <Text style={styles.errorIcon}>⚠️</Text>
+          <Text style={styles.retryText}>Failed to load</Text>
         </View>
       )}
     </View>

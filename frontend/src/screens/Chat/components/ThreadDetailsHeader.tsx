@@ -21,10 +21,7 @@ function BaseThreadDetailsHeader(props: Props) {
   const { colors } = useTheme();
   const { navigate } = useNavigation<StackNavProp<'ThreadDetail'>>();
 
-  const cacheMessageFragment = useFragment<
-    ChatFragment,
-    OperationVariables
-  >({
+  const cacheMessageFragment = useFragment<ChatFragment, OperationVariables>({
     fragment: ChatFragmentDoc,
     fragmentName: 'ChatFragment',
     from: {

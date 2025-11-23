@@ -32,7 +32,8 @@ export const TOPICS = gql`
         topics @type(name: "Topic") {
           id
           title
-          imageUrl {      # <--- Changed from just "imageUrl"
+          imageUrl {
+            # <--- Changed from just "imageUrl"
             url
             width
             height

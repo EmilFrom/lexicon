@@ -110,7 +110,7 @@ const actionBarHeight =
   statusBarHeight + (ios ? IOS_BAR : ANDROID_BAR) + normalizedSize;
 const headerViewHeight = actionBarHeight + (ios ? 0 : 24);
 
-type SortOption = typeof sortOptionsArray[number];
+type SortOption = (typeof sortOptionsArray)[number];
 
 export default function Home() {
   const { refetch: siteRefetch } = useSiteSettings();

@@ -25,10 +25,7 @@ function BaseHomePostItem(props: Props) {
 
   const { topicId, prevScreen, isHidden = false, onPressReply, style } = props;
 
-  const cacheTopicResult = useFragment<
-    TopicFragment,
-    OperationVariables
-  >({
+  const cacheTopicResult = useFragment<TopicFragment, OperationVariables>({
     fragment: TopicFragmentDoc,
     fragmentName: 'TopicFragment',
     from: {

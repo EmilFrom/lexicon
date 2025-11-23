@@ -22,7 +22,7 @@ import { Color, makeStyles, useTheme } from '../../theme';
 import { Channel, Poll, PollsVotes, StackNavProp } from '../../types';
 import { Author } from '../Author';
 import { PollPreview } from '../Poll';
-import { ImageDimension } from '../../helpers/api/lexicon'; 
+import { ImageDimension } from '../../helpers/api/lexicon';
 import { useImageDimensions } from '../../hooks/useImageDimensions';
 
 import { PostGroupings } from './PostGroupings';
@@ -67,7 +67,9 @@ function BasePostItem(props: Props) {
   const storage = useStorage();
   const styles = useStyles();
   const { colors } = useTheme();
-  const [fullScreenImage, setFullScreenImage] = React.useState<string | null>(null);
+  const [fullScreenImage, setFullScreenImage] = React.useState<string | null>(
+    null,
+  );
 
   const {
     topicId,
@@ -87,7 +89,7 @@ function BasePostItem(props: Props) {
     showImageRow = false,
     nonclickable = false,
     imageDimensions,
-    imageDimensionsMap, 
+    imageDimensionsMap,
     isHidden = false,
     footer,
     onPressViewIgnoredContent = () => {},
@@ -101,7 +103,7 @@ function BasePostItem(props: Props) {
     images: propImages, // Destructure images prop
     ...otherProps
   } = props;
-  
+
   const time =
     createdAt === ''
       ? t('Loading...')
@@ -128,14 +130,15 @@ function BasePostItem(props: Props) {
   );
 
   // 1. Memoize the HTML conversion so it only happens if 'content' text changes
-  const htmlContent = React.useMemo(() => 
-    markdownToHtml(content), 
-    [content]
-  );
+  const htmlContent = React.useMemo(() => markdownToHtml(content), [content]);
 
   // 2. Memoize the image extraction
   const images = React.useMemo(() => {
-      return propImages ?? (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[] || []);
+    return (
+      propImages ??
+      ((getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) ||
+        [])
+    );
   }, [propImages, htmlContent]);
 
   // 3. This hook is now safe because 'images' is a stable array
@@ -144,42 +147,45 @@ function BasePostItem(props: Props) {
   // --- FIX: ROBUST DIMENSION MATCHING ---
   const finalDimensionsMap = React.useMemo(() => {
     const combined: Record<string, ImageDimension> = {};
-    
+
     // Helper: Removes Discourse resolution suffix (e.g. "_2_690x388" or "_2_1024x768")
     // Regex looks for: _DIGIT_DIGITSxDIGITS before the extension
-    const normalizeUrl = (u: string) => u.replace(/_\d+_\d+x\d+(?=\.[a-zA-Z]+$)/, '');
+    const normalizeUrl = (u: string) =>
+      u.replace(/_\d+_\d+x\d+(?=\.[a-zA-Z]+$)/, '');
 
     // 1. Create a lookup map of [Normalized URL] -> [Dimension Object]
     // This allows us to match even if the resolution suffix differs
     const normalizedLookup: Record<string, ImageDimension> = {};
-    Object.values(fetchedDimensions).forEach(dim => {
-        if (dim && dim.url) {
-            normalizedLookup[normalizeUrl(dim.url)] = dim;
-        }
+    Object.values(fetchedDimensions).forEach((dim) => {
+      if (dim && dim.url) {
+        normalizedLookup[normalizeUrl(dim.url)] = dim;
+      }
     });
 
     // 2. Iterate through the images we want to display
-    images.forEach(imgUrl => {
-        // Try exact match first
-        if (fetchedDimensions[imgUrl]) {
-            combined[imgUrl] = fetchedDimensions[imgUrl];
-        } 
-        // Try normalized match
-        else {
-            const norm = normalizeUrl(imgUrl);
-            if (normalizedLookup[norm]) {
-                combined[imgUrl] = normalizedLookup[norm];
-            }
+    images.forEach((imgUrl) => {
+      // Try exact match first
+      if (fetchedDimensions[imgUrl]) {
+        combined[imgUrl] = fetchedDimensions[imgUrl];
+      }
+      // Try normalized match
+      else {
+        const norm = normalizeUrl(imgUrl);
+        if (normalizedLookup[norm]) {
+          combined[imgUrl] = normalizedLookup[norm];
         }
+      }
     });
 
     // 3. Fallback to props dimensions (thumbnails) for the first image if still missing
     if (images.length > 0 && imageDimensions && !combined[images[0]]) {
-        combined[images[0]] = {
-            url: images[0],
-            ...imageDimensions,
-            aspectRatio: imageDimensions.aspectRatio || (imageDimensions.width / imageDimensions.height)
-        };
+      combined[images[0]] = {
+        url: images[0],
+        ...imageDimensions,
+        aspectRatio:
+          imageDimensions.aspectRatio ||
+          imageDimensions.width / imageDimensions.height,
+      };
     }
     return combined;
   }, [fetchedDimensions, imageDimensions, images]);
@@ -188,30 +194,39 @@ function BasePostItem(props: Props) {
   // Only log if we have images but the map is empty, or if we have data
   if (__DEV__) {
     const firstImg = images[0];
-    const hasData = finalDimensionsMap && Object.keys(finalDimensionsMap).length > 0;
+    const hasData =
+      finalDimensionsMap && Object.keys(finalDimensionsMap).length > 0;
     const hasMatch = finalDimensionsMap && finalDimensionsMap[firstImg];
-    
+
     if (images.length > 0) {
-       if (!hasData) {
-         // This is normal while loading
-         // console.log('[PostItem] Waiting for dimensions...');
-       } else if (!hasMatch) {
-         console.warn('[PostItem] Data loaded, but KEY MISMATCH.', {
-           lookingFor: firstImg,
-           availableKeys: Object.keys(finalDimensionsMap)
-         });
-       } else {
-         console.log('[PostItem] Success! Dimension found for:', firstImg, finalDimensionsMap[firstImg]);
-       }
+      if (!hasData) {
+        // This is normal while loading
+        // console.log('[PostItem] Waiting for dimensions...');
+      } else if (!hasMatch) {
+        console.warn('[PostItem] Data loaded, but KEY MISMATCH.', {
+          lookingFor: firstImg,
+          availableKeys: Object.keys(finalDimensionsMap),
+        });
+      } else {
+        console.log(
+          '[PostItem] Success! Dimension found for:',
+          firstImg,
+          finalDimensionsMap[firstImg],
+        );
+      }
     }
   }
-  
+
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
   // --- END OF PATTERN ---
 
   const contentTitle = (
-    <Text style={[styles.spacingBottom, styles.flex]} variant="semiBold" size="l">
+    <Text
+      style={[styles.spacingBottom, styles.flex]}
+      variant="semiBold"
+      size="l"
+    >
       {title}
     </Text>
   );
@@ -284,7 +299,7 @@ function BasePostItem(props: Props) {
         images={images}
         onImagePress={(uri) => setFullScreenImage(uri)}
         // Pass the full map instead of single serverDimensions
-        imageDimensionsMap={finalDimensionsMap} 
+        imageDimensionsMap={finalDimensionsMap}
       />
     </View>
   );
@@ -295,7 +310,12 @@ function BasePostItem(props: Props) {
     <>
       {showLabel && isLiked && (
         <View>
-          <Text style={styles.label} variant="bold" color="primary" numberOfLines={3}>
+          <Text
+            style={styles.label}
+            variant="bold"
+            color="primary"
+            numberOfLines={3}
+          >
             {currentUser === storage.getItem('user')?.username
               ? t(`You liked this post`)
               : t(`{currentUser} liked this post`, { currentUser })}

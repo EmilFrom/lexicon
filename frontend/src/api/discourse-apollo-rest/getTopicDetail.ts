@@ -7,7 +7,8 @@ export const TOPIC_FRAGMENT = gql`
   fragment TopicFragment on Topic {
     id
     title
-    imageUrl {    # <--- Changed from just "imageUrl"
+    imageUrl {
+      # <--- Changed from just "imageUrl"
       url
       width
       height

@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ImageBackgroundProps,
-  TouchableOpacity,
-} from 'react-native';
+import { ImageBackgroundProps, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { useReactiveVar } from '@apollo/client'; // Added
 
@@ -55,12 +52,14 @@ export function Avatar(props: Props) {
   // Removed useAuthenticatedImage hook logic
 
   const loadChild = src === '' || error; // Simplified loading logic, rely on Image to show empty/loading
-  
+
   // Construct source with headers
-  const imgSource = normalizedSrc ? {
-    uri: normalizedSrc,
-    headers: { Authorization: token ? `Bearer ${token}` : '' }
-  } : undefined;
+  const imgSource = normalizedSrc
+    ? {
+        uri: normalizedSrc,
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      }
+    : undefined;
 
   const letterAvatar = (
     <LetterAvatar

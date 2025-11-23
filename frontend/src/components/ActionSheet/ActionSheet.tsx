@@ -44,7 +44,7 @@ export function ActionSheet(props: Props) {
 
   const { orderedOptions, hasCancelOption } = useMemo(() => {
     const clonedOptions = [...options];
-    let cancelItem: typeof options[number] | undefined;
+    let cancelItem: (typeof options)[number] | undefined;
 
     if (
       cancelButtonIndex != null &&

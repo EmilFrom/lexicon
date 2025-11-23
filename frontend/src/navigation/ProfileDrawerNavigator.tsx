@@ -73,7 +73,7 @@ function DrawerItem(props: DrawerItemProps) {
 function DrawerContent({ state }: DrawerContentComponentProps) {
   const styles = useStyles();
   const { colors } = useTheme();
-  
+
   const storage = useStorage();
   const username = storage.getItem('user')?.username || '';
 
@@ -101,9 +101,10 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
   });
   const [splittedBio, setSplittedBio] = useState<Array<string>>();
 
-  const bioContent = (splittedBio && splittedBio.length > 3
-    ? `${splittedBio.slice(0, 3).join('\n')}...`
-    : user.bioRaw) || '';
+  const bioContent =
+    (splittedBio && splittedBio.length > 3
+      ? `${splittedBio.slice(0, 3).join('\n')}...`
+      : user.bioRaw) || '';
 
   const { allowUserStatus, enableLexiconPushNotifications } = useSiteSettings({
     fetchPolicy: 'network-only',
@@ -161,10 +162,7 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
         >
           {user.email}
         </Text>
-       <MarkdownRenderer
-          content={bioContent}
-          style={styles.bioContainer}
-        />
+        <MarkdownRenderer content={bioContent} style={styles.bioContainer} />
         {allowUserStatus &&
           (!user.status?.description && !user.status?.emoji ? (
             <IconWithLabel
