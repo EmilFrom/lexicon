@@ -35,13 +35,17 @@ function BaseUserInformationPostItem(props: Props) {
   });
   const cacheUserAction = cacheUserActionResult.data;
 
+  // --- FIX START ---
   if (!cacheUserActionResult.complete || !cacheUserAction) {
-    /**
-     * This shouldn't ever happen since UserActions
-     * have always already loaded the UserInformation screens by this point.
-     */
+    return null;
+  }
+  // --- FIX END ---
+
+  /* REMOVED:
+  if (!cacheUserActionResult.complete || !cacheUserAction) {
     throw new Error('Post not found');
   }
+  */
 
   const {
     title,

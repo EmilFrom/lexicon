@@ -45,18 +45,27 @@ function BaseSearchPostItem(props: Props) {
   const cachedSearchTopic = cachedSearchTopicResult.data;
   const cacheSearchPost = cacheSearchPostResult.data;
 
+  // --- FIX START ---
   if (
     !cachedSearchTopicResult.complete ||
     !cacheSearchPostResult.complete ||
     !cachedSearchTopic ||
     !cacheSearchPost
   ) {
-    /**
-     * This shouldn't ever happen since SearchTopic and SearchPost already
-     * fetched in SearchScreen
-     */
+    return null;
+  }
+  // --- FIX END ---
+
+  /* REMOVED:
+  if (
+    !cachedSearchTopicResult.complete ||
+    !cacheSearchPostResult.complete ||
+    !cachedSearchTopic ||
+    !cacheSearchPost
+  ) {
     throw new Error('Post not found');
   }
+  */
   const channels = storage.getItem('channels');
   const channel = findChannelByCategoryId({
     categoryId: cachedSearchTopic.categoryId,

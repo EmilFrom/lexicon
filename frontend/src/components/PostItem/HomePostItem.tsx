@@ -25,6 +25,7 @@ function BaseHomePostItem(props: Props) {
 
   const { topicId, prevScreen, isHidden = false, onPressReply, style } = props;
 
+  // 1. HOOK: Always call useFragment
   const cacheTopicResult = useFragment<TopicFragment, OperationVariables>({
     fragment: TopicFragmentDoc,
     fragmentName: 'TopicFragment',
@@ -35,15 +36,39 @@ function BaseHomePostItem(props: Props) {
   });
   const cacheTopic = cacheTopicResult.data;
 
-  if (!cacheTopicResult.complete || !cacheTopic) {
-    /**
-     * This shouldn't ever happen since postList
-     * have always already loaded the topic by this point.
-     */
-    throw new Error('Post not found');
-  }
+  // 2. HOOK: Always call useFirstPostContent
+  const { content: firstPostContent } = useFirstPostContent(topicId);
 
   const channelsData = storage.getItem('channels');
+
+  // 3. CALCULATION: Safely prepare data for the callback
+  // If cacheTopic is missing, we use 'undefined' so transformTopicToPost isn't called with null
+  const postData = cacheTopic 
+    ? transformTopicToPost({ ...cacheTopic, channels: channelsData ?? [] })
+    : undefined;
+
+  // Derive content safe for the callback dependency
+  const content = firstPostContent || postData?.content || '';
+
+  // 4. HOOK: Always call useCallback (it depends on 'content' which we safely derived above)
+  const onPressPost = useCallback(() => {
+    navigate('PostDetail', {
+      topicId,
+      prevScreen,
+      focusedPostNumber: undefined,
+      content,
+      hidden: isHidden,
+    });
+  }, [navigate, topicId, prevScreen, content, isHidden]);
+
+  // --- FIX START ---
+  // 5. GUARD: Now it is safe to return early because all hooks have executed.
+  if (!cacheTopicResult.complete || !cacheTopic || !postData) {
+    return null;
+  }
+  // --- FIX END ---
+
+  // 6. DESTRUCTURE: Now we can safely extract variables from postData
   const {
     title,
     avatar,
@@ -58,30 +83,11 @@ function BaseHomePostItem(props: Props) {
     isLiked,
     freqPosters,
     postNumber,
-    content: excerptContent,
     imageUrls,
     pinned,
-  } = transformTopicToPost({ ...cacheTopic, channels: channelsData ?? [] });
-
-  // Fetch first post content (cache-first, lazy-loaded)
-  const { content: firstPostContent } = useFirstPostContent(topicId);
-
-  // Use first post content if available, otherwise fall back to excerpt
-  const content = firstPostContent || excerptContent;
+  } = postData;
 
   const isCreator = username === storage.getItem('user')?.username;
-
-  // Memoize callback to prevent unnecessary re-renders
-  const onPressPost = useCallback(() => {
-    navigate('PostDetail', {
-      topicId,
-      prevScreen,
-      focusedPostNumber: undefined,
-      content,
-      hidden: isHidden,
-    });
-  }, [navigate, topicId, prevScreen, content, isHidden]);
-
   const imagePreviewUrls = firstPostContent ? undefined : imageUrls;
 
   return (
@@ -114,6 +120,7 @@ function BaseHomePostItem(props: Props) {
           frequentPosters={freqPosters.slice(1)}
           likePerformedFrom={'home-scene'}
           onPressReply={onPressReply}
+          // Use the hoisted callback
           onPressView={onPressPost}
           style={styles.spacingTop}
         />

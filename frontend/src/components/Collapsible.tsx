@@ -1,6 +1,11 @@
 import React, { useState, PropsWithChildren } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { Icon, Text } from '../core-ui';
+// --- FIX START ---
+// Import directly from the file to break the cycle (Collapsible -> core-ui -> ChatBubble -> MarkdownRenderer -> Collapsible)
+import { Icon } from '../core-ui/Icon';
+import { Text } from '../core-ui/Text';
+// REMOVED: import { Icon, Text } from '../core-ui';
+// --- FIX END ---
 import { makeStyles, useTheme } from '../theme';
 
 type Props = {

@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActionSheetIOS,
   Modal,
@@ -82,14 +82,20 @@ export default function Notifications() {
   const [showMore, setShowMore] = useState<boolean>(false);
   const [loadMorePolicy, setLoadMorePolicy] = useState<boolean>(false);
 
+   // --- FIX START ---
   const { data, loading, error, refetch, fetchMore } = useNotification({
     variables: { page },
-    onError: (error) => {
-      setErrorMsg(errorHandler(error, true));
-    },
+    // Remove onError
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: loadMorePolicy ? 'cache-first' : 'no-cache',
   });
+
+  useEffect(() => {
+    if (error) {
+      setErrorMsg(errorHandler(error, true));
+    }
+  }, [error]);
+  // --- FIX END ---
 
   const { markAsRead, loading: markAsReadLoading } = useMarkRead({
     onError: () => {},

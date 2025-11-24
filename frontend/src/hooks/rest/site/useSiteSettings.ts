@@ -75,6 +75,7 @@ export function useSiteSettings(options?: QueryHookOptions<SiteQuery>) {
     loading,
     error,
     refetch,
+    data,
   };
 }
 

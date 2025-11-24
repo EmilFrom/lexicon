@@ -103,59 +103,69 @@ export default function ChatChannelDetail() {
     useState(false);
   const previousPushEnabled = useRef<boolean | null>(null);
 
+   // --- START OF CHANGES ---
   const {
     getChatChannelDetail,
     loading: chatChannelDetailLoading,
     data: chatChannelDetailData,
-  } = useChatChannelDetail({
-    onError: (error) => {
-      errorHandlerAlert(error);
-    },
-  });
+    error: chatChannelDetailError,
+  } = useChatChannelDetail({});
+
+  useEffect(() => {
+    if (chatChannelDetailError) {
+      errorHandlerAlert(chatChannelDetailError);
+    }
+  }, [chatChannelDetailError]);
 
   const {
     getChatChannelMessages,
     loading: channelMessagesLoading,
     fetchMore,
     refetch,
-  } = useChatChannelMessages(
-    {
-      onCompleted: ({ getChatChannelMessages }) => {
-        const { messages, canLoadMorePast, canLoadMoreFuture } =
-          getChatChannelMessages;
+    data: messagesData,
+  } = useChatChannelMessages({}, 'HIDE_ALERT');
 
-        setChatMessages(messages);
-        setHasOlderMessages(canLoadMorePast);
+  useEffect(() => {
+    if (messagesData?.getChatChannelMessages) {
+      const { messages, canLoadMorePast, canLoadMoreFuture } =
+        messagesData.getChatChannelMessages;
 
-        if (messages.length) {
-          setHasUnread(lastMessageId !== messages[0].id);
-        }
-        setIsFetchMore(false);
+      setChatMessages(messages);
+      setHasOlderMessages(canLoadMorePast);
 
-        if (messages.length && targetMessageId && isInitialRequest) {
-          const targetMessage = messages.find(
-            (message) => message.id === targetMessageId,
+      if (messages.length) {
+        setHasUnread(lastMessageId !== messages[0].id);
+      }
+      setIsFetchMore(false);
+
+      if (messages.length && targetMessageId && isInitialRequest) {
+        const targetMessage = messages.find(
+          (message) => message.id === targetMessageId,
+        );
+        if (targetMessage) {
+          setTimeout(
+            () =>
+              virtualListRef.current?.scrollToItem({
+                item: targetMessage,
+              }),
+            ios ? 50 : 150,
           );
-          if (targetMessage) {
-            setTimeout(
-              () =>
-                virtualListRef.current?.scrollToItem({
-                  item: targetMessage,
-                }),
-              ios ? 50 : 150,
-            );
-          }
         }
+      }
 
-        nextTargetMessageId.current = canLoadMoreFuture ? messages[0].id : 0;
-        setShouldMaintainVisiblePosition(canLoadMoreFuture);
-      },
-    },
-    'HIDE_ALERT',
-  );
+      nextTargetMessageId.current = canLoadMoreFuture ? messages[0].id : 0;
+      setShouldMaintainVisiblePosition(canLoadMoreFuture);
+    }
+  }, [messagesData, lastMessageId, targetMessageId, isInitialRequest, ios]);
+  // --- END OF CHANGES ---
 
+// --- FIX START ---
   const { preference, refetch: refetchPreference } =
     useGetChatChannelNotificationPreference(channelId);
+  
+  // Safe access helper
+  const isPushEnabled = preference ? preference.pushEnabled : true;
+  // --- FIX END ---
   const {
     updatePreference,
     loading: updatePreferenceLoading,
@@ -183,39 +193,37 @@ export default function ChatChannelDetail() {
   });
 
   const { replyChat, loading: replyLoading } = useReplyChat({
-   onCompleted: async (data) => { // <--- Make this async to await refetch
+    onCompleted: async (data) => {
       setMessage('');
       
-      /* ---------------------------------------------------------
-         FIX: AUTO-REFRESH LOGIC
-         1. Get the new message ID from the mutation response.
-         2. Call refetch() with this ID to force the list to update.
-         3. Scroll to offset 0 (bottom) after refresh.
-      --------------------------------------------------------- */
-      const newMessageId = data.replyChat.messageId;
-
+      // --- FIX START ---
       try {
-        // Explicitly fetch the chunk containing our new message
+        // 1. Evict the cached messages for this channel.
+        // The keyArgs in client.ts is `channel-${channelId}`.
+        // By evicting the field 'getChatChannelMessages', we force a network refresh.
+        client.cache.evict({ fieldName: 'getChatChannelMessages' });
+        client.cache.gc();
+
+        // 2. Manually trigger refetch to re-populate immediately
         await refetch({
-          channelId,
-          pageSize: CHAT_CHANNEL_DETAIL_PAGE_SIZE,
-          targetMessageId: newMessageId,
-          // Ensure we aren't passing leftover pagination parameters
-          direction: undefined, 
-          isPolling: false
+           channelId,
+           pageSize: CHAT_CHANNEL_DETAIL_PAGE_SIZE,
+           targetMessageId: undefined // fetch latest
         });
 
-        // Scroll to bottom (Inverted List: Offset 0 is the bottom)
-        // A small timeout ensures the React render cycle has finished updating the list
-        setTimeout(() => {
-          virtualListRef.current?.scrollToOffset({ offset: 0, animated: true });
-        }, 300);
-
+        // 3. Scroll to bottom
+        if (virtualListRef.current) {
+          setTimeout(() => {
+            virtualListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          }, 100);
+        }
       } catch (error) {
-        console.error("Failed to refresh chat after reply", error);
+        console.warn('Failed to refresh chat', error);
       }
+      // --- FIX END ---
     },
   });
+
 
   const { createThread } = useCreateThread({
     onCompleted: ({ createThread: { id, lastMessageId } }) => {
@@ -459,7 +467,10 @@ export default function ChatChannelDetail() {
   };
 
   const handleTogglePush = async (newValue: boolean) => {
-    previousPushEnabled.current = preference?.pushEnabled ?? true;
+    // --- FIX START ---
+    previousPushEnabled.current = isPushEnabled;
+    // --- FIX END ---
+
     try {
       await updatePreference(channelId, newValue);
       Toast.show({

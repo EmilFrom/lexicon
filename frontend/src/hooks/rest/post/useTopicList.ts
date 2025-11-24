@@ -34,9 +34,10 @@ export function useTopicList(
 export function useLazyTopicList(
   options?: LazyQueryHookOptions<TopicListType, TopicListVariables>,
 ) {
+   // --- FIX START ---
+  // Remove context from here
   const [getTopicListMutateFunc, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery<TopicListType, TopicListVariables>(TopicsDocument, {
-      context: { queryDeduplication: true },
       ...options,
     });
 
@@ -47,8 +48,11 @@ export function useLazyTopicList(
         ...args.variables,
         topicsPath: topicsPathBuilder,
       },
+      // Pass context here instead
+      context: { queryDeduplication: true }, 
     });
   };
+  // --- FIX END ---
 
   return { getTopicList, loading, error, refetch, fetchMore, data };
 }

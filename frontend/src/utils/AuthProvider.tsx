@@ -72,13 +72,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const storage = useStorage();
   useGetAllChatChannelNotificationPreferences();
+  // --- START OF CHANGES ---
   const {
+    data: siteData,
     canSignUp,
     loginRequired,
     loading: siteSettingsLoading,
     error: siteSettingsError,
   } = useSiteSettings({
-    onCompleted: ({ site }) => {
+    fetchPolicy: 'network-only',
+    skip: token === undefined,
+  });
+
+  useEffect(() => {
+    if (siteData?.site) {
       const {
         discourseBaseUrl,
         siteSettings: {
@@ -87,7 +94,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           allowPoll,
           pollCreateMinimumTrustLevel,
         },
-      } = site;
+      } = siteData.site;
       storage.setItem('userStatus', {
         emojiSet,
         externalEmojiUrl,
@@ -97,24 +104,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         allowPoll,
         pollCreateMinimumTrustLevel,
       });
-    },
-    onError: ({ message }) => {
+    }
+  }, [siteData, storage]);
+
+  useEffect(() => {
+    if (siteSettingsError) {
+      const { message } = siteSettingsError;
       if (
         message.includes(sessionExpired) ||
         message.includes(unauthorizedAccess)
       ) {
-        /**
-         * clean session when session expired or unauthorized access and token exist
-         * check docs/authentication.md for more info
-         */
         if (tokenVar()) {
           cleanSession();
         }
       }
-    },
-    fetchPolicy: 'network-only',
-    skip: token === undefined,
-  });
+    }
+  }, [siteSettingsError]);
+  // --- END OF CHANGES ---
 
   useEffect(() => {
     // load token from storage on initial mount

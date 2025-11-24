@@ -5,11 +5,33 @@ import { useReactiveVar } from '@apollo/client';
 import { tokenVar } from '../../../reactiveVars';
 import { Mutation, Query } from '../../../generatedAPI/server';
 
+// --- FIX START ---
+// Import the output type
+import { ChatChannelNotificationsOutput } from '../../../generatedAPI/server';
+
+// Define local response types since these aren't on the main Query type
+interface GetNotificationPreferenceData {
+  chatChannelNotificationPreference: ChatChannelNotificationsOutput;
+}
+
+interface GetAllNotificationPreferencesData {
+  chatChannelNotificationPreferences: {
+    preferences: ChatChannelNotificationsOutput[];
+  };
+}
+
+interface UpdateNotificationPreferenceData {
+  updateChatChannelNotificationPreference: ChatChannelNotificationsOutput;
+}
+// --- FIX END ---
+
+
+// Make sure the query is defined to return 'ChatChannelNotificationsOutput' or equivalent
 const GET_NOTIFICATION_PREFERENCE = gql`
   query getNotificationPreference($channelId: Int!) {
     chatChannelNotificationPreference(channelId: $channelId)
       @rest(
-        type: "ChatChannelNotificationPreference"
+        type: "ChatChannelNotificationsOutput" 
         path: "/lexicon/chat-notifications/{args.channelId}"
         method: "GET"
       ) {
@@ -24,12 +46,12 @@ const GET_ALL_NOTIFICATION_PREFERENCES = gql`
   query getAllNotificationPreferences {
     chatChannelNotificationPreferences
       @rest(
-        type: "[ChatChannelNotificationPreference]"
+        type: "[ChatChannelNotificationsOutput]"
         path: "/lexicon/chat-notifications"
         method: "GET"
         endpoint: "v1"
       ) {
-      preferences @type(name: "[ChatChannelNotificationPreference]") {
+      preferences @type(name: "[ChatChannelNotificationsOutput]") {
         userId
         channelId
         pushEnabled
@@ -49,7 +71,7 @@ const UPDATE_NOTIFICATION_PREFERENCE = gql`
       input: $input
     )
       @rest(
-        type: "ChatChannelNotificationPreference"
+        type: "ChatChannelNotificationsOutput"
         path: "/lexicon/chat-notifications/{args.channelId}"
         method: "PUT"
         bodyKey: "input"
@@ -64,10 +86,12 @@ const UPDATE_NOTIFICATION_PREFERENCE = gql`
 export function useGetAllChatChannelNotificationPreferences() {
   const client = useApolloClient();
   const token = useReactiveVar(tokenVar);
-  useQuery<Pick<Query, 'chatChannelNotificationPreferences'>>(
+  
+  // --- FIX START ---
+  useQuery<GetAllNotificationPreferencesData>(
     GET_ALL_NOTIFICATION_PREFERENCES,
     {
-      skip: !token, // Don't run this query if the user is not logged in
+      skip: !token, 
       onCompleted: (queryData) => {
         queryData?.chatChannelNotificationPreferences?.preferences?.forEach(
           (preference) => {
@@ -76,7 +100,7 @@ export function useGetAllChatChannelNotificationPreferences() {
               variables: { channelId: preference.channelId },
               data: {
                 chatChannelNotificationPreference: {
-                  __typename: 'ChatChannelNotificationPreference',
+                  __typename: 'ChatChannelNotificationsOutput',
                   ...preference,
                 },
               },
@@ -86,16 +110,17 @@ export function useGetAllChatChannelNotificationPreferences() {
       },
     },
   );
+  // --- FIX END ---
 }
 
 export function useGetChatChannelNotificationPreference(channelId: number) {
-  const { data, ...rest } = useQuery<
-    Pick<Query, 'chatChannelNotificationPreference'>
-  >(GET_NOTIFICATION_PREFERENCE, {
+  // --- FIX START ---
+  const { data, ...rest } = useQuery<GetNotificationPreferenceData>(GET_NOTIFICATION_PREFERENCE, {
     variables: { channelId },
     skip: !channelId,
     fetchPolicy: 'cache-first',
   });
+  // --- FIX END ---
 
   return {
     preference: data?.chatChannelNotificationPreference,
@@ -104,9 +129,9 @@ export function useGetChatChannelNotificationPreference(channelId: number) {
 }
 
 export function useUpdateChatChannelNotificationPreference() {
-  const [mutate, { loading, error, ...rest }] = useMutation<
-    Pick<Mutation, 'updateChatChannelNotificationPreference'>
-  >(UPDATE_NOTIFICATION_PREFERENCE);
+  // --- FIX START ---
+  const [mutate, { loading, error, ...rest }] = useMutation<UpdateNotificationPreferenceData>(UPDATE_NOTIFICATION_PREFERENCE);
+  // --- FIX END ---
 
   const updatePreference = useCallback(
     (channelId: number, pushEnabled: boolean) => {

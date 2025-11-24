@@ -46,6 +46,16 @@ import {
   RootStackRouteProp,
 } from '../types';
 import { useModal } from '../utils';
+// /* --- 1. Add these imports --- */
+import {
+  TopicsDocument,
+  GetTopicDetailDocument,
+  ProfileDocument,
+  UserActivityDocument,
+  ListPostDraftsDocument,
+} from '../generatedAPI/server';
+import { postDraftPathBuilder } from '../api/pathBuilder';
+import { defaultArgsListPostDraft } from '../constants/postDraft';
 
 const ios = Platform.OS === 'ios';
 
@@ -115,29 +125,47 @@ export default function PostPreview() {
   // Fetch dimensions for the resolved images
   const { dimensions } = useImageDimensions(displayImages);
 
-  // --- START OF CHANGES ---
-  // Define which queries to refetch.
-  // 'Topics': Updates the Home screen list.
-  // 'GetTopicDetail': Updates the Post Detail screen (if you are replying).
-  // 'Profile': Updates post counts on the profile.
-  // 'UserActivity': Updates the activity tab.
-  const activeRefetchQueries = ['Topics', 'GetTopicDetail', 'Profile', 'UserActivity'];
+const username = storage.getItem('user')?.username || '';
 
-  // If it's a draft, use the draft-specific queries.
-  // If it's a PUBLISHED post, refetch the active app data.
-  const refetchQueries = isDraft ? refetchQueriesPostDraft : activeRefetchQueries;
-  // --- END OF CHANGES ---
+  // /* --- 2. Define Document-based Refetch Queries --- */f
+  // We always want to update these when a post is published
+  const activeRefetchQueries = [
+    { query: TopicsDocument },
+    { query: GetTopicDetailDocument },
+    { query: ProfileDocument, variables: { username } },
+    { query: UserActivityDocument, variables: { username, offset: 0 } },
+  ];
+
+  // If it was a draft, we ALSO want to refresh the draft list to remove it
+  const draftRefetchQuery = {
+    query: ListPostDraftsDocument,
+    variables: {
+      ...defaultArgsListPostDraft,
+      postDraftPath: postDraftPathBuilder,
+    },
+  };
+
+  const forceRefreshTopics = () => {
+    // This nuclear option deletes the cached list of topics.
+    // The next time Home.tsx renders or focuses, it WILL fetch from the network.
+    client.cache.evict({ fieldName: 'topics' });
+    client.cache.gc();
+  };
+  // --- FIX END ---
+
+  
 
   const { newTopic, loading: newTopicLoading } = useNewTopic({
     onCompleted: () => {
+      forceRefreshTopics(); 
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    refetchQueries,
     onError: (error) => errorHandlerAlert(error),
   });
+
 
   const { reply: replyTopic, loading: replyLoading } = useReplyTopic({
     onCompleted: () => {
@@ -151,34 +179,34 @@ export default function PostPreview() {
         client.cache.evict({ fieldName: 'topicDetail' });
         client.cache.gc();
       }
+      forceRefreshTopics(); 
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    refetchQueries,
     onError: (error) => errorHandlerAlert(error),
   });
 
   const { editPost, loading: editPostLoading } = useEditPost({
     onCompleted: () => {
+      forceRefreshTopics(); 
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    refetchQueries,
     onError: (error) => errorHandlerAlert(error),
   });
 
   const { editTopic, loading: editTopicLoading } = useEditTopic({
     onCompleted: () => {
+      forceRefreshTopics(); 
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
       }, 0);
     },
-    refetchQueries,
     onError: (error) => errorHandlerAlert(error),
   });
 

@@ -11,13 +11,14 @@ import { useLazyQuery } from '../../../utils';
 export function useLazyGetChatChannels(
   options?: LazyQueryHookOptions<GetChatChannelsType, GetChatChannelsVariables>,
 ) {
+  // --- FIX START ---
+  // Remove context from here
   const [
     getChatChannelsMutateFunc,
     { data, loading, error, refetch, fetchMore },
   ] = useLazyQuery<GetChatChannelsType, GetChatChannelsVariables>(
     GetChatChannelsDocument,
     {
-      context: { queryDeduplication: true },
       pollingEnabled: true,
       ...options,
     },
@@ -30,8 +31,11 @@ export function useLazyGetChatChannels(
         ...args.variables,
         getChatChannelsPath: getChatChannelsPathBuilder,
       },
+      // Pass context here instead
+      context: { queryDeduplication: true },
     });
   };
+  // --- FIX END ---
 
   return { getChatChannels, loading, error, refetch, fetchMore, data };
 }

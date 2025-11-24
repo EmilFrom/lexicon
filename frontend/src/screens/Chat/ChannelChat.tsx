@@ -57,27 +57,28 @@ export default function ChannelChat() {
     [setSearchValue],
   );
 
-  const {
+const {
     getChatChannels,
     error: errorChannels,
     data: channelDataList,
     fetchMore: fetchMoreChannels,
     refetch: refetchChannels,
-  } = useLazyGetChatChannels({
-    variables: {
-      offset: offset,
-      filter: searchValue,
-      status: selectedOption.value,
-      limit: CHAT_CHANNEL_DETAIL_PAGE_SIZE,
-    },
-    onError: () => {
+  } = useLazyGetChatChannels({}); // Remove variables
+
+  useEffect(() => {
+    if (errorChannels) {
       setRefreshing(false);
       setLoading(false);
-    },
-    onCompleted: () => {
+    }
+  }, [errorChannels]);
+
+  useEffect(() => {
+    if (channelDataList) {
       setLoading(false);
-    },
-  });
+      // setData is called in another useEffect below which observes channelDataList
+    }
+  }, [channelDataList]);
+  // --- END OF CHANGES ---
 
   const getData = useCallback(
     (variables: GetChatChannelsQueryVariables) => {

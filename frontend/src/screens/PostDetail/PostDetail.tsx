@@ -21,10 +21,13 @@ import {
   NestedComment,
   PostDetailHeaderItem,
   PostDetailHeaderItemProps,
-  PressMoreParams,
-  PressReplyParams,
   RenderItemCustomOption,
 } from '../../components';
+// --- FIX START ---
+// Import types directly from NestedComment
+import { PressMoreParams, PressReplyParams } from '../../components/NestedComment';
+// --- FIX END ---
+
 import {
   FORM_DEFAULT_VALUES,
   MAX_POST_COUNT_PER_REQUEST,
@@ -123,6 +126,8 @@ export default function PostDetail() {
 
   const ios = Platform.OS === 'ios';
 
+  // --- FIX START ---
+  // Refactor useTopicDetail to remove onCompleted/onError
   const {
     data,
     loading: topicDetailLoading,
@@ -132,47 +137,45 @@ export default function PostDetail() {
   } = useTopicDetail(
     {
       variables: { topicId, postNumber, includeFirstPost: true },
-      onCompleted: ({ topicDetail }) => {
-        if (topicDetail.deletedAt) {
-          Alert.alert(t('Error'), t('This topic has been deleted.'), [
-            {
-              text: t('Got it'),
-              onPress: () => {
-                goBack();
-              },
-            },
-          ]);
-        }
-      },
-      onError: (error) => {
-        /**
-         * if we get error about private post which cannot be access.
-         * we need check first it is because user haven't login or because post it self only open to specific group
-         * if user not login we will redirect to login scene.
-         * But if user already login still get same error will redirect to home scene and show private post alert
-         */
-
-        if (error.message.includes('Invalid Access')) {
-          if (
-            !useInitialLoadResult.loading &&
-            !useInitialLoadResult.isLoggedIn
-          ) {
-            reset({
-              index: 1,
-              routes: [
-                { name: 'TabNav', state: { routes: [{ name: 'Home' }] } },
-                { name: 'Welcome' },
-              ],
-            });
-          } else {
-            navigate('TabNav', { state: { routes: [{ name: 'Home' }] } });
-            privateTopicAlert();
-          }
-        }
-      },
     },
     'HIDE_ALERT',
   );
+
+  // Handle onCompleted logic
+  useEffect(() => {
+    if (data?.topicDetail?.deletedAt) {
+      Alert.alert(t('Error'), t('This topic has been deleted.'), [
+        {
+          text: t('Got it'),
+          onPress: () => {
+            goBack();
+          },
+        },
+      ]);
+    }
+  }, [data, goBack]);
+
+  // Handle onError logic
+  useEffect(() => {
+    if (error && error.message.includes('Invalid Access')) {
+        if (
+          !useInitialLoadResult.loading &&
+          !useInitialLoadResult.isLoggedIn
+        ) {
+          reset({
+            index: 1,
+            routes: [
+              { name: 'TabNav', state: { routes: [{ name: 'Home' }] } },
+              { name: 'Welcome' },
+            ],
+          });
+        } else {
+          navigate('TabNav', { state: { routes: [{ name: 'Home' }] } });
+          privateTopicAlert();
+        }
+      }
+  }, [error, useInitialLoadResult, reset, navigate]);
+  // --- FIX END ---
 
   const { postRaw } = usePostRaw({
     onCompleted: ({ postRaw: { cooked } }) => {
@@ -439,7 +442,9 @@ export default function PostDetail() {
 
   const onPressMore = useCallback(
     (params?: PressMoreParams) => {
-      const mergedParams: PressMoreParams = params ?? {};
+      // --- FIX START ---
+      // Cast to Partial to allow empty object fallback without TS complaining about missing required keys
+      const mergedParams = params ?? ({} as Partial<PressMoreParams>);
       let { id } = mergedParams;
       const {
         canFlag = !!(firstPost && firstPost.canFlag),
@@ -448,6 +453,7 @@ export default function PostDetail() {
         fromPost = true,
         author,
       } = mergedParams;
+      // --- FIX END ---
       if (currentUserId && topic) {
         if (!id || typeof id !== 'number') {
           id = topic.firstPostId;

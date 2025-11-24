@@ -8,11 +8,12 @@ export function handleDuplicateRef<T extends Reference>(
     return secondArray || firstArray || [];
   }
 
-  const firstArrayIds = firstArray.map(({ __ref }) => __ref);
-
+  // /* --- CHANGED: Optimized with Set --- */
+  const firstArrayIds = new Set(firstArray.map(({ __ref }) => __ref));
   const filteredSecondArray = secondArray.filter(
-    (item) => !firstArrayIds.includes(item.__ref),
+    (item) => !firstArrayIds.has(item.__ref),
   );
+  // /* ---------------------------------- */
 
   return [...firstArray, ...filteredSecondArray];
 }
@@ -23,13 +24,20 @@ export function handleDuplicates<T extends Reference>(params: {
   newArrayIs: 'prepended' | 'appended';
 }) {
   const { newArray, oldArray, newArrayIs } = params;
-  if (!oldArray || !newArray) {
-    return oldArray || newArray || [];
-  }
-  const newArrayIds = newArray.map(({ __ref }) => __ref);
+
+  // /* --- CHANGED: Safety Checks --- */
+  if (!oldArray || oldArray.length === 0) return newArray || [];
+  if (!newArray || newArray.length === 0) return oldArray || [];
+  // /* ----------------------------- */
+
+  // /* --- CHANGED: Use Set for lookup --- */
+  const newArrayIds = new Set(newArray.map(({ __ref }) => __ref));
+
   const filteredOldArray = oldArray.filter((item) => {
-    return !newArrayIds.includes(item.__ref);
+    return !newArrayIds.has(item.__ref);
   });
+  // /* ---------------------------------- */
+
   if (newArrayIs === 'prepended') {
     return [...newArray, ...filteredOldArray];
   } else {

@@ -11,7 +11,8 @@ export function useAbout(
   options?: LazyQueryHookOptions<AboutType>,
   errorAlert: ErrorAlertOptionType = 'SHOW_ALERT',
 ) {
-  const [getAbout, { error }] = useLazyQuery<AboutType>(
+  // Capture data
+  const [getAbout, { error, data }] = useLazyQuery<AboutType>(
     AboutDocument,
     {
       ...options,
@@ -19,5 +20,5 @@ export function useAbout(
     errorAlert,
   );
 
-  return { getAbout, error };
+  return { getAbout, error, data }; // Return data
 }

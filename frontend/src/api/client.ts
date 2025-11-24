@@ -97,32 +97,33 @@ const cache = new InMemoryCache({
             if (!context.variables || !context.variables.sort) {
               return '';
             }
-
             const { categoryId, sort } = context.variables;
+            // Ensure strict null/undefined handling for consistency
             return `${categoryId ?? NO_CHANNEL_FILTER.id}-${sort}`;
           },
           merge: (existing, incoming, { variables }) => {
-            if (!variables) {
+            // --- FIX START ---
+            // 1. If no variables, strictly take incoming
+            if (!variables) return incoming;
+
+            // 2. Identify if this is a "Refresh" or "First Load" (page 0)
+            // Some calls might pass page:0, others might omit it.
+            const page = variables.page ?? 0;
+            
+            if (page === 0) {
+              // STALENESS FIX: Completely ignore 'existing' when fetching page 0.
+              // This makes Pull-to-Refresh work immediately.
               return incoming;
             }
+            // --- FIX END ---
 
-            if (!existing || !incoming) {
-              return incoming || existing || undefined;
-            }
-            let mergedTopics: Readonly<Array<Reference>> = [];
-            if (variables.page > 0) {
-              mergedTopics = handleDuplicates({
-                newArray: incoming['topics@type({"name":"Topic"})'],
-                oldArray: existing['topics@type({"name":"Topic"})'],
-                newArrayIs: 'appended',
-              });
-            } else {
-              mergedTopics = handleDuplicates({
-                newArray: incoming['topics@type({"name":"Topic"})'],
-                oldArray: existing['topics@type({"name":"Topic"})'],
-                newArrayIs: 'prepended',
-              });
-            }
+            // 3. Pagination logic (appending)
+            const mergedTopics = handleDuplicates({
+              newArray: incoming['topics@type({"name":"Topic"})'],
+              oldArray: existing ? existing['topics@type({"name":"Topic"})'] : [],
+              newArrayIs: 'appended',
+            });
+
             return {
               ...existing,
               'topics@type({"name":"Topic"})': mergedTopics,
@@ -185,40 +186,40 @@ const cache = new InMemoryCache({
             const { channelId } = context.variables;
             return `channel-${channelId}`;
           },
-          merge: (existing, incoming) => {
-            // NOTE: We should not reverse exisiting data because it is already reversed in the previous iteration
-            if (!incoming) {
-              return existing;
-            }
-            if (!existing) {
-              return incoming ? [...incoming].reverse() : undefined;
-            }
+          merge: (existing, incoming, { variables }) => {
+            // 1. If no incoming data (e.g. poll returned empty), keep existing
+            if (!incoming || incoming.length === 0) return existing;
+            
+            // Chat is inverted.
+            const incomingReversed = [...incoming].reverse();
 
-            const reversedIncoming = [...incoming].reverse();
-            const lastExisting = getLatestApolloId(existing);
-            const lastIncoming = getLatestApolloId(reversedIncoming);
+            // --- FIX START ---
+            // If we are polling or doing an initial load (no pagination target), 
+            // we assume this is the "latest" state.
+            const isPagination = variables?.targetMessageId !== undefined;
 
-            if (!lastExisting || !lastIncoming) {
-              return existing;
+            // If this is a fresh fetch (not scrolling up to load past), 
+            // we trust the new data implicitly for the recent messages.
+            if (!isPagination) {
+               return incomingReversed;
             }
+            // --- FIX END ---
+
+            if (!existing) return incomingReversed;
 
             return mergeReferenceData({
               existing,
-              incoming: reversedIncoming,
-              lastExisting,
-              lastIncoming,
+              incoming: incomingReversed,
+              lastExisting: getLatestApolloId(existing),
+              lastIncoming: getLatestApolloId(incomingReversed),
               reverse: true,
             });
           },
         },
         canLoadMorePast: {
           keyArgs: (_, context) => {
-            if (!context.variables || !context.variables.channelId) {
-              return '';
-            }
-
-            const { channelId } = context.variables;
-            return `channel-${channelId}`;
+            if (!context.variables || !context.variables.channelId) return '';
+            return `channel-${context.variables.channelId}`;
           },
           merge: (existing, incoming, { variables }) => {
             return variables?.isPolling ? existing : incoming;

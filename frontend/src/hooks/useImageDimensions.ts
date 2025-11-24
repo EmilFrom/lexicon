@@ -1,57 +1,74 @@
 import { useEffect, useState, useRef } from 'react';
 import { fetchImageDimensions, ImageDimension } from '../helpers/api/lexicon';
 
+// --- FIX START ---
+// Move cache outside the hook to share state across all components (Global Cache)
+const globalDimensionsCache: Record<string, ImageDimension> = {};
+const globalProcessedUrls = new Set<string>();
+// --- FIX END ---
+
+
 export function useImageDimensions(urls: string[]) {
   const [dimensions, setDimensions] = useState<Record<string, ImageDimension>>(
-    {},
+    globalDimensionsCache, // Initialize with what we already know
   );
   const [loading, setLoading] = useState(false);
-
-  // 1. THE FIX: "Memory" of what we already asked for
-  const processedUrls = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let isMounted = true;
 
-    // 2. FILTER: Only ask for URLs we haven't asked for yet
+    // 1. Filter: Only ask for URLs we haven't asked for globally
     const newUrlsToFetch = urls.filter((url) => {
       if (!url) return false;
-      if (url.includes('/emoji/')) return false; // Don't ask for emojis
+      if (url.includes('/emoji/')) return false;
       if (url.endsWith('.svg')) return false;
-      return !processedUrls.current.has(url);
+      
+      // Check global sets/objects
+      return !globalProcessedUrls.has(url) && !globalDimensionsCache[url];
     });
 
-    if (newUrlsToFetch.length === 0) return;
+    // If everything is cached, just ensure local state is up to date
+    if (newUrlsToFetch.length === 0) {
+        // Optional: Check if we need to sync local state with global cache
+        // setDimensions((prev) => ({ ...prev, ...globalDimensionsCache }));
+        return;
+    }
 
     const loadDimensions = async () => {
       setLoading(true);
 
-      // Mark these as "processing" so we don't ask again
-      newUrlsToFetch.forEach((u) => processedUrls.current.add(u));
+      // Mark these as "processing" immediately to prevent other components from asking
+      newUrlsToFetch.forEach((u) => globalProcessedUrls.add(u));
 
       try {
-        // 3. API CALL
         const data = await fetchImageDimensions(newUrlsToFetch);
 
+        // Update Global Cache
+        Object.assign(globalDimensionsCache, data);
+
         if (isMounted) {
-          // Merge new data with old data
-          setDimensions((prev) => ({ ...prev, ...data }));
+          // Update Local State
+          setDimensions((prev) => ({ ...prev, ...globalDimensionsCache }));
         }
       } catch (e) {
         console.warn('[useImageDimensions] Failed to fetch:', e);
+        // On error, remove from processed so we can try again later? 
+        // For now, leave them to avoid infinite error loops on 429s.
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
-    // 4. DEBOUNCE: Wait 200ms before firing to group rapid requests
-    const timeoutId = setTimeout(loadDimensions, 200);
+    // 2. Debounce: 
+    // Even with global caching, multiple components mounting at the exact same ms 
+    // might slip through. A slightly longer debounce helps batch them.
+    const timeoutId = setTimeout(loadDimensions, 500); 
 
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [JSON.stringify(urls)]); // Only run if the list of URLs changes
+  }, [JSON.stringify(urls)]); 
 
   return { dimensions, loading };
 }

@@ -24,11 +24,13 @@ import { PostHidden } from './PostItem';
 import { RepliedPost } from './RepliedPost';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
-type PressReplyParams = {
+// --- FIX START ---
+// Add 'export' keyword to allow importing in PostDetail
+export type PressReplyParams = {
   replyToPostId?: number;
 };
 
-type PressMoreParams = {
+export type PressMoreParams = {
   id: number;
   canFlag?: boolean;
   canEdit?: boolean;
@@ -36,8 +38,13 @@ type PressMoreParams = {
   fromPost: boolean;
   author: string;
 };
+// --- FIX END ---
 
-type Props = ViewProps &
+
+
+// --- FIX START ---
+// Omit 'id' from ViewProps to allow 'id' to be a number (from Post)
+type Props = Omit<ViewProps, 'id'> &
   Pick<
     Post,
     | 'id'

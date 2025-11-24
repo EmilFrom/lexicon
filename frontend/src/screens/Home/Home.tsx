@@ -191,41 +191,44 @@ export default function Home() {
   const [allTopicCount, setAllTopicCount] = useState(0);
   const [width, setWidth] = useState(0);
   const [visibleTopicIds, setVisibleTopicIds] = useState<number[]>([]);
-
+ // --- START OF CHANGES ---
   const {
     loading: channelsLoading,
     error: channelsError,
     refetch: channelsRefetch,
-  } = useChannels(
-    {
-      onCompleted: (data) => {
-        if (data && data.category.categories) {
-          const channels = data.category.categories.map((channel) => {
-            const { id, color, name, descriptionText } = channel;
-            return { id, color, name, description: descriptionText ?? null };
-          });
-          storage.setItem('channels', channels);
-        }
-      },
-      onError: () => {
-        setRefreshing(false);
-        setLoading(false);
-      },
-    },
-    'HIDE_ALERT',
-  );
+    data: channelsData,
+  } = useChannels({}, 'HIDE_ALERT');
 
-  const { getAbout } = useAbout(
-    {
-      onCompleted: (data) => {
-        if (data) {
-          const { topicCount } = data.about;
-          setAllTopicCount(topicCount);
-        }
-      },
-    },
-    'HIDE_ALERT',
-  );
+  useEffect(() => {
+    if (channelsData?.category?.categories) {
+      const channels = channelsData.category.categories.map((channel) => {
+        const { id, color, name, descriptionText } = channel;
+        return { id, color, name, description: descriptionText ?? null };
+      });
+      storage.setItem('channels', channels);
+    }
+  }, [channelsData, storage]);
+
+  useEffect(() => {
+    if (channelsError) {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  }, [channelsError]);
+  // --- END OF CHANGES ---
+
+ // --- FIX START ---
+  // Ensure useAbout returns data and we use useEffect
+  const { getAbout, data: aboutData } = useAbout({}, 'HIDE_ALERT');
+
+  useEffect(() => {
+    if (aboutData) {
+      const { topicCount } = aboutData.about;
+      setAllTopicCount(topicCount);
+    }
+  }, [aboutData]);
+  // --- FIX END ---
+
 
   const setData = useCallback(
     ({ topics }: TopicsQuery) => {
@@ -256,21 +259,23 @@ export default function Home() {
     error: topicsError,
     refetch: refetchTopics,
     fetchMore: fetchMoreTopics,
-  } = useLazyTopicList({
-    variables: isNoChannelFilter(selectedChannelId)
-      ? { sort: sortState, page, username }
-      : { sort: sortState, categoryId: selectedChannelId, page, username },
-    onError: () => {
+    data: fetchedTopicsData,
+  } = useLazyTopicList({}); // Remove variables and callbacks
+
+  useEffect(() => {
+    if (fetchedTopicsData) {
+      setLoading(false);
+      setData(fetchedTopicsData);
+    }
+  }, [fetchedTopicsData, setData]);
+
+  useEffect(() => {
+    if (topicsError) {
       setRefreshing(false);
       setLoading(false);
-    },
-    onCompleted: (data) => {
-      setLoading(false);
-      if (data) {
-        setData(data);
-      }
-    },
-  });
+    }
+  }, [topicsError]);
+  // --- END OF CHANGES ---
 
   const { deletePostDraft } = useDeletePostDraft();
   const { checkPostDraft } = useLazyCheckPostDraft();
@@ -465,9 +470,24 @@ export default function Home() {
     setRefreshing(true);
     if (refetchTopics) {
       setPage(FIRST_PAGE);
-      refetchTopics().finally(() => setRefreshing(false));
+      
+      // --- FIX START ---
+      // Explicitly pass page: 0. 
+      // Our new client.ts logic checks `if (page === 0)` to perform a hard replace.
+      const variables = isNoChannelFilter(selectedChannelId)
+      ? { sort: sortState, page: 0, username }
+      : { sort: sortState, categoryId: selectedChannelId, page: 0, username };
+
+      refetchTopics(variables)
+        .then(() => {
+           // Optional: Update channels too
+           channelsRefetch();
+        })
+        .finally(() => setRefreshing(false));
+      // --- FIX END ---
     }
   };
+
 
   const onRefreshError = () => {
     channelsRefetch();
