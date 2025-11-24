@@ -3,7 +3,7 @@ import {
   DrawerContentScrollView,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, TouchableOpacity, View } from 'react-native';
 
 import { MarkdownRenderer, UserStatus } from '../components'; //
@@ -47,7 +47,7 @@ function DrawerItem(props: DrawerItemProps) {
         styles.drawerItemContainer,
         isIOS ? styles.drawerItemIOS : styles.drawerItemAndroid,
         active &&
-          (isIOS ? styles.activeBackgroundIOS : styles.activeBackgroundAndroid),
+        (isIOS ? styles.activeBackgroundIOS : styles.activeBackgroundAndroid),
       ]}
       onPress={onPress}
     >
@@ -113,15 +113,16 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
   const { data } = useProfile(
     {
       variables: { username },
-      onCompleted: ({ profile }) => {
-        if (profile.user.__typename === 'UserDetail') {
-          setUser(profile.user);
-          setSplittedBio(profile.user.bioRaw?.split(/\r\n|\r|\n/));
-        }
-      },
     },
     'HIDE_ALERT',
   );
+
+  useEffect(() => {
+    if (data?.profile?.user?.__typename === 'UserDetail') {
+      setUser(data.profile.user);
+      setSplittedBio(data.profile.user.bioRaw?.split(/\r\n|\r|\n/));
+    }
+  }, [data]);
 
   const { logout } = useLogout({
     onCompleted: async () => {

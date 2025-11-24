@@ -10,10 +10,10 @@ import { useLazyQuery } from '../../../utils';
 export function usePostRaw(
   options?: LazyQueryHookOptions<PostRawType, PostRawQueryVariables>,
 ) {
-  const [postRaw, { loading }] = useLazyQuery<
+  const [postRaw, { loading, data }] = useLazyQuery<
     PostRawType,
     PostRawQueryVariables
   >(PostRawDocument, { ...options });
 
-  return { postRaw, loading };
+  return { postRaw, loading, data };
 }

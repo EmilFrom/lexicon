@@ -1,5 +1,5 @@
 import { gql, useApolloClient, useMutation, useQuery } from '@apollo/client';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useReactiveVar } from '@apollo/client';
 
 import { tokenVar } from '../../../reactiveVars';
@@ -86,30 +86,33 @@ const UPDATE_NOTIFICATION_PREFERENCE = gql`
 export function useGetAllChatChannelNotificationPreferences() {
   const client = useApolloClient();
   const token = useReactiveVar(tokenVar);
-  
+
   // --- FIX START ---
-  useQuery<GetAllNotificationPreferencesData>(
+  const { data } = useQuery<GetAllNotificationPreferencesData>(
     GET_ALL_NOTIFICATION_PREFERENCES,
     {
-      skip: !token, 
-      onCompleted: (queryData) => {
-        queryData?.chatChannelNotificationPreferences?.preferences?.forEach(
-          (preference) => {
-            client.cache.writeQuery({
-              query: GET_NOTIFICATION_PREFERENCE,
-              variables: { channelId: preference.channelId },
-              data: {
-                chatChannelNotificationPreference: {
-                  __typename: 'ChatChannelNotificationsOutput',
-                  ...preference,
-                },
-              },
-            });
-          },
-        );
-      },
+      skip: !token,
     },
   );
+
+  useEffect(() => {
+    if (data?.chatChannelNotificationPreferences?.preferences) {
+      data.chatChannelNotificationPreferences.preferences.forEach(
+        (preference) => {
+          client.cache.writeQuery({
+            query: GET_NOTIFICATION_PREFERENCE,
+            variables: { channelId: preference.channelId },
+            data: {
+              chatChannelNotificationPreference: {
+                __typename: 'ChatChannelNotificationsOutput',
+                ...preference,
+              },
+            },
+          });
+        },
+      );
+    }
+  }, [data, client]);
   // --- FIX END ---
 }
 

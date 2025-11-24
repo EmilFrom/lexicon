@@ -158,31 +158,33 @@ export default function PostDetail() {
   // Handle onError logic
   useEffect(() => {
     if (error && error.message.includes('Invalid Access')) {
-        if (
-          !useInitialLoadResult.loading &&
-          !useInitialLoadResult.isLoggedIn
-        ) {
-          reset({
-            index: 1,
-            routes: [
-              { name: 'TabNav', state: { routes: [{ name: 'Home' }] } },
-              { name: 'Welcome' },
-            ],
-          });
-        } else {
-          navigate('TabNav', { state: { routes: [{ name: 'Home' }] } });
-          privateTopicAlert();
-        }
+      if (
+        !useInitialLoadResult.loading &&
+        !useInitialLoadResult.isLoggedIn
+      ) {
+        reset({
+          index: 1,
+          routes: [
+            { name: 'TabNav', state: { routes: [{ name: 'Home' }] } },
+            { name: 'Welcome' },
+          ],
+        });
+      } else {
+        navigate('TabNav', { state: { routes: [{ name: 'Home' }] } });
+        privateTopicAlert();
       }
+    }
   }, [error, useInitialLoadResult, reset, navigate]);
   // --- FIX END ---
 
-  const { postRaw } = usePostRaw({
-    onCompleted: ({ postRaw: { cooked } }) => {
-      setContent(cooked.markdownContent);
-      setMentionedUsers(cooked.mentions);
-    },
-  });
+  const { postRaw, data: postRawData } = usePostRaw();
+
+  useEffect(() => {
+    if (postRawData?.postRaw?.cooked) {
+      setContent(postRawData.postRaw.cooked.markdownContent);
+      setMentionedUsers(postRawData.postRaw.cooked.mentions);
+    }
+  }, [postRawData]);
 
   const { deletePostDraft } = useDeletePostDraft();
 
@@ -639,10 +641,10 @@ export default function PostDetail() {
           error
             ? errorHandler(error, true, t('topic'))
             : isLoading
-            ? replyLoading
-              ? t('Finishing your Reply')
-              : undefined
-            : t('Post is not available')
+              ? replyLoading
+                ? t('Finishing your Reply')
+                : undefined
+              : t('Post is not available')
         }
       />
     );

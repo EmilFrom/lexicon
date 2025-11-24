@@ -17,7 +17,7 @@ import {
   CustomHeader,
   FooterLoadingIndicator,
   LoadingOrError,
-  Markdown,
+  MarkdownRenderer,
   PostGroupings,
 } from '../components';
 import { defaultArgsListPostDraft } from '../constants/postDraft';
@@ -66,14 +66,16 @@ export default function PostDraft() {
     refetch,
     loading: loadingPostDraft,
     fetchMore,
-  } = useListPostDrafts({
-    onCompleted: ({ listPostDrafts }) => {
-      if (listPostDrafts.length < page * defaultArgsListPostDraft.limit) {
+  } = useListPostDrafts();
+
+  useEffect(() => {
+    if (data?.listPostDrafts) {
+      if (data.listPostDrafts.length < page * defaultArgsListPostDraft.limit) {
         setHasMore(false);
       }
       setLoadingMore(false);
-    },
-  });
+    }
+  }, [data, page]);
 
   const { deletePostDraft } = useDeletePostDraft({
     onCompleted: () => {
@@ -261,9 +263,8 @@ export default function PostDraft() {
               size="s"
               color={!isPrivateMessage ? 'primary' : 'success'}
             >
-              {`${isPrivateMessage ? t('PRIVATE MESSAGE') : t('POST')} ${
-                isReply ? t('REPLY') : ''
-              }`}
+              {`${isPrivateMessage ? t('PRIVATE MESSAGE') : t('POST')} ${isReply ? t('REPLY') : ''
+                }`}
             </Text>
             {draftTitle && (
               <Text variant="semiBold" size="l">
@@ -282,7 +283,7 @@ export default function PostDraft() {
             testID={`PostDraft:IconMore:${draftTitle}`}
           />
         </View>
-        <Markdown
+        <MarkdownRenderer
           style={styles.postContent}
           content={
             replaceImageMarkdownWithPlaceholder({

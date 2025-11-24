@@ -25,8 +25,13 @@ export function useQuery<TData, TVariables extends OperationVariables = Operatio
   };
   
 
-// Destructure onError to prevent passing it to useQueryBase
-  const { fetchPolicy = 'cache-and-network', onError: _onError, ...others } = options ?? {};
+  // Destructure onError and onCompleted to prevent passing them to useQueryBase
+  const {
+    fetchPolicy = 'cache-and-network',
+    onError: _onError,
+    onCompleted: _onCompleted,
+    ...others
+  } = options ?? {};
 
   const {
     nextFetchPolicy = fetchPolicy === 'cache-and-network'

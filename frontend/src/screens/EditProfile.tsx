@@ -51,7 +51,7 @@ import { StackRouteProp } from '../types';
 import { useDevice } from '../utils';
 
 type ProfileProps = Pick<AvatarProps, 'size'> & {
-  image: string;
+  image?: string;
   imageStyle?: StyleProp<ImageStyle>;
 };
 
@@ -209,11 +209,11 @@ export default function EditProfile(props: ProfileProps) {
     },
     refetchQueries: isTabletLandscape
       ? [
-          {
-            query: ProfileDocument,
-            variables: { username },
-          },
-        ]
+        {
+          query: ProfileDocument,
+          variables: { username },
+        },
+      ]
       : undefined,
   });
 

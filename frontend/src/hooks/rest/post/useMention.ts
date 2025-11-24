@@ -22,8 +22,11 @@ export function useMention(
     SearchUserQueryVariables
   >(SearchUserDocument, {
     variables: { search: mentionKeyword },
-    onCompleted: () => {
-      const formattedMember = searchData?.searchUser.users.map(
+  });
+
+  useEffect(() => {
+    if (searchData?.searchUser?.users) {
+      const formattedMember = searchData.searchUser.users.map(
         ({ name, username, avatar }) => {
           return {
             name: name ?? null,
@@ -32,10 +35,10 @@ export function useMention(
           };
         },
       );
-      setMentionLoading(loading);
       setMentionMembers(formattedMember);
-    },
-  });
+    }
+    setMentionLoading(loading);
+  }, [searchData, loading, setMentionLoading]);
 
   useEffect(() => {
     let fetchSearch: NodeJS.Timeout;

@@ -210,68 +210,63 @@ export default function MessageDetail() {
   } = useMessageDetail(
     {
       variables: { topicId: id, postNumber },
-      onCompleted: ({ privateMessageDetailQuery: result }) => {
-        if (result) {
-          setTitle(result.title || '');
-
-          if (!result.details) {
-            return;
-          }
-          const messageMembers = result.details.allowedUsers?.map(
-            ({ avatarTemplate, ...otherProps }) => ({
-              ...otherProps,
-              avatar: getImage(avatarTemplate),
-            }),
-          );
-          if (messageMembers) {
-            /**
-             * Avoid short-circuit expressions so ESLint can verify the setter side-effect.
-             */
-            setMembers(messageMembers);
-          }
-          const participants: Array<User> = result.details.participants.map(
-            ({ avatar, ...otherProps }) => ({
-              ...otherProps,
-              avatar: getImage(avatar),
-            }),
-          );
-          setParticipants(participants);
-          setCanLeaveMessage(
-            result.details.allowedUsers
-              ? result.details.allowedUsers.length > 1
-              : false,
-          );
-        }
-      },
-      onError: (error) => {
-        /**
-         * if we get error about private post which cannot be access.
-         * we need check first it is because user haven't login or because post it self only open to specific group
-         * if user not login we will redirect to login scene.
-         * But if user already login still get same error will redirect to home scene and show private post alert
-         */
-
-        if (error.message.includes('Invalid Access')) {
-          if (
-            !useInitialLoadResult.loading &&
-            !useInitialLoadResult.isLoggedIn
-          ) {
-            reset({
-              index: 1,
-              routes: [
-                { name: 'TabNav', state: { routes: [{ name: 'Home' }] } },
-                { name: 'Welcome' },
-              ],
-            });
-          } else {
-            navigate('TabNav', { state: { routes: [{ name: 'Home' }] } });
-            messageInvalidAccessAlert();
-          }
-        }
-      },
     },
     'HIDE_ALERT',
   );
+
+  useEffect(() => {
+    if (baseData?.privateMessageDetailQuery) {
+      const result = baseData.privateMessageDetailQuery;
+      if (result) {
+        setTitle(result.title || '');
+
+        if (!result.details) {
+          return;
+        }
+        const messageMembers = result.details.allowedUsers?.map(
+          ({ avatarTemplate, ...otherProps }) => ({
+            ...otherProps,
+            avatar: getImage(avatarTemplate),
+          }),
+        );
+        if (messageMembers) {
+          setMembers(messageMembers);
+        }
+        const participants: Array<User> = result.details.participants.map(
+          ({ avatar, ...otherProps }) => ({
+            ...otherProps,
+            avatar: getImage(avatar),
+          }),
+        );
+        setParticipants(participants);
+        setCanLeaveMessage(
+          result.details.allowedUsers
+            ? result.details.allowedUsers.length > 1
+            : false,
+        );
+      }
+    }
+  }, [baseData]);
+
+  useEffect(() => {
+    if (error && error.message.includes('Invalid Access')) {
+      if (
+        !useInitialLoadResult.loading &&
+        !useInitialLoadResult.isLoggedIn
+      ) {
+        reset({
+          index: 1,
+          routes: [
+            { name: 'TabNav', state: { routes: [{ name: 'Home' }] } },
+            { name: 'Welcome' },
+          ],
+        });
+      } else {
+        navigate('TabNav', { state: { routes: [{ name: 'Home' }] } });
+        messageInvalidAccessAlert();
+      }
+    }
+  }, [error, useInitialLoadResult, reset, navigate]);
 
   const { createPostDraft, loading: loadingCreateAndUpdatePostDraft } =
     useCreateAndUpdatePostDraft({
@@ -903,7 +898,7 @@ export default function MessageDetail() {
       setInitialHeight(
         Math.round(
           event.nativeEvent.contentSize.height -
-            event.nativeEvent.layoutMeasurement.height,
+          event.nativeEvent.layoutMeasurement.height,
         ),
       );
     }

@@ -46,66 +46,67 @@ export default function Search() {
 
   const skipSearchStatus = searchValue.length < minSearchLength;
 
-  const { getPosts, error, refetch, fetchMore } = useSearchPost({
-    onCompleted: ({ search: result }) => {
-      if (result) {
-        const tempPosts: Array<Post> = [];
-        const postsData = result.posts;
-        const topicsData = result.topics;
-        postsData.forEach(
-          ({
+  const { getPosts, error, refetch, fetchMore, data: searchData } = useSearchPost();
+
+  useEffect(() => {
+    const result = searchData?.search;
+    if (result) {
+      const tempPosts: Array<Post> = [];
+      const postsData = result.posts;
+      const topicsData = result.topics;
+      postsData.forEach(
+        ({
+          id,
+          avatarTemplate,
+          blurb,
+          createdAt,
+          username,
+          likeCount,
+          topicId,
+        }) => {
+          const tempTopicData = topicsData.find(
+            (item) => item.id === topicId,
+          );
+
+          const channel = channels?.find(
+            (channel) => channel.id === tempTopicData?.categoryId,
+          );
+          const tags: Array<string> = tempTopicData?.tags || [];
+
+          tempPosts.push({
             id,
-            avatarTemplate,
-            blurb,
-            createdAt,
-            username,
-            likeCount,
             topicId,
-          }) => {
-            const tempTopicData = topicsData.find(
-              (item) => item.id === topicId,
-            );
-
-            const channel = channels?.find(
-              (channel) => channel.id === tempTopicData?.categoryId,
-            );
-            const tags: Array<string> = tempTopicData?.tags || [];
-
-            tempPosts.push({
-              id,
-              topicId,
-              title: tempTopicData?.title || '',
-              content: blurb,
-              username: username || '',
-              avatar: getImage(avatarTemplate),
-              replyCount: tempTopicData?.replyCount || 0,
-              likeCount,
-              viewCount: tempTopicData?.postsCount || 0,
-              isLiked: tempTopicData?.liked || false,
-              channel: channel || DEFAULT_CHANNEL,
-              tags,
-              createdAt,
-              freqPosters: [],
-            });
-          },
-        );
-        const currentPostIds = posts.map((post) => post.id);
-        const incomingPostIds = tempPosts.map((post) => post.id);
-        if (
-          JSON.stringify(currentPostIds) === JSON.stringify(incomingPostIds) ||
-          incomingPostIds.length < page * maxPostsPerPage
-        ) {
-          setHasOlderPosts(false);
-        } else {
-          setHasOlderPosts(true);
-        }
-        setPosts(tempPosts);
-      } else {
+            title: tempTopicData?.title || '',
+            content: blurb,
+            username: username || '',
+            avatar: getImage(avatarTemplate),
+            replyCount: tempTopicData?.replyCount || 0,
+            likeCount,
+            viewCount: tempTopicData?.postsCount || 0,
+            isLiked: tempTopicData?.liked || false,
+            channel: channel || DEFAULT_CHANNEL,
+            tags,
+            createdAt,
+            freqPosters: [],
+          });
+        },
+      );
+      const currentPostIds = posts.map((post) => post.id);
+      const incomingPostIds = tempPosts.map((post) => post.id);
+      if (
+        JSON.stringify(currentPostIds) === JSON.stringify(incomingPostIds) ||
+        incomingPostIds.length < page * maxPostsPerPage
+      ) {
         setHasOlderPosts(false);
+      } else {
+        setHasOlderPosts(true);
       }
-      setLoading(false);
-    },
-  });
+      setPosts(tempPosts);
+    } else {
+      setHasOlderPosts(false);
+    }
+    setLoading(false);
+  }, [searchData, page, channels, maxPostsPerPage]);
 
   useEffect(() => {
     setLoading(true);
@@ -153,9 +154,9 @@ export default function Search() {
   const keyboardDismissProp: ScrollViewProps = ios
     ? { keyboardDismissMode: 'on-drag' }
     : {
-        onScrollBeginDrag: Keyboard.dismiss,
-        keyboardShouldPersistTaps: count > 1 ? 'never' : 'always',
-      };
+      onScrollBeginDrag: Keyboard.dismiss,
+      keyboardShouldPersistTaps: count > 1 ? 'never' : 'always',
+    };
 
   const resultInfo = () => {
     let message = '';

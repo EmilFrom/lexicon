@@ -56,13 +56,17 @@ export default function Tags() {
     getTags,
     loading: tagsLoading,
     refetch,
+    data: tagsData,
   } = useTags({
     variables: { q: searchValue, selectedTags: currentTagsIds },
-    onCompleted: ({ searchTag }) => {
-      setTags([...searchTag]);
-      setLoading(false);
-    },
   });
+
+  useEffect(() => {
+    if (tagsData?.searchTag) {
+      setTags([...tagsData.searchTag]);
+      setLoading(false);
+    }
+  }, [tagsData]);
 
   useEffect(() => {
     try {

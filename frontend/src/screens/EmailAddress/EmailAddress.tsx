@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -27,25 +27,27 @@ export default function EmailAddress() {
 
   const ios = Platform.OS === 'ios';
 
-  const { loading: userLoading, refetch } = useProfile({
+  const { loading: userLoading, refetch, data: profileData } = useProfile({
     variables: { username },
-    onCompleted: ({ profile: result }) => {
-      if (result.user.__typename === 'UserDetail') {
-        const { email, secondaryEmails, unconfirmedEmails } = result.user;
-        const temp: Array<EmailAddressType> = [];
-        temp[0] = { emailAddress: email, type: 'PRIMARY' };
-        secondaryEmails?.forEach((emailAddress) =>
-          temp.push({ emailAddress, type: 'SECONDARY' }),
-        );
-        unconfirmedEmails?.forEach((emailAddress) =>
-          temp.push({ emailAddress, type: 'UNCONFIRMED' }),
-        );
-        setEmailAddress(temp);
-        onSetLoading(false);
-      }
-    },
     fetchPolicy: 'network-only',
   });
+
+  useEffect(() => {
+    if (profileData?.profile?.user?.__typename === 'UserDetail') {
+      const result = profileData.profile;
+      const { email, secondaryEmails, unconfirmedEmails } = result.user;
+      const temp: Array<EmailAddressType> = [];
+      temp[0] = { emailAddress: email, type: 'PRIMARY' };
+      secondaryEmails?.forEach((emailAddress) =>
+        temp.push({ emailAddress, type: 'SECONDARY' }),
+      );
+      unconfirmedEmails?.forEach((emailAddress) =>
+        temp.push({ emailAddress, type: 'UNCONFIRMED' }),
+      );
+      setEmailAddress(temp);
+      onSetLoading(false);
+    }
+  }, [profileData]);
 
   const onSetLoading = (value: boolean) => {
     setLoading(value);

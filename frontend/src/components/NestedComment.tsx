@@ -118,12 +118,14 @@ function BaseNestedComment(props: Props) {
   const time = formatRelativeTime(createdAt);
   const color: Color = hidden ? 'textLight' : 'textNormal';
 
-  const { postRaw, loading } = usePostRaw({
-    onCompleted: ({ postRaw: { cooked } }) => {
-      setContent(cooked.markdownContent);
+  const { postRaw, loading, data: postRawData } = usePostRaw();
+
+  useEffect(() => {
+    if (postRawData?.postRaw?.cooked) {
+      setContent(postRawData.postRaw.cooked.markdownContent);
       setHidden(false);
-    },
-  });
+    }
+  }, [postRawData]);
 
   // --- NEW CONTENT PROCESSING PATTERN ---
   const htmlContent = markdownToHtml(content);
@@ -220,8 +222,8 @@ function BaseNestedComment(props: Props) {
               content={
                 replyToPostId
                   ? handleUnsupportedMarkdown(
-                      deleteQuoteBbCode(contentWithoutImages),
-                    )
+                    deleteQuoteBbCode(contentWithoutImages),
+                  )
                   : handleUnsupportedMarkdown(contentWithoutImages)
               }
               fontColor={colors[color]}
