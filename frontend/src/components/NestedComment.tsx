@@ -24,8 +24,6 @@ import { PostHidden } from './PostItem';
 import { RepliedPost } from './RepliedPost';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
-// --- FIX START ---
-// Add 'export' keyword to allow importing in PostDetail
 export type PressReplyParams = {
   replyToPostId?: number;
 };
@@ -38,12 +36,7 @@ export type PressMoreParams = {
   fromPost: boolean;
   author: string;
 };
-// --- FIX END ---
 
-
-
-// --- FIX START ---
-// Omit 'id' from ViewProps to allow 'id' to be a number (from Post)
 type Props = Omit<ViewProps, 'id'> &
   Pick<
     Post,
@@ -92,7 +85,7 @@ function BaseNestedComment(props: Props) {
     avatar,
     canFlag,
     canEdit,
-    content: contentFromGetTopicDetail,
+    content: contentFromProps,
     hidden,
     hasMetrics = true,
     style,
@@ -110,25 +103,30 @@ function BaseNestedComment(props: Props) {
     ...otherProps
   } = props;
 
-  const [content, setContent] = useState(contentFromGetTopicDetail);
-  const [isHidden, setHidden] = useState(hidden ?? false);
+  // --- START OF CHANGES ---
+  const { postRaw, loading, data: postRawData } = usePostRaw();
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+  const [manuallyUnhidden, setManuallyUnhidden] = useState(false);
 
   const isTopicOwner = username === storage.getItem('user')?.username;
   const time = formatRelativeTime(createdAt);
-  const color: Color = hidden ? 'textLight' : 'textNormal';
 
-  const { postRaw, loading, data: postRawData } = usePostRaw();
+  // Derived State
+  // If we fetched raw data, use it. Otherwise use props.
+  const fetchedContent = postRawData?.postRaw?.cooked?.markdownContent;
+  const effectiveContent = fetchedContent ?? contentFromProps;
 
-  useEffect(() => {
-    if (postRawData?.postRaw?.cooked) {
-      setContent(postRawData.postRaw.cooked.markdownContent);
-      setHidden(false);
-    }
-  }, [postRawData]);
+  // Logic: Hidden if (prop is hidden AND not manually unhidden AND not fetched raw data)
+  // If data was fetched (fetchedContent exists), we imply it's now visible.
+  const isContentHidden =
+    (hidden ?? false) && !manuallyUnhidden && !fetchedContent;
+
+  const color: Color = isContentHidden ? 'textLight' : 'textNormal';
+
+  // --- END OF CHANGES ---
 
   // --- NEW CONTENT PROCESSING PATTERN ---
-  const htmlContent = markdownToHtml(content);
+  const htmlContent = markdownToHtml(effectiveContent);
   const images =
     (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || [];
   const imageTagRegex = /<img[^>]*>/g;
@@ -142,10 +140,10 @@ function BaseNestedComment(props: Props) {
   }, [id, onLayout]);
 
   const onPressViewIgnoredContent = () => {
-    if (content === '') {
+    if (!effectiveContent) {
       postRaw({ variables: { postId: id } });
     } else {
-      setHidden(false);
+      setManuallyUnhidden(true);
     }
   };
 
@@ -209,7 +207,7 @@ function BaseNestedComment(props: Props) {
         {replyToPostId && (
           <RepliedPost postId={id} replyToPostId={replyToPostId} />
         )}
-        {isHidden ? (
+        {isContentHidden ? (
           <PostHidden
             loading={loading}
             author={isTopicOwner}
@@ -234,7 +232,7 @@ function BaseNestedComment(props: Props) {
             />
           </>
         )}
-        {hasMetrics && !isHidden && (
+        {hasMetrics && !isContentHidden && (
           <Metrics
             topicId={topicId}
             postId={id}

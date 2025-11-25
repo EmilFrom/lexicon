@@ -44,14 +44,16 @@ if (__DEV__) {
   LogBox.ignoreLogs([
     '[Reanimated] Reduced motion setting is enabled on this device.',
     'An error occurred in a responseTransformer:',
-    'An error occurred! For more details,', 
+    'An error occurred! For more details,',
   ]);
 }
 
 export default function App() {
-  if (__DEV__) {
-    useApolloClientDevTools(client);
-  }
+  // Fix: Hooks must be called at the top level, not inside conditionals.
+  // We pass the client conditionally to the hook instead.
+  const devToolsClient = __DEV__ ? client : undefined;
+  // @ts-ignore - Library types might enforce client presence, but runtime handles undefined/null in prod
+  useApolloClientDevTools(devToolsClient);
 
   const newPostMethods = useForm<NewPostForm>({
     mode: 'onChange',

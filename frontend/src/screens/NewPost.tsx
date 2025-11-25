@@ -86,6 +86,48 @@ type LocalImage = {
   uploadedUrl?: string;
 };
 
+type HeaderProps = {
+  ios: boolean;
+  title: string;
+  onCancel: () => void;
+  onNext: () => void;
+  isLoading: boolean;
+  isValid: boolean;
+};
+
+const Header = ({ ios, title, onCancel, onNext, isLoading, isValid }: HeaderProps) =>
+  ios ? (
+    <ModalHeader
+      title={title}
+      left={
+        <HeaderItem
+          label={t('Cancel')}
+          left
+          onPressItem={onCancel}
+          disabled={isLoading} // Use props
+        />
+      }
+      right={
+        <HeaderItem
+          label={t('Next')}
+          onPressItem={onNext}
+          loading={isLoading}
+          disabled={!isValid || isLoading}
+        />
+      }
+    />
+  ) : (
+    <CustomHeader
+      title={title}
+      rightTitle={t('Next')}
+      isLoading={isLoading}
+      disabled={!isValid || isLoading}
+      onPressRight={onNext}
+    />
+  );
+// --- CHANGE END ---
+
+
 export default function NewPost() {
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const handleImagePress = useCallback((uri: string) => {
@@ -460,50 +502,18 @@ export default function NewPost() {
     formState,
   ]);
 
-  const Header = () =>
-    ios ? (
-      <ModalHeader
-        title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
-        left={
-          <HeaderItem
-            label={t('Cancel')}
-            left
-            onPressItem={() => {
-              goBack();
-            }}
-            disabled={loadingCreateAndUpdatePostDraft}
-          />
-        }
-        right={
-          <HeaderItem
-            label={t('Next')}
-            onPressItem={onPreview}
-            loading={localImages.some((image) => image.isUploading)}
-            disabled={
-              !postValidity ||
-              loadingCreateAndUpdatePostDraft ||
-              localImages.some((image) => image.isUploading)
-            }
-          />
-        }
-      />
-    ) : (
-      <CustomHeader
-        title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
-        rightTitle={t('Next')}
-        isLoading={localImages.some((image) => image.isUploading)}
-        disabled={
-          !postValidity ||
-          loadingCreateAndUpdatePostDraft ||
-          localImages.some((image) => image.isUploading)
-        }
-        onPressRight={onPreview}
-      />
-    );
 
   return (
     <SafeAreaView style={styles.container} testID="NewPost:SafeAreaView">
-      <Header />
+      {/* 4. Render the external Header with props */}
+      <Header
+        ios={ios}
+        title={editTopicId || editPostId ? t('Edit Post') : t('New Post')}
+        onCancel={() => goBack()}
+        onNext={onPreview}
+        isLoading={localImages.some((image) => image.isUploading) || loadingCreateAndUpdatePostDraft}
+        isValid={postValidity}
+      />
       <KeyboardTextAreaScrollView
         {...kasv.props}
         bottomMenu={
@@ -636,9 +646,8 @@ export default function NewPost() {
             >
               <Dot
                 variant="large"
-                color={`#${
-                  channels?.find(({ id }) => id === selectedChannel)?.color
-                }`}
+                color={`#${channels?.find(({ id }) => id === selectedChannel)?.color
+                  }`}
                 style={{ marginEnd: spacing.m }}
               />
               <Text color="textNormal">

@@ -91,19 +91,14 @@ export default function ChatChannelDetail() {
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [textInputFocused, setInputFocused] = useState(false);
   const [showActionSheet, setShowActionSheet] = useState(false);
-  const [hasOlderMessages, setHasOlderMessages] = useState(true);
-  const [chatMessages, setChatMessages] = useState<Array<ChatMessageContent>>(
-    [],
-  );
   const [isInitialRequest, setIsInitialRequest] = useState(true);
-  const [hasUnread, setHasUnread] = useState(false);
-  const [isFetchMore, setIsFetchMore] = useState(false);
   const [loadingMessageId, setLoadingMessageId] = useState<number | null>(null);
+  // We still need state for this because it's passed as a prop to ChatList
   const [shouldMaintainVisiblePosition, setShouldMaintainVisiblePosition] =
     useState(false);
   const previousPushEnabled = useRef<boolean | null>(null);
 
-   // --- START OF CHANGES ---
+  // --- START OF CHANGES ---
   const {
     getChatChannelDetail,
     loading: chatChannelDetailLoading,
@@ -125,51 +120,57 @@ export default function ChatChannelDetail() {
     data: messagesData,
   } = useChatChannelMessages({}, 'HIDE_ALERT');
 
+  // Derived State
+  const messagesResult = messagesData?.getChatChannelMessages;
+  const chatMessages = messagesResult?.messages ?? [];
+  const hasOlderMessages = messagesResult?.canLoadMorePast ?? true;
+  const canLoadMoreFuture = messagesResult?.canLoadMoreFuture ?? false;
+
+  // Derived Unread State
+  const hasUnread =
+    chatMessages.length > 0 && lastMessageId !== chatMessages[0].id;
+
+  // Side Effect: Sync Refs and Scroll
   useEffect(() => {
-    if (messagesData?.getChatChannelMessages) {
-      const { messages, canLoadMorePast, canLoadMoreFuture } =
-        messagesData.getChatChannelMessages;
+    // Update refs
+    nextTargetMessageId.current = canLoadMoreFuture
+      ? chatMessages[0]?.id ?? 0
+      : 0;
+    setShouldMaintainVisiblePosition(canLoadMoreFuture);
 
-      setChatMessages(messages);
-      setHasOlderMessages(canLoadMorePast);
-
-      if (messages.length) {
-        setHasUnread(lastMessageId !== messages[0].id);
-      }
-      setIsFetchMore(false);
-
-      if (messages.length && targetMessageId && isInitialRequest) {
-        const targetMessage = messages.find(
-          (message) => message.id === targetMessageId,
+    // Scroll logic for target message on initial load
+    if (chatMessages.length && targetMessageId && isInitialRequest) {
+      const targetMessage = chatMessages.find(
+        (message) => message.id === targetMessageId,
+      );
+      if (targetMessage) {
+        setTimeout(
+          () =>
+            virtualListRef.current?.scrollToItem({
+              item: targetMessage,
+            }),
+          ios ? 50 : 150,
         );
-        if (targetMessage) {
-          setTimeout(
-            () =>
-              virtualListRef.current?.scrollToItem({
-                item: targetMessage,
-              }),
-            ios ? 50 : 150,
-          );
-        }
       }
-
-      nextTargetMessageId.current = canLoadMoreFuture ? messages[0].id : 0;
-      setShouldMaintainVisiblePosition(canLoadMoreFuture);
     }
-  }, [messagesData, lastMessageId, targetMessageId, isInitialRequest, ios]);
+  }, [
+    chatMessages,
+    canLoadMoreFuture,
+    targetMessageId,
+    isInitialRequest,
+    ios,
+  ]);
   // --- END OF CHANGES ---
 
-// --- FIX START ---
   const { preference, refetch: refetchPreference } =
     useGetChatChannelNotificationPreference(channelId);
-  
+
   // Safe access helper
   const isPushEnabled = preference ? preference.pushEnabled : true;
-  // --- FIX END ---
+
   const {
     updatePreference,
     loading: updatePreferenceLoading,
-    error: updatePreferenceError,
   } = useUpdateChatChannelNotificationPreference();
 
   const { leaveChannel } = useLeaveChannel({
@@ -193,37 +194,36 @@ export default function ChatChannelDetail() {
   });
 
   const { replyChat, loading: replyLoading } = useReplyChat({
-    onCompleted: async (data) => {
+    onCompleted: async () => {
       setMessage('');
-      
-      // --- FIX START ---
+
       try {
         // 1. Evict the cached messages for this channel.
         // The keyArgs in client.ts is `channel-${channelId}`.
-        // By evicting the field 'getChatChannelMessages', we force a network refresh.
         client.cache.evict({ fieldName: 'getChatChannelMessages' });
         client.cache.gc();
 
         // 2. Manually trigger refetch to re-populate immediately
         await refetch({
-           channelId,
-           pageSize: CHAT_CHANNEL_DETAIL_PAGE_SIZE,
-           targetMessageId: undefined // fetch latest
+          channelId,
+          pageSize: CHAT_CHANNEL_DETAIL_PAGE_SIZE,
+          targetMessageId: undefined, // fetch latest
         });
 
         // 3. Scroll to bottom
         if (virtualListRef.current) {
           setTimeout(() => {
-            virtualListRef.current?.scrollToOffset({ offset: 0, animated: true });
+            virtualListRef.current?.scrollToOffset({
+              offset: 0,
+              animated: true,
+            });
           }, 100);
         }
       } catch (error) {
         console.warn('Failed to refresh chat', error);
       }
-      // --- FIX END ---
     },
   });
-
 
   const { createThread } = useCreateThread({
     onCompleted: ({ createThread: { id, lastMessageId } }) => {
@@ -304,9 +304,6 @@ export default function ChatChannelDetail() {
       return;
     }
 
-    if (hasOlderMessages) {
-      setIsFetchMore(true);
-    }
     const targetMessageId = chatMessages[chatMessages.length - 1].id;
 
     fetchPaginatedMessages({
@@ -441,7 +438,7 @@ export default function ChatChannelDetail() {
   const onReply = (message: string) => {
     if (message.trim() !== '') {
       // 1. Keyboard hides immediately here (from previous step)
-      Keyboard.dismiss(); 
+      Keyboard.dismiss();
 
       // 2. We send the mutation
       replyChat({
@@ -459,17 +456,12 @@ export default function ChatChannelDetail() {
     if (isInitialRequest) {
       setTimeout(() => {
         setIsInitialRequest(false);
-        if (chatMessages.length) {
-          setHasUnread(lastMessageId !== chatMessages[0].id);
-        }
       }, 1000);
     }
   };
 
   const handleTogglePush = async (newValue: boolean) => {
-    // --- FIX START ---
     previousPushEnabled.current = isPushEnabled;
-    // --- FIX END ---
 
     try {
       await updatePreference(channelId, newValue);
@@ -520,7 +512,8 @@ export default function ChatChannelDetail() {
       rightIcon="More"
       onPressRight={onPressMore}
       onPressTitle={() => setMenuVisible(true)}
-      isLoading={isFetchMore}
+      // Use channelMessagesLoading as a proxy for "isFetchingMore" if needed
+      isLoading={channelMessagesLoading && !isInitialRequest}
     />
   );
 
@@ -558,8 +551,8 @@ export default function ChatChannelDetail() {
           contentInset={{
             top: textInputFocused
               ? ((isTablet ? (isTabletLandscape ? 45 : 25) : 30) *
-                  screen.height) /
-                100
+                screen.height) /
+              100
               : 0,
             bottom: textInputFocused ? ((2 * screen.height) / 100) * -1 : 0,
           }}

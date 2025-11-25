@@ -112,6 +112,11 @@ const headerViewHeight = actionBarHeight + (ios ? 0 : 24);
 
 type SortOption = (typeof sortOptionsArray)[number];
 
+// Fix: Define viewabilityConfig outside component to avoid ref usage and ensure stability
+const VIEWABILITY_CONFIG = {
+  itemVisiblePercentThreshold: 50,
+};
+
 export default function Home() {
   const { refetch: siteRefetch } = useSiteSettings();
   const { isTablet, isPortrait } = useDevice();
@@ -191,7 +196,7 @@ export default function Home() {
   const [allTopicCount, setAllTopicCount] = useState(0);
   const [width, setWidth] = useState(0);
   const [visibleTopicIds, setVisibleTopicIds] = useState<number[]>([]);
- // --- START OF CHANGES ---
+
   const {
     loading: channelsLoading,
     error: channelsError,
@@ -215,9 +220,7 @@ export default function Home() {
       setLoading(false);
     }
   }, [channelsError]);
-  // --- END OF CHANGES ---
 
- // --- FIX START ---
   // Ensure useAbout returns data and we use useEffect
   const { getAbout, data: aboutData } = useAbout({}, 'HIDE_ALERT');
 
@@ -227,8 +230,6 @@ export default function Home() {
       setAllTopicCount(topicCount);
     }
   }, [aboutData]);
-  // --- FIX END ---
-
 
   const setData = useCallback(
     ({ topics }: TopicsQuery) => {
@@ -275,7 +276,6 @@ export default function Home() {
       setLoading(false);
     }
   }, [topicsError]);
-  // --- END OF CHANGES ---
 
   const { deletePostDraft } = useDeletePostDraft();
   const { checkPostDraft } = useLazyCheckPostDraft();
@@ -293,11 +293,6 @@ export default function Home() {
       .filter(Boolean);
     setVisibleTopicIds(ids);
   }, []);
-
-  // Stable reference for viewability config
-  const viewabilityConfigRef = useRef({
-    itemVisiblePercentThreshold: 50,
-  });
 
   const getData = useCallback(
     (variables: TopicsQueryVariables) => {
@@ -470,24 +465,21 @@ export default function Home() {
     setRefreshing(true);
     if (refetchTopics) {
       setPage(FIRST_PAGE);
-      
-      // --- FIX START ---
-      // Explicitly pass page: 0. 
+
+      // Explicitly pass page: 0.
       // Our new client.ts logic checks `if (page === 0)` to perform a hard replace.
       const variables = isNoChannelFilter(selectedChannelId)
-      ? { sort: sortState, page: 0, username }
-      : { sort: sortState, categoryId: selectedChannelId, page: 0, username };
+        ? { sort: sortState, page: 0, username }
+        : { sort: sortState, categoryId: selectedChannelId, page: 0, username };
 
       refetchTopics(variables)
         .then(() => {
-           // Optional: Update channels too
-           channelsRefetch();
+          // Optional: Update channels too
+          channelsRefetch();
         })
         .finally(() => setRefreshing(false));
-      // --- FIX END ---
     }
   };
-
 
   const onRefreshError = () => {
     channelsRefetch();
@@ -501,10 +493,10 @@ export default function Home() {
     const variables: TopicsQueryVariables = isNoChannelFilter(selectedChannelId)
       ? { sort: sortState, page: FIRST_PAGE }
       : {
-          sort: sortState,
-          categoryId: selectedChannelId,
-          page: FIRST_PAGE,
-        };
+        sort: sortState,
+        categoryId: selectedChannelId,
+        page: FIRST_PAGE,
+      };
     setTopicsData(null);
     setPage(FIRST_PAGE);
     getData(variables);
@@ -679,7 +671,7 @@ export default function Home() {
         onEndReachedThreshold={0.1}
         onEndReached={onEndReached}
         onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfigRef.current}
+        viewabilityConfig={VIEWABILITY_CONFIG} // Fix: Passed static config
         renderItem={({ item }) => {
           return (
             <HomePostItem

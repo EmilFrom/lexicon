@@ -78,11 +78,14 @@ export default function Notifications() {
   };
 
   const [page, setPage] = useState<number>(1);
-  const [errorMsg, setErrorMsg] = useState<string>('');
+
+
+  /*   const [errorMsg, setErrorMsg] = useState<string>(''); */
+
   const [showMore, setShowMore] = useState<boolean>(false);
   const [loadMorePolicy, setLoadMorePolicy] = useState<boolean>(false);
 
-   // --- FIX START ---
+  // --- FIX START ---
   const { data, loading, error, refetch, fetchMore } = useNotification({
     variables: { page },
     // Remove onError
@@ -90,15 +93,18 @@ export default function Notifications() {
     nextFetchPolicy: loadMorePolicy ? 'cache-first' : 'no-cache',
   });
 
-  useEffect(() => {
-    if (error) {
-      setErrorMsg(errorHandler(error, true));
-    }
-  }, [error]);
-  // --- FIX END ---
+  const errorMsg = error ? errorHandler(error, true) : '';
+  // --- CHANGE END ---
+
+  /*  useEffect(() => {
+     if (error) {
+       setErrorMsg(errorHandler(error, true));
+     }
+   }, [error]);
+   // --- FIX END --- */
 
   const { markAsRead, loading: markAsReadLoading } = useMarkRead({
-    onError: () => {},
+    onError: () => { },
   });
 
   /**

@@ -79,7 +79,7 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
 
   const useAuthResults = useAuth();
 
-  const [user, setUser] = useState<UserDetail>({
+  /* const [user, setUser] = useState<UserDetail>({
     __typename: 'UserDetail',
     avatar: '',
     bioRaw: '',
@@ -100,6 +100,41 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
     },
   });
   const [splittedBio, setSplittedBio] = useState<Array<string>>();
+ */
+
+
+  const { data } = useProfile(
+    {
+      variables: { username },
+    },
+    'HIDE_ALERT',
+  );
+
+  // Calculate derived state immediately
+  const user = data?.profile?.user?.__typename === 'UserDetail'
+    ? data.profile.user
+    : {
+      avatar: '',
+      bioRaw: '',
+      dateOfBirth: '',
+      location: '',
+      name: '',
+      username: '',
+      websiteName: '',
+      email: '',
+      secondaryEmails: [],
+      unconfirmedEmails: [],
+      canEditUsername: true,
+      admin: false,
+      status: {
+        emoji: '',
+        description: '',
+        endsAt: '',
+      },
+    } as UserDetail; // Cast or ensure defaults match type
+
+  const splittedBio = user.bioRaw?.split(/\r\n|\r|\n/);
+  // --- CHANGE END ---
 
   const bioContent =
     (splittedBio && splittedBio.length > 3
@@ -110,20 +145,14 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
     fetchPolicy: 'network-only',
   });
 
-  const { data } = useProfile(
-    {
-      variables: { username },
-    },
-    'HIDE_ALERT',
-  );
 
-  useEffect(() => {
-    if (data?.profile?.user?.__typename === 'UserDetail') {
-      setUser(data.profile.user);
-      setSplittedBio(data.profile.user.bioRaw?.split(/\r\n|\r|\n/));
-    }
-  }, [data]);
-
+  /*   useEffect(() => {
+      if (data?.profile?.user?.__typename === 'UserDetail') {
+        setUser(data.profile.user);
+        setSplittedBio(data.profile.user.bioRaw?.split(/\r\n|\r|\n/));
+      }
+    }, [data]);
+   */
   const { logout } = useLogout({
     onCompleted: async () => {
       await useAuthResults.cleanSession();

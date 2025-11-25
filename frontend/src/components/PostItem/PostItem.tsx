@@ -92,7 +92,7 @@ function BasePostItem(props: Props) {
     imageDimensionsMap,
     isHidden = false,
     footer,
-    onPressViewIgnoredContent = () => {},
+    onPressViewIgnoredContent = () => { },
     showStatus,
     emojiCode,
     polls,
@@ -108,7 +108,7 @@ function BasePostItem(props: Props) {
     createdAt === ''
       ? t('Loading...')
       : (prevScreen === 'Home' ? t('Last Activity ') : '') +
-        formatRelativeTime(createdAt);
+      formatRelativeTime(createdAt);
 
   const isCreator = username === storage.getItem('user')?.username;
   const color: Color = hidden ? 'textLight' : 'textNormal';
@@ -350,8 +350,12 @@ function BasePostItem(props: Props) {
       </TouchableOpacity>
       {pollsContent}
       {imageContent}
-      <Pressable onPress={onPressPost} style={styles.viewPostButton}>
-        <Text color="primary" variant="bold">
+      <Pressable
+        onPress={onPressPost}
+        style={styles.viewPostButton}
+        android_ripple={{ color: 'rgba(255, 255, 255, 0.3)' }}
+      >
+        <Text style={styles.viewPostButtonText} variant="bold">
           {t('View Post')}
         </Text>
       </Pressable>
@@ -424,7 +428,17 @@ const useStyles = makeStyles(({ colors, fontSizes, shadow, spacing }) => ({
   pinnedBorder: { borderLeftWidth: 4, borderColor: colors.primary },
   viewPostButton: {
     marginTop: spacing.l,
-    alignSelf: 'flex-start',
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.l,
+    paddingHorizontal: spacing.xxl,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  viewPostButtonText: {
+    color: colors.background,
+    fontSize: fontSizes.m,
   },
 }));
 

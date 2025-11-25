@@ -1,5 +1,5 @@
 import { useFragment, OperationVariables } from '@apollo/client';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import {
   TopicDetailFragmentDoc,
@@ -20,14 +20,11 @@ type UseFirstPostContentResult = {
  * 1. Check Apollo cache for existing topicDetail data
  * 2. If cached, extract markdownContent immediately
  * 3. If not cached, trigger lazy fetch of /t/{topicId}.json
- * 4. Return stable content to prevent flickering
+ * 4. Return stable content directly to prevent flickering
  */
 export function useFirstPostContent(
   topicId: number,
 ): UseFirstPostContentResult {
-  const [shouldFetch, setShouldFetch] = useState(false);
-  const [stableContent, setStableContent] = useState<string | null>(null);
-
   // Try to read from cache first
   const cacheResult = useFragment<TopicDetailOutput, OperationVariables>({
     fragment: TopicDetailFragmentDoc,
@@ -49,48 +46,35 @@ export function useFirstPostContent(
     );
   }, [cacheResult.complete, cacheResult.data]);
 
-  // Only fetch if not in cache and we haven't already started fetching
+  // --- START OF CHANGES ---
+  // Determine if we should skip the network request based on cache availability
+  const skipQuery = !!cachedContent;
+
   const { data, loading } = useTopicDetail(
     {
       variables: {
         topicId,
         includeFirstPost: true,
       },
-      skip: !shouldFetch || cacheResult.complete,
+      skip: skipQuery, // Skip if we have content from cache fragment
       fetchPolicy: 'cache-first',
     },
     'HIDE_ALERT',
   );
 
-  // Trigger fetch if cache miss
-  useEffect(() => {
-    if (!cacheResult.complete && !shouldFetch) {
-      setShouldFetch(true);
-    }
-  }, [cacheResult.complete, shouldFetch]);
+  // Extract content from fetched data
+  const fetchedContent =
+    data?.topicDetail?.postStream?.firstPost?.markdownContent ??
+    data?.topicDetail?.postStream?.posts?.[0]?.markdownContent ??
+    null;
 
-  // Extract content from fetched data (memoized)
-  // Try firstPost first (when includeFirstPost=true), then fall back to posts[0]
-  const fetchedContent = useMemo(() => {
-    if (!data?.topicDetail) return null;
-    return (
-      data.topicDetail.postStream?.firstPost?.markdownContent ||
-      data.topicDetail.postStream?.posts?.[0]?.markdownContent ||
-      null
-    );
-  }, [data]);
-
-  // Update stable content only when we have new content
-  // This prevents flickering by keeping the previous content until new content is ready
-  useEffect(() => {
-    const newContent = cachedContent || fetchedContent;
-    if (newContent && newContent !== stableContent) {
-      setStableContent(newContent);
-    }
-  }, [cachedContent, fetchedContent, stableContent]);
+  // Stable content is either what we found in cache fragment OR what we just fetched
+  const content = cachedContent ?? fetchedContent;
 
   return {
-    content: stableContent,
-    loading: !cacheResult.complete && loading,
+    content,
+    // We are loading if we don't have content yet AND the query is in progress
+    loading: !content && loading,
   };
+  // --- END OF CHANGES ---
 }

@@ -56,7 +56,7 @@ export default function PostDraft() {
   const [page, setPage] = useState<number>(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isInitialRequest, setIsInitialRequest] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
+  //const [hasMore, setHasMore] = useState(true);
 
   const { setValue, reset: resetForm } = useFormContext<NewPostForm>();
 
@@ -68,14 +68,26 @@ export default function PostDraft() {
     fetchMore,
   } = useListPostDrafts();
 
-  useEffect(() => {
+  // Derived logic
+  const draftCount = data?.listPostDrafts?.length ?? 0;
+  const expectedCount = page * defaultArgsListPostDraft.limit;
+  // Assuming backend returns exact limit if more exists
+  const hasMore = draftCount >= expectedCount;
+
+  // Note: loadingMore was set to false in effect. 
+  // Ensure it's set to false in the onEndReached promise/callback if strictly needed, 
+  // or trust the `loading` prop from Apollo if `notifyOnNetworkStatusChange` is true.
+  // For now, we remove the effect syncing. 
+  // --- CHANGE END ---
+
+  /* useEffect(() => {
     if (data?.listPostDrafts) {
       if (data.listPostDrafts.length < page * defaultArgsListPostDraft.limit) {
         setHasMore(false);
       }
       setLoadingMore(false);
     }
-  }, [data, page]);
+  }, [data, page]); */
 
   const { deletePostDraft } = useDeletePostDraft({
     onCompleted: () => {

@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Platform, RefreshControl, VirtualizedList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,67 +36,97 @@ export default function Messages() {
 
   const storage = useStorage();
   const username = storage.getItem('user')?.username || '';
-  const currentUserId = storage.getItem('user')?.id || '';
+  // const currentUserId = storage.getItem('user')?.id || '';
 
-  const [messages, setMessages] = useState<Array<MessageType>>([]);
-  const [participants, setParticipants] = useState<Array<MessageParticipants>>(
-    [],
-  );
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const ios = Platform.OS === 'ios';
 
-  const conditionHiddenFooterLoading =
-    !hasOlderMessages || messages.length <= 20;
-   // --- FIX START ---
   // --- START OF CHANGES ---
-  const { error, refetch, fetchMore, data: messagesData } = useMessageList(
+  const {
+    error,
+    refetch,
+    fetchMore,
+    data: messagesData,
+    loading: loadingList,
+  } = useMessageList(
     {
       variables: { username, page },
       fetchPolicy: 'network-only',
+      notifyOnNetworkStatusChange: true,
     },
     'HIDE_ALERT',
   );
 
-  useEffect(() => {
-    if (messagesData) {
-       // ... Existing logic from previous onCompleted ...
-       // Move the logic that sets messages, participants, hasOlderMessages here
-       const allMessages = messagesData.privateMessageList.topicList.topics ?? [];
-       // ... (copy full logic from original onCompleted)
-       setLoading(false);
-    }
-  }, [messagesData, username, currentUserId, messages]);
-  // --- END OF CHANGES ---
+  // Derive messages directly from data
+  const messages = useMemo(() => {
+    return messagesData?.privateMessageList?.topicList?.topics ?? [];
+  }, [messagesData]);
 
+  // Derive participants
+  const participants = useMemo(() => {
+    const users = messagesData?.privateMessageList?.users ?? [];
+    return messages.map((message) => {
+      const participantIds = message.participants?.map((p) => p.userId) ?? [];
+      // Safely access lastPosterUsername if it exists on the type
+      const lastPosterUsername = message.lastPosterUsername ?? '';
+
+      return getParticipants(
+        participantIds,
+        users,
+        username,
+        lastPosterUsername,
+      );
+    });
+  }, [messages, messagesData?.privateMessageList?.users, username]);
+
+  // Logic for showing the footer loading indicator (Spinner at bottom)
+  // Visible if we have more items to load and the list is substantial
+  const conditionHiddenFooterLoading = !hasMore || messages.length <= 20;
+  // --- END OF CHANGES ---
 
   const onPressNewMessage = async () => {
     reset(FORM_DEFAULT_VALUES);
     navigate('NewMessage');
   };
 
-  const onRefresh = () => {
-    setLoading(true);
-    refetch().then(() => setLoading(false));
+  const onRefresh = async () => {
+    setRefreshing(true);
+    setPage(0);
+    setHasMore(true);
+    try {
+      await refetch({ username, page: 0 });
+    } finally {
+      setRefreshing(false);
+    }
   };
 
-  const onEndReached = () => {
-    // The `messages.length` condition prevents unnecessary fetching when the onEndReachedThreshold is triggered,
-    // but the layout does not require more data to be loaded.
-    // This issue occurs, for example, when there is only 1 message, and the scroll detects it has reached the threshold.
-    // In such cases, the `onEndReached` function is called, causing a loading indicator to appear despite there being no additional data.
-    // By default, we set the messages per page to 30. To solve this issue, we add a condition to check `messages.length`.
-    if (conditionHiddenFooterLoading || loading) {
+  const onEndReached = async () => {
+    if (conditionHiddenFooterLoading || loadingList || loadingMore) {
       return;
     }
-    setLoading(true);
+
+    setLoadingMore(true);
     const nextPage = page + 1;
-    setPage(nextPage);
-    fetchMore({ variables: { username, page: nextPage } }).then(() =>
-      setLoading(false),
-    );
+
+    try {
+      const { data } = await fetchMore({
+        variables: { username, page: nextPage },
+      });
+      const newTopics = data?.privateMessageList?.topicList?.topics ?? [];
+      if (newTopics.length === 0) {
+        setHasMore(false);
+      } else {
+        setPage(nextPage);
+      }
+    } catch (e) {
+      // Error is handled by the hook's error state passed to UI
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   const getItem = (messages: Array<MessageType>, index: number) =>
@@ -128,9 +158,9 @@ export default function Messages() {
   let content;
   if (error) {
     content = <LoadingOrError message={errorHandler(error, true)} />;
-  } else if (loading && messages.length < 1) {
+  } else if (loadingList && messages.length < 1 && !refreshing) {
     content = <LoadingOrError loading />;
-  } else if (!loading && messages.length < 1) {
+  } else if (!loadingList && messages.length < 1 && !refreshing) {
     content = <LoadingOrError message={t('You have no messages')} />;
   } else {
     content = (
@@ -138,7 +168,7 @@ export default function Messages() {
         data={messages}
         refreshControl={
           <RefreshControl
-            refreshing={loading}
+            refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.loading}
           />

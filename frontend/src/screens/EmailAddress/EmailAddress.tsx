@@ -27,10 +27,18 @@ export default function EmailAddress() {
 
   const ios = Platform.OS === 'ios';
 
+  // --- CHANGE START ---
+  // 1. Move this definition UP, before the useEffect.
+  // 2. Wrap in useCallback to prevent infinite effect loops.
+  const onSetLoading = React.useCallback((value: boolean) => {
+    setLoading(value);
+  }, []);
+
   const { loading: userLoading, refetch, data: profileData } = useProfile({
     variables: { username },
     fetchPolicy: 'network-only',
   });
+
 
   useEffect(() => {
     if (profileData?.profile?.user?.__typename === 'UserDetail') {
@@ -47,11 +55,7 @@ export default function EmailAddress() {
       setEmailAddress(temp);
       onSetLoading(false);
     }
-  }, [profileData]);
-
-  const onSetLoading = (value: boolean) => {
-    setLoading(value);
-  };
+  }, [profileData, onSetLoading]);
 
   const onRefresh = () => {
     onSetLoading(true);
