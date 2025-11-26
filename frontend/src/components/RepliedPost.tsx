@@ -29,7 +29,8 @@ type BaseRepliedPostProps = GeneralRepliedPostProps &
 function BaseRepliedPost(props: BaseRepliedPostProps) {
   const styles = useStyles();
 
-  const { avatar, username, markdownContent, mentions, hideAuthor } = props;
+  // --- FIX: Removed unused 'mentions' ---
+  const { avatar, username, markdownContent, hideAuthor } = props;
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = markdownContent
     ? markdownContent.replace(imageTagRegex, '')
@@ -82,8 +83,8 @@ export function RepliedPost(props: RepliedPostProps) {
   const { hideAuthor = false, postId, replyToPostId } = props;
   const { data, loading, error } = useRepliedPostQuery({
     variables: {
-      postId, //used to look for replies of current post
-      replyToPostId, //used to look post at cache
+      postId,
+      replyToPostId,
     },
   });
   if (!data || loading) {
@@ -92,8 +93,6 @@ export function RepliedPost(props: RepliedPostProps) {
 
   const { replyingTo } = data;
 
-  // If there's no replyingTo data, it means this post isn't a reply to anything
-  // Just return null instead of showing an error
   if (!replyingTo || !replyingTo.post) {
     return null;
   }
@@ -114,7 +113,6 @@ export function LocalRepliedPost(props: LocalRepliedPostProps) {
     id: `Post:${String(props.replyToPostId)}`,
   });
 
-  // If there's no cached data for the replied-to post, just don't render anything
   if (!replyingTo) {
     return null;
   }

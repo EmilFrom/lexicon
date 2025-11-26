@@ -26,21 +26,16 @@ if (__DEV__) {
   void import('react-native-console-time-polyfill');
   void import('../reactotronConfig.js');
 
-  // --- START OF CHANGES ---
   // Override console.warn to suppress specific Apollo warnings in the terminal
   const originalWarn = console.warn;
   console.warn = (...args) => {
     const msg = args[0];
-    // Check if the warning starts with the Apollo error prefix
     if (typeof msg === 'string' && msg.includes('https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A104%2C%22args%22%3A%5B%22cache.diff%22%2C%22canonizeResults%22%2C%22Please%20remove%20this%20option.%22%5D%7D')) {
-      return; // Silently ignore this warning
+      return;
     }
-    // Otherwise, pass it through to the original handler
     originalWarn(...args);
   };
-  // --- END OF CHANGES ---
 
-  // Based on react-native-reanimated documentation about warning https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#reduced-motion-setting-is-enabled-on-this-device
   LogBox.ignoreLogs([
     '[Reanimated] Reduced motion setting is enabled on this device.',
     'An error occurred in a responseTransformer:',
@@ -49,10 +44,9 @@ if (__DEV__) {
 }
 
 export default function App() {
-  // Fix: Hooks must be called at the top level, not inside conditionals.
-  // We pass the client conditionally to the hook instead.
   const devToolsClient = __DEV__ ? client : undefined;
-  // @ts-ignore - Library types might enforce client presence, but runtime handles undefined/null in prod
+  // --- FIX: Use expect-error instead of ignore ---
+  // @ts-expect-error - Library types might enforce client presence, but runtime handles undefined/null in prod
   useApolloClientDevTools(devToolsClient);
 
   const newPostMethods = useForm<NewPostForm>({
@@ -61,7 +55,6 @@ export default function App() {
     defaultValues: FORM_DEFAULT_VALUES,
   });
 
-  // Clean up expired image cache on app startup
   useEffect(() => {
     const cleanupCache = async () => {
       try {
@@ -77,10 +70,6 @@ export default function App() {
     };
     cleanupCache();
   }, []);
-
-  /**
-   * Error Boundary is inside the ThemeProvider because we need to use the core UI, which relies on the theme provided by the ThemeProvider.
-   */
 
   return (
     <ApolloProvider client={client}>

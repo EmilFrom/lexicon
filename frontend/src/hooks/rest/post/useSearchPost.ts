@@ -7,18 +7,20 @@ import {
   SearchQueryVariables as SearchPostVariables,
 } from '../../../generatedAPI/server';
 import { useLazyQuery } from '../../../utils';
+import { useCallback } from 'react'; // Import useCallback
 
 export function useSearchPost(
   options?: LazyQueryHookOptions<SearchPostType, SearchPostVariables>,
 ) {
-  const [getPostsLazyFunc, { data, error, refetch, fetchMore }] = useLazyQuery<
+  const [getPostsLazyFunc, { data, loading, error, refetch, fetchMore }] = useLazyQuery<
     SearchPostType,
     SearchPostVariables
   >(SearchDocument, {
     ...options,
   });
 
-  const getPosts = (args: { variables: SearchPostVariables }) => {
+  // --- FIX START: Memoize function ---
+  const getPosts = useCallback((args: { variables: SearchPostVariables }) => {
     return getPostsLazyFunc({
       ...args,
       variables: {
@@ -26,7 +28,9 @@ export function useSearchPost(
         searchPostPath: searchPostPathBuilder,
       },
     });
-  };
+  }, [getPostsLazyFunc]); // Dependency is the Apollo function (stable)
+  // --- FIX END ---
 
-  return { getPosts, data, error, refetch, fetchMore };
+
+  return { getPosts, data, loading, error, refetch, fetchMore };
 }

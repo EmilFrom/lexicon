@@ -13,11 +13,9 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDebouncedCallback } from 'use-debounce';
 
 import { client } from '../api/client';
 import {
@@ -33,7 +31,7 @@ import {
   FullScreenImageModal,
 } from '../components';
 import { FORM_DEFAULT_VALUES } from '../constants';
-import { Divider, Icon, IconWithLabel, TextInputType } from '../core-ui';
+import { Divider, IconWithLabel, TextInputType } from '../core-ui';
 import {
   PostDraftType,
   PostFragment,
@@ -49,10 +47,10 @@ import {
   existingPostIsValid,
   formatExtensions,
   getHyperlink,
-  getReplacedImageUploadStatus,
+  // removed getReplacedImageUploadStatus
   goBackWithoutSaveDraftAlert,
   insertHyperlink,
-  insertImageUploadStatus,
+  // removed insertImageUploadStatus
   mentionHelper,
   newPostIsValid,
   onKeyPress,
@@ -97,22 +95,18 @@ export default function PostReply() {
   const { colors } = useTheme();
 
   const navigation = useNavigation<RootStackNavProp<'PostReply'>>();
-  const { navigate, goBack } = navigation; // Corrected: useNavigation is only called once
+  const { navigate, goBack } = navigation;
 
   const { params } = useRoute<RootStackRouteProp<'PostReply'>>();
 
-  // --- FIX 1: Replace the entire useRef anti-pattern with useState and useEffect ---
   const [persistedParams, setPersistedParams] =
     useState<RootStackParamList['PostReply']>(params);
 
   useEffect(() => {
-    // This effect safely merges new incoming params into our persistent state
-    // without violating the rules of hooks.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPersistedParams((prevParams) => ({ ...prevParams, ...params }));
   }, [params]);
 
-  // --- FIX 2: All variables are now safely derived from state, NOT a ref ---
   const {
     title,
     topicId,
@@ -125,7 +119,6 @@ export default function PostReply() {
     hyperlinkTitle = '',
     hyperlinkUrl,
   } = persistedParams;
-  // --- END OF MAJOR FIX ---
 
   const replyingTo = useMemo(() => {
     if (!replyToPostId) return null;
@@ -146,7 +139,7 @@ export default function PostReply() {
 
   const storage = useStorage();
   const user = storage.getItem('user');
-  const { discourseUrl } = storage.getItem('config') || {};
+
 
   const { authorizedExtensions } = useSiteSettings();
   const extensions = authorizedExtensions?.split('|');
@@ -540,7 +533,6 @@ export default function PostReply() {
             >
               <View style={styles.localImageWrapper}>
                 <Image source={{ uri: image.uri }} style={styles.localImage} />
-                {/* ... remove button and uploading overlay ... */}
               </View>
             </TouchableOpacity>
           ))}
@@ -549,6 +541,7 @@ export default function PostReply() {
           polls={polls || []}
           setValue={setValue}
           navigate={navigate}
+          editPostId={editPostId}
           prevScreen="PostReply"
         />
         <Controller

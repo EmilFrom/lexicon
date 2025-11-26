@@ -1,5 +1,5 @@
 import {
-  ApolloError,
+
   DocumentNode,
   LazyQueryHookOptions,
   OperationVariables,
@@ -22,19 +22,19 @@ export function useLazyQuery<TData, TVariables extends OperationVariables = Oper
   },
   errorAlert: ErrorAlertOptionType = 'SHOW_ALERT',
 ): QueryTuple<TData, TVariables> {
-// --- FIX END ---
+  // --- FIX END ---
 
   const isFocused = useIsFocused();
 
-  const onErrorDefault = (error: ApolloError) => {
-    errorHandlerAlert(error);
-  };
+
 
   // Destructure variables and onError to avoid passing them to initialization
   const {
     fetchPolicy = 'cache-and-network',
     pollingEnabled = false,
-    variables: _variables, 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    variables: _variables,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onError: _onError,
     ...others
   } = options ?? {};

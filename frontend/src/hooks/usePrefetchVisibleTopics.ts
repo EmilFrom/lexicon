@@ -9,12 +9,6 @@ type UsePrefetchVisibleTopicsParams = {
 
 /**
  * Hook to prefetch topic details for visible items + 30% buffer.
- *
- * Strategy:
- * 1. Calculate visible range + 30% buffer
- * 2. Batch-fetch topic details for calculated range
- * 3. Use cache-first policy to avoid redundant requests
- * 4. Debounce to prevent excessive fetching during scroll
  */
 export function usePrefetchVisibleTopics({
   visibleTopicIds,
@@ -24,31 +18,25 @@ export function usePrefetchVisibleTopics({
   const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Fix: Use state to hold the filtered list.
-  // This ensures we don't read 'prefetchedIds.current' during the render phase.
   const [topicsToFetch, setTopicsToFetch] = useState<number[]>([]);
 
-  // Stabilize the visible IDs array to prevent unnecessary effect runs
-  const visibleIdsKey = visibleTopicIds.join(',');
-
-  // Calculate buffer: 30% more topics (memoized to prevent recalculation)
+  // Calculate buffer: 30% more topics
+  // --- FIX: Removed visibleIdsKey as it was causing a linter warning and wasn't strictly necessary given visibleTopicIds is a dep ---
   const potentialCandidates = useMemo(() => {
     const bufferSize = Math.ceil(visibleTopicIds.length * 0.3);
     return visibleTopicIds.slice(0, visibleTopicIds.length + bufferSize);
-  }, [visibleIdsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visibleTopicIds]);
 
   // Fix: Filter topics in an effect.
-  // This moves the Ref access out of the render phase and into the effect phase.
   useEffect(() => {
     const needed = potentialCandidates.filter(
       (id) => !prefetchedIds.current.has(id),
     );
-    // Only update state if there is actually work to do to prevent extra renders
     if (needed.length > 0) {
       setTopicsToFetch(needed);
     }
   }, [potentialCandidates]);
 
-  // Use lazy query for each topic (Apollo will handle caching)
   const { refetch } = useTopicDetail(
     {
       skip: true, // Don't fetch on mount
@@ -62,27 +50,24 @@ export function usePrefetchVisibleTopics({
       return;
     }
 
-    // Debounce prefetch to avoid excessive requests during scroll
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
 
     debounceTimer.current = setTimeout(() => {
-      // Prefetch each topic
       topicsToFetch.forEach((topicId) => {
         refetch({
           topicId,
           includeFirstPost: true,
         })
           .then(() => {
-            // Only mark as prefetched after successful fetch
             prefetchedIds.current.add(topicId);
           })
           .catch(() => {
-            // Silently fail - this is background prefetch
+            // Silently fail
           });
       });
-    }, 200); // 200ms debounce
+    }, 200);
 
     return () => {
       if (debounceTimer.current) {
@@ -93,8 +78,10 @@ export function usePrefetchVisibleTopics({
 
   // Cleanup on unmount
   useEffect(() => {
+    // --- FIX: Copy ref value to variable to safely use in cleanup ---
+    const idsSet = prefetchedIds.current;
     return () => {
-      prefetchedIds.current.clear();
+      idsSet.clear();
     };
   }, []);
 }

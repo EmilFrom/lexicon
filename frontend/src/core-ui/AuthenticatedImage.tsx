@@ -7,6 +7,7 @@ import {
   View,
   ViewStyle,
   useWindowDimensions,
+  ImageErrorEventData,
 } from 'react-native';
 import { useReactiveVar } from '@apollo/client';
 
@@ -63,11 +64,9 @@ export function AuthenticatedImage({
 
     const calculatedHeight = screenWidth / aspectRatio;
 
-    // --- FIX START: Safety fallback ---
     if (!calculatedHeight || isNaN(calculatedHeight) || calculatedHeight <= 0) {
       return 300; // Safe default height
     }
-    // --- FIX END ---
 
     if (maxHeightRatio === 0 || maxHeightRatio === Infinity) {
       return calculatedHeight;
@@ -88,9 +87,10 @@ export function AuthenticatedImage({
     setIsLoading(false);
   };
 
-  const handleError = (e: any) => {
+  const handleError = (e: ImageErrorEventData) => {
     if (__DEV__) {
-      console.error('[AuthenticatedImage] Error:', e?.nativeEvent?.error);
+      // Access .error directly, not .nativeEvent.error
+      console.error('[AuthenticatedImage] Error:', e.error);
     }
     setHasError(true);
     setIsLoading(false);

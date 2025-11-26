@@ -22,7 +22,7 @@ import { Icon, Text } from '../core-ui';
 import { errorHandler, getImage, useStorage } from '../helpers';
 import { useSearchPost, useSiteSettings } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
-import { Post, StackNavProp } from '../types';
+import { StackNavProp } from '../types';
 
 const ios = Platform.OS === 'ios';
 
@@ -40,102 +40,90 @@ export default function Search() {
 
   const [searchValue, setSearchValue] = useState('');
   const [page, setPage] = useState(1);
-  const [posts, setPosts] = useState<Array<Post>>([]);
-  const [hasOlderPosts, setHasOlderPosts] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isDebouncing, setIsDebouncing] = useState(false);
 
   const skipSearchStatus = searchValue.length < minSearchLength;
 
-  const { getPosts, error, refetch, fetchMore, data: searchData } = useSearchPost();
+  const { getPosts, error, refetch, fetchMore, data: searchData, loading: searchLoading } = useSearchPost();
 
-  useEffect(() => {
-    const result = searchData?.search;
-    if (result) {
-      const tempPosts: Array<Post> = [];
-      const postsData = result.posts;
-      const topicsData = result.topics;
-      postsData.forEach(
-        ({
+  const posts = useMemo(() => {
+    if (skipSearchStatus || !searchData?.search) {
+      return [];
+    }
+    const result = searchData.search;
+    const postsData = result.posts;
+    const topicsData = result.topics;
+
+    return postsData.map(
+      ({
+        id,
+        avatarTemplate,
+        blurb,
+        createdAt,
+        username,
+        likeCount,
+        topicId,
+      }) => {
+        const tempTopicData = topicsData.find(
+          (item) => item.id === topicId,
+        );
+
+        const channel = channels?.find(
+          (channel) => channel.id === tempTopicData?.categoryId,
+        );
+        const tags: Array<string> = tempTopicData?.tags || [];
+
+        return {
           id,
-          avatarTemplate,
-          blurb,
-          createdAt,
-          username,
-          likeCount,
           topicId,
-        }) => {
-          const tempTopicData = topicsData.find(
-            (item) => item.id === topicId,
-          );
+          title: tempTopicData?.title || '',
+          content: blurb,
+          username: username || '',
+          avatar: getImage(avatarTemplate),
+          replyCount: tempTopicData?.replyCount || 0,
+          likeCount,
+          viewCount: tempTopicData?.postsCount || 0,
+          isLiked: tempTopicData?.liked || false,
+          channel: channel || DEFAULT_CHANNEL,
+          tags,
+          createdAt,
+          freqPosters: [],
+        };
+      },
+    );
+  }, [searchData, channels, skipSearchStatus]);
 
-          const channel = channels?.find(
-            (channel) => channel.id === tempTopicData?.categoryId,
-          );
-          const tags: Array<string> = tempTopicData?.tags || [];
+  const hasOlderPosts = useMemo(() => {
+    if (skipSearchStatus || !searchData?.search) return false;
+    return posts.length >= page * maxPostsPerPage;
+  }, [posts.length, page, maxPostsPerPage, skipSearchStatus, searchData]);
 
-          tempPosts.push({
-            id,
-            topicId,
-            title: tempTopicData?.title || '',
-            content: blurb,
-            username: username || '',
-            avatar: getImage(avatarTemplate),
-            replyCount: tempTopicData?.replyCount || 0,
-            likeCount,
-            viewCount: tempTopicData?.postsCount || 0,
-            isLiked: tempTopicData?.liked || false,
-            channel: channel || DEFAULT_CHANNEL,
-            tags,
-            createdAt,
-            freqPosters: [],
-          });
-        },
-      );
-      const currentPostIds = posts.map((post) => post.id);
-      const incomingPostIds = tempPosts.map((post) => post.id);
-      if (
-        JSON.stringify(currentPostIds) === JSON.stringify(incomingPostIds) ||
-        incomingPostIds.length < page * maxPostsPerPage
-      ) {
-        setHasOlderPosts(false);
-      } else {
-        setHasOlderPosts(true);
-      }
-      setPosts(tempPosts);
-    } else {
-      setHasOlderPosts(false);
-    }
-    setLoading(false);
-  }, [searchData, page, channels, maxPostsPerPage]);
+  const loading = isDebouncing || searchLoading;
 
   useEffect(() => {
-    setLoading(true);
-    let fetchSearch: NodeJS.Timeout;
-    if (!skipSearchStatus) {
-      fetchSearch = setTimeout(() => {
-        getPosts({
-          variables: {
-            search: searchValue,
-            page,
-            order: 'latest',
-          },
-        });
-      }, 500);
-    } else {
-      setPosts([]);
-      setLoading(false);
+    if (skipSearchStatus) {
+      return;
     }
+
+    const fetchSearch = setTimeout(() => {
+      getPosts({
+        variables: {
+          search: searchValue,
+          page: 1,
+          order: 'latest',
+        },
+      });
+      setIsDebouncing(false);
+    }, 500);
+
     return () => clearTimeout(fetchSearch);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [skipSearchStatus, setPosts, page, searchValue]);
+  }, [skipSearchStatus, searchValue, getPosts]);
 
   const count = posts.length;
 
   const onRefresh = () => {
     if (refetch) {
-      /**
-       * Prefer an explicit conditional over a short-circuit expression for clearer intent.
-       */
+      setPage(1);
       refetch();
     }
   };
@@ -187,11 +175,20 @@ export default function Search() {
     (text: string) => {
       setPage(1);
       setSearchValue(text);
+      if (text.length >= minSearchLength) {
+        setIsDebouncing(true);
+      } else {
+        // --- FIX: Set isDebouncing to false immediately when input is cleared or too short ---
+        setIsDebouncing(false);
+      }
     },
-    [setPage, setSearchValue],
+    [setPage, setSearchValue, minSearchLength],
   );
 
-  const onPressCancel = useCallback(() => setSearchValue(''), [setSearchValue]);
+  const onPressCancel = useCallback(() => {
+    setSearchValue('');
+    setIsDebouncing(false);
+  }, [setSearchValue]);
 
   const search = useMemo(
     () => (
@@ -204,7 +201,7 @@ export default function Search() {
           onChangeText={onChangeValue}
           placeholder={t('Search for ...')}
           placeholderTextColor={colors.textLighter}
-          keyboardType="visible-password" // To remove underline at every words on Android
+          keyboardType="visible-password"
           testID="Search:TextInput:Query"
         />
         {searchValue !== '' && (

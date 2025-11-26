@@ -1,5 +1,5 @@
 import {
-  ApolloError,
+
   DocumentNode,
   OperationVariables,
   QueryHookOptions,
@@ -19,16 +19,16 @@ export function useQuery<TData, TVariables extends OperationVariables = Operatio
   options?: QueryHookOptions<TData, TVariables>,
   errorAlert: ErrorAlertOptionType = 'SHOW_ALERT',
 ): QueryResult<TData, TVariables> {
-// --- FIX END ---
-  const onErrorDefault = (error: ApolloError) => {
-    errorHandlerAlert(error);
-  };
-  
+  // --- FIX END ---
+
+
 
   // Destructure onError and onCompleted to prevent passing them to useQueryBase
   const {
     fetchPolicy = 'cache-and-network',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onError: _onError,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onCompleted: _onCompleted,
     ...others
   } = options ?? {};

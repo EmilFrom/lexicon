@@ -2,24 +2,95 @@
 
 ## Overview
 
-This document provides a detailed analysis and implementation plan for fixing 79 linting/compilation errors (73 errors, 6 warnings) identified by `yarn test`. The errors span across multiple categories including React Hooks violations, TypeScript type issues, and React Compiler optimization warnings.
+This document provides a detailed analysis and implementation plan for fixing 70 linting/compilation errors (62 errors, 8 warnings) identified by `yarn test`. The errors span across multiple categories including React Hooks violations, TypeScript type issues, and React Compiler optimization warnings.
 
-## Error Categories Summary
+**Last Updated:** 2025-11-26  
+**Status:** Most critical errors fixed, cleanup phase remaining
 
-| Category | Count | Severity | Effort |
+## Error Categories Summary (Current State)
+
+| Category | Count | Severity | Status |
 |----------|-------|----------|--------|
-| React Hooks - setState in effect | 9 | High | Medium |
-| React Hooks - refs during render | 5 | High | Medium |
-| React Hooks - preserve memoization | 3 | Medium | Medium |
-| TypeScript - unused vars/imports | 30 | Low | Low |
-| TypeScript - explicit any | 6 | Medium | Low |
-| React Hooks - rules of hooks | 1 | High | Low |
-| React Hooks - exhaustive deps | 4 | Medium | Low |
-| React Hooks - static components | 1 | High | Medium |
-| React Hooks - immutability | 1 | High | Medium |
+| TypeScript - unused vars/imports | 37 | Low | ✅ Cleanup needed |
+| React Hooks - setState in effect | 6 | High | ⚠️ Needs fixing |
+| React Hooks - preserve memoization | 4 | Medium | ⚠️ Needs fixing |
+| TypeScript - explicit any | 5 | Medium | ✅ Cleanup needed |
+| React Hooks - exhaustive deps | 7 | Medium | ⚠️ Review needed |
+| TypeScript - ban-ts-comment | 1 | Low | ✅ Quick fix |
+| React Hooks - unused eslint-disable | 1 | Low | ✅ Quick fix |
 
-**Total Estimated Effort: 2-3 days**  
-**Priority: High** - These errors prevent production builds and indicate potential runtime bugs
+**Total: 62 errors, 8 warnings (70 problems)**  
+**Progress: ~15 critical errors fixed, mainly cleanup remaining**  
+**Remaining Effort: 1-2 days**
+
+---
+
+## Current Error Breakdown by File
+
+### Files with Multiple Errors (Priority Order)
+
+1. **`src/screens/Home/Home.tsx`** - 5 errors
+   - 1 unused import (`StyleSheet`)
+   - 4 setState in effect violations (lines 222, 233, 271, 278)
+
+2. **`src/screens/NewPost.tsx`** - 8 errors, 1 warning
+   - 2 unused imports (`ActivityIndicator`, `useDebouncedCallback`)
+   - 1 setState in effect (line 319)
+   - 2 explicit any types (line 328)
+   - 1 unused variable (`data` at line 347)
+   - 1 exhaustive-deps warning (line 490)
+
+3. **`src/screens/PostReply.tsx`** - 6 errors
+   - 5 unused imports
+   - 1 unused variable (`discourseUrl`)
+
+4. **`src/screens/NewMessage.tsx`** - 5 errors
+   - 3 unused imports
+   - 2 unused variables
+
+5. **`src/screens/PostPreview.tsx`** - 6 errors, 1 warning
+   - 4 unused variables
+   - 1 exhaustive-deps warning
+
+6. **`src/components/PostItem/HomePostItem.tsx`** - 2 errors
+   - 2 preserve-manual-memoization errors (lines 54, 62)
+
+7. **`src/components/PostItem/PostItem.tsx`** - 3 errors
+   - 3 unused variables
+
+8. **`src/components/MarkdownRenderer.tsx`** - 3 errors
+   - 2 explicit any types (lines 60, 106)
+   - 1 unused variable (`spacing`)
+
+9. **`src/screens/Chat/ChatChannelDetail.tsx`** - 3 errors, 1 warning
+   - 1 setState in effect (line 139)
+   - 1 unused variable (`e` at line 473)
+   - 1 exhaustive-deps warning (line 125)
+
+10. **`src/hooks/usePrefetchVisibleTopics.ts`** - 1 error, 1 warning
+    - 1 preserve-manual-memoization error (line 34)
+    - 1 exhaustive-deps warning (line 97)
+
+11. **`src/screens/EmailAddress/EmailAddress.tsx`** - 1 error
+    - 1 setState in effect (line 55)
+
+### Files with Single Errors (Quick Wins)
+
+- `src/App.tsx` - 1 error: Use @ts-expect-error instead of @ts-ignore
+- `src/components/NestedComment.tsx` - 2 errors: unused imports
+- `src/components/RepliedPost.tsx` - 1 error: unused variable
+- `src/components/SelectImagePreviewEdit.tsx` - 1 error: unused variable
+- `src/core-ui/AuthenticatedImage.tsx` - 1 error: unused import
+- `src/core-ui/Avatar/index.tsx` - 2 errors: unused variables
+- `src/core-ui/CustomImage.tsx` - 1 error: unused import
+- `src/hooks/rest/chat/useChatChannelNotifications.ts` - 2 errors: unused imports
+- `src/hooks/useImageDimensions.ts` - 1 error, 2 warnings: unused import + exhaustive-deps
+- `src/navigation/ProfileDrawerNavigator.tsx` - 2 errors: unused imports
+- `src/screens/Messages/Messages.tsx` - 2 errors: unused import + unused variable
+- `src/screens/Notifications/Notifications.tsx` - 1 error: unused import
+- `src/screens/Search.tsx` - 1 warning: exhaustive-deps + 1 unused eslint-disable
+- `src/utils/useLazyQuery.ts` - 3 errors: unused variables
+- `src/utils/useQuery.ts` - 3 errors: unused variables
 
 ---
 

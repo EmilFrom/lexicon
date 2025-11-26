@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { ImageBackgroundProps, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
-import { useReactiveVar } from '@apollo/client'; // Added
+import { useReactiveVar } from '@apollo/client';
 
 import {
   AVATAR_ICON_SIZES,
   AVATAR_ICON_SIZE_VARIANTS,
   AVATAR_LETTER_SIZES,
 } from '../../constants';
-import { makeStyles, useTheme } from '../../theme';
+import { useTheme } from '../../theme';
 import { convertUrl } from '../../helpers';
-import { tokenVar } from '../../reactiveVars'; // Added
-// import { useAuthenticatedImage } from '../../hooks'; // Removed
+import { tokenVar } from '../../reactiveVars';
 
 import { LetterAvatar } from './LetterAvatar';
 
@@ -27,9 +26,8 @@ type Props = Omit<ImageBackgroundProps, 'source'> & {
 export { Props as AvatarProps };
 
 export function Avatar(props: Props) {
-  const styles = useStyles();
   const { colors } = useTheme();
-  const token = useReactiveVar(tokenVar); // Added
+  const token = useReactiveVar(tokenVar);
 
   const {
     src = '',
@@ -42,23 +40,20 @@ export function Avatar(props: Props) {
   } = props;
 
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const finalSize = AVATAR_ICON_SIZES[size];
   const fontSize = AVATAR_LETTER_SIZES[size];
 
   const normalizedSrc = src ? convertUrl(src) : undefined;
 
-  // Removed useAuthenticatedImage hook logic
-
-  const loadChild = src === '' || error; // Simplified loading logic, rely on Image to show empty/loading
+  const loadChild = src === '' || error;
 
   // Construct source with headers
   const imgSource = normalizedSrc
     ? {
-        uri: normalizedSrc,
-        headers: { Authorization: token ? `Bearer ${token}` : '' },
-      }
+      uri: normalizedSrc,
+      headers: { Authorization: token ? `Bearer ${token}` : '' },
+    }
     : undefined;
 
   const letterAvatar = (
@@ -83,8 +78,6 @@ export function Avatar(props: Props) {
             style,
           ]}
           onError={() => setError(true)}
-          onLoadStart={() => setLoading(true)}
-          onLoadEnd={() => setLoading(false)}
           contentFit="cover"
           cachePolicy="disk"
           {...otherProps}
@@ -93,9 +86,3 @@ export function Avatar(props: Props) {
     </TouchableOpacity>
   );
 }
-
-const useStyles = makeStyles(() => ({
-  circle: {
-    borderRadius: 100,
-  },
-}));

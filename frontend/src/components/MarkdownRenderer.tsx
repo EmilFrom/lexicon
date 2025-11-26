@@ -3,6 +3,7 @@ import { StyleProp, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 import RenderHTML, {
+  CustomBlockRenderer,
   MixedStyleDeclaration,
   TNode,
 } from 'react-native-render-html';
@@ -28,11 +29,11 @@ function BaseMarkdownRenderer({
   nonClickable,
 }: Props) {
   const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
+  // --- FIX: Removed unused 'spacing' ---
   const { colors, fontSizes } = useTheme();
   const { width } = useWindowDimensions();
   const styles = useStyles();
 
-  // 1. Memoize tagsStyles so it doesn't recreate on every render
   const tagsStyles: Readonly<Record<string, MixedStyleDeclaration>> = useMemo(
     () => ({
       body: { color: fontColor || colors.textNormal, fontSize: fontSizes.m },
@@ -51,17 +52,15 @@ function BaseMarkdownRenderer({
     [fontColor, colors, fontSizes],
   );
 
-  // 2. Memoize the source object
   const source = useMemo(() => ({ html: content }), [content]);
 
-  const renderers = useMemo(
+  const renderers: Record<string, CustomBlockRenderer> = useMemo(
     () => ({
-      a: ({ TDefaultRenderer, tnode, ...props }: any) => {
+      a: ({ TDefaultRenderer, tnode, ...props }) => {
         const { href } = tnode.attributes;
         const isMention = tnode.classes.includes('mention');
 
         if (isMention && !nonClickable) {
-          // Safely access the text data
           const firstChild = tnode.children[0];
           const mentionText =
             firstChild && firstChild.type === 'text' ? firstChild.data : '';
@@ -102,7 +101,7 @@ function BaseMarkdownRenderer({
           </Text>
         );
       },
-      details: ({ TDefaultRenderer, tnode, ...props }: any) => {
+      details: ({ TDefaultRenderer, tnode, ...props }) => {
         const summaryNode = tnode.children.find(
           (c: TNode) => 'tagName' in c && c.tagName === 'summary',
         );
@@ -144,7 +143,7 @@ function BaseMarkdownRenderer({
   );
 }
 
-const useStyles = makeStyles(({ colors, spacing }) => ({
+const useStyles = makeStyles(({ colors }) => ({
   mention: {
     fontWeight: 'bold',
     color: colors.primary,
@@ -155,7 +154,4 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
   },
 }));
 
-// 3. Export as Memoized Component
-// This prevents the renderer from updating if the props (content/styles) haven't changed,
-// even if the parent (PostItem) re-renders.
 export const MarkdownRenderer = React.memo(BaseMarkdownRenderer);

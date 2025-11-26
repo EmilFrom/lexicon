@@ -15,7 +15,7 @@ import { MessageQuery } from '../../generatedAPI/server';
 import { errorHandler, getParticipants, useStorage } from '../../helpers';
 import { useMessageList } from '../../hooks';
 import { makeStyles, useTheme } from '../../theme';
-import { MessageParticipants, StackNavProp } from '../../types';
+import { StackNavProp } from '../../types';
 import { useDevice } from '../../utils';
 
 import { MessageCard } from './Components';
@@ -36,7 +36,6 @@ export default function Messages() {
 
   const storage = useStorage();
   const username = storage.getItem('user')?.username || '';
-  // const currentUserId = storage.getItem('user')?.id || '';
 
   const [page, setPage] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -45,7 +44,6 @@ export default function Messages() {
 
   const ios = Platform.OS === 'ios';
 
-  // --- START OF CHANGES ---
   const {
     error,
     refetch,
@@ -61,17 +59,14 @@ export default function Messages() {
     'HIDE_ALERT',
   );
 
-  // Derive messages directly from data
   const messages = useMemo(() => {
     return messagesData?.privateMessageList?.topicList?.topics ?? [];
   }, [messagesData]);
 
-  // Derive participants
   const participants = useMemo(() => {
     const users = messagesData?.privateMessageList?.users ?? [];
     return messages.map((message) => {
       const participantIds = message.participants?.map((p) => p.userId) ?? [];
-      // Safely access lastPosterUsername if it exists on the type
       const lastPosterUsername = message.lastPosterUsername ?? '';
 
       return getParticipants(
@@ -83,10 +78,7 @@ export default function Messages() {
     });
   }, [messages, messagesData?.privateMessageList?.users, username]);
 
-  // Logic for showing the footer loading indicator (Spinner at bottom)
-  // Visible if we have more items to load and the list is substantial
   const conditionHiddenFooterLoading = !hasMore || messages.length <= 20;
-  // --- END OF CHANGES ---
 
   const onPressNewMessage = async () => {
     reset(FORM_DEFAULT_VALUES);
@@ -122,7 +114,7 @@ export default function Messages() {
       } else {
         setPage(nextPage);
       }
-    } catch (e) {
+    } catch {
       // Error is handled by the hook's error state passed to UI
     } finally {
       setLoadingMore(false);

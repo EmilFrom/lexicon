@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   Alert,
   Dimensions,
@@ -93,12 +93,8 @@ export default function ChatChannelDetail() {
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [isInitialRequest, setIsInitialRequest] = useState(true);
   const [loadingMessageId, setLoadingMessageId] = useState<number | null>(null);
-  // We still need state for this because it's passed as a prop to ChatList
-  const [shouldMaintainVisiblePosition, setShouldMaintainVisiblePosition] =
-    useState(false);
   const previousPushEnabled = useRef<boolean | null>(null);
 
-  // --- START OF CHANGES ---
   const {
     getChatChannelDetail,
     loading: chatChannelDetailLoading,
@@ -120,25 +116,25 @@ export default function ChatChannelDetail() {
     data: messagesData,
   } = useChatChannelMessages({}, 'HIDE_ALERT');
 
-  // Derived State
   const messagesResult = messagesData?.getChatChannelMessages;
-  const chatMessages = messagesResult?.messages ?? [];
+  // --- FIX: Memoize chatMessages ---
+  const chatMessages = useMemo(
+    () => messagesResult?.messages ?? [],
+    [messagesResult],
+  );
   const hasOlderMessages = messagesResult?.canLoadMorePast ?? true;
   const canLoadMoreFuture = messagesResult?.canLoadMoreFuture ?? false;
 
-  // Derived Unread State
+  const shouldMaintainVisiblePosition = canLoadMoreFuture;
+
   const hasUnread =
     chatMessages.length > 0 && lastMessageId !== chatMessages[0].id;
 
-  // Side Effect: Sync Refs and Scroll
   useEffect(() => {
-    // Update refs
     nextTargetMessageId.current = canLoadMoreFuture
       ? chatMessages[0]?.id ?? 0
       : 0;
-    setShouldMaintainVisiblePosition(canLoadMoreFuture);
 
-    // Scroll logic for target message on initial load
     if (chatMessages.length && targetMessageId && isInitialRequest) {
       const targetMessage = chatMessages.find(
         (message) => message.id === targetMessageId,
@@ -160,12 +156,10 @@ export default function ChatChannelDetail() {
     isInitialRequest,
     ios,
   ]);
-  // --- END OF CHANGES ---
 
   const { preference, refetch: refetchPreference } =
     useGetChatChannelNotificationPreference(channelId);
 
-  // Safe access helper
   const isPushEnabled = preference ? preference.pushEnabled : true;
 
   const {
@@ -181,7 +175,6 @@ export default function ChatChannelDetail() {
       cache.modify({
         id: `ChannelList:${variables?.channelId}`,
         fields: {
-          // update data cache isFollowing into false after mutation complete
           isFollowingChannel: () => {
             return false;
           },
@@ -198,19 +191,15 @@ export default function ChatChannelDetail() {
       setMessage('');
 
       try {
-        // 1. Evict the cached messages for this channel.
-        // The keyArgs in client.ts is `channel-${channelId}`.
         client.cache.evict({ fieldName: 'getChatChannelMessages' });
         client.cache.gc();
 
-        // 2. Manually trigger refetch to re-populate immediately
         await refetch({
           channelId,
           pageSize: CHAT_CHANNEL_DETAIL_PAGE_SIZE,
-          targetMessageId: undefined, // fetch latest
+          targetMessageId: undefined,
         });
 
-        // 3. Scroll to bottom
         if (virtualListRef.current) {
           setTimeout(() => {
             virtualListRef.current?.scrollToOffset({
@@ -240,8 +229,6 @@ export default function ChatChannelDetail() {
 
   useEffect(() => {
     const unsubscribe = addListener('focus', () => {
-      // setInitialLoad(true);
-      // Check if data channel at cache empty or not and param memberCount or threadEnabled undefined
       if (
         (typeof memberCount !== 'number' ||
           typeof threadEnabled !== 'boolean' ||
@@ -350,7 +337,6 @@ export default function ChatChannelDetail() {
       if (threadId) {
         navigateToThread(threadId, id);
       } else {
-        // to make sure only replies at specific item loading
         setLoadingMessageId(id);
         createThread({
           variables: {
@@ -437,10 +423,8 @@ export default function ChatChannelDetail() {
 
   const onReply = (message: string) => {
     if (message.trim() !== '') {
-      // 1. Keyboard hides immediately here (from previous step)
       Keyboard.dismiss();
 
-      // 2. We send the mutation
       replyChat({
         variables: {
           channelId,
@@ -470,16 +454,14 @@ export default function ChatChannelDetail() {
         text1: t('Notifications updated successfully'),
       });
       refetchPreference();
-    } catch (e) {
+    } catch {
+      // --- FIX: Removed unused 'e' variable from catch block ---
       Toast.show({
         type: 'notificationErrorToast',
         text1: t('Failed to update notification preferences'),
         text2: t('Please try again'),
       });
-      // Revert on error
       if (previousPushEnabled.current !== null) {
-        // This part is tricky as we can't directly set the switch back
-        // We rely on the cache update from refetchPreference to do it.
         refetchPreference();
       }
     }
@@ -512,7 +494,6 @@ export default function ChatChannelDetail() {
       rightIcon="More"
       onPressRight={onPressMore}
       onPressTitle={() => setMenuVisible(true)}
-      // Use channelMessagesLoading as a proxy for "isFetchingMore" if needed
       isLoading={channelMessagesLoading && !isInitialRequest}
     />
   );

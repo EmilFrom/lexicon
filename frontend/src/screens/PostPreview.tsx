@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useState, useMemo } from 'react'; // Added useMemo
+import React, { useEffect, useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Platform } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -18,7 +18,7 @@ import {
   MarkdownRenderer,
 } from '../components';
 import { PollPostPreview } from '../components/Poll';
-import { FORM_DEFAULT_VALUES, refetchQueriesPostDraft } from '../constants';
+import { FORM_DEFAULT_VALUES } from '../constants';
 import { Divider, IconWithLabel, Text } from '../core-ui';
 import { FullScreenImageModal } from '../components/FullScreenImageModal';
 import {
@@ -26,7 +26,7 @@ import {
   errorHandlerAlert,
   getImage,
   getPostShortUrl,
-  sortImageUrl,
+  // --- FIX: Removed unused sortImageUrl ---
   useStorage,
 } from '../helpers';
 import { markdownToHtml } from '../helpers/markdownToHtml';
@@ -37,7 +37,7 @@ import {
   useLookupUrls,
   useNewTopic,
   useReplyTopic,
-  useImageDimensions, // Import the dimension hook
+  useImageDimensions,
 } from '../hooks';
 import { makeStyles, useTheme } from '../theme';
 import {
@@ -46,16 +46,8 @@ import {
   RootStackRouteProp,
 } from '../types';
 import { useModal } from '../utils';
-// /* --- 1. Add these imports --- */
-import {
-  TopicsDocument,
-  GetTopicDetailDocument,
-  ProfileDocument,
-  UserActivityDocument,
-  ListPostDraftsDocument,
-} from '../generatedAPI/server';
-import { postDraftPathBuilder } from '../api/pathBuilder';
-import { defaultArgsListPostDraft } from '../constants/postDraft';
+
+
 
 const ios = Platform.OS === 'ios';
 
@@ -74,21 +66,25 @@ export default function PostPreview() {
   const storage = useStorage();
   const channels = storage.getItem('channels');
   const { reset: resetForm, getValues, watch } = useFormContext();
-  const [imageUrls, setImageUrls] = useState<Array<string>>();
 
   // Map to store resolved URLs (upload:// -> https://)
   const [resolvedUrlMap, setResolvedUrlMap] = useState<Record<string, string>>(
     {},
   );
 
-  const { title, raw: content, tags, channelId, isDraft } = getValues();
+  const { title, raw: content, tags, channelId } = getValues();
   const draftKey: string | undefined = watch('draftKey');
   const shortUrls = getPostShortUrl(content) ?? [];
 
   // --- NEW CONTENT PROCESSING PATTERN ---
   const htmlContent = markdownToHtml(content);
-  const imagesFromContent =
-    (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || [];
+
+  const imagesFromContent = useMemo(() => {
+    return (
+      (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || []
+    );
+  }, [htmlContent]);
+
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
   // --- END OF PATTERN ---
@@ -103,8 +99,7 @@ export default function PostPreview() {
       });
       setResolvedUrlMap(newMap);
 
-      // Maintain existing state logic just in case
-      setImageUrls(sortImageUrl(shortUrls, lookupUrls));
+
     },
   });
 
@@ -125,25 +120,7 @@ export default function PostPreview() {
   // Fetch dimensions for the resolved images
   const { dimensions } = useImageDimensions(displayImages);
 
-const username = storage.getItem('user')?.username || '';
 
-  // /* --- 2. Define Document-based Refetch Queries --- */f
-  // We always want to update these when a post is published
-  const activeRefetchQueries = [
-    { query: TopicsDocument },
-    { query: GetTopicDetailDocument },
-    { query: ProfileDocument, variables: { username } },
-    { query: UserActivityDocument, variables: { username, offset: 0 } },
-  ];
-
-  // If it was a draft, we ALSO want to refresh the draft list to remove it
-  const draftRefetchQuery = {
-    query: ListPostDraftsDocument,
-    variables: {
-      ...defaultArgsListPostDraft,
-      postDraftPath: postDraftPathBuilder,
-    },
-  };
 
   const forceRefreshTopics = () => {
     // This nuclear option deletes the cached list of topics.
@@ -151,13 +128,10 @@ const username = storage.getItem('user')?.username || '';
     client.cache.evict({ fieldName: 'topics' });
     client.cache.gc();
   };
-  // --- FIX END ---
-
-  
 
   const { newTopic, loading: newTopicLoading } = useNewTopic({
     onCompleted: () => {
-      forceRefreshTopics(); 
+      forceRefreshTopics();
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
@@ -179,7 +153,7 @@ const username = storage.getItem('user')?.username || '';
         client.cache.evict({ fieldName: 'topicDetail' });
         client.cache.gc();
       }
-      forceRefreshTopics(); 
+      forceRefreshTopics();
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
@@ -190,7 +164,7 @@ const username = storage.getItem('user')?.username || '';
 
   const { editPost, loading: editPostLoading } = useEditPost({
     onCompleted: () => {
-      forceRefreshTopics(); 
+      forceRefreshTopics();
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);
@@ -201,7 +175,7 @@ const username = storage.getItem('user')?.username || '';
 
   const { editTopic, loading: editTopicLoading } = useEditTopic({
     onCompleted: () => {
-      forceRefreshTopics(); 
+      forceRefreshTopics();
       setTimeout(() => {
         navigation.pop(2);
         resetForm(FORM_DEFAULT_VALUES);

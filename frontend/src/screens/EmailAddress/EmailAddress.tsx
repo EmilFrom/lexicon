@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FlatList, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -19,46 +19,42 @@ export default function EmailAddress() {
 
   const { navigate } = useNavigation<StackNavProp<'EmailAddress'>>();
 
-  const [emailAddress, setEmailAddress] = useState<Array<EmailAddressType>>([]);
   const [loading, setLoading] = useState(false);
+  const onSetLoading = React.useCallback((value: boolean) => {
+    setLoading(value);
+  }, []);
 
   const storage = useStorage();
   const username = storage.getItem('user')?.username || '';
 
   const ios = Platform.OS === 'ios';
 
-  // --- CHANGE START ---
-  // 1. Move this definition UP, before the useEffect.
-  // 2. Wrap in useCallback to prevent infinite effect loops.
-  const onSetLoading = React.useCallback((value: boolean) => {
-    setLoading(value);
-  }, []);
-
   const { loading: userLoading, refetch, data: profileData } = useProfile({
     variables: { username },
     fetchPolicy: 'network-only',
   });
 
-
-  useEffect(() => {
+  // --- FIX: Derive emailAddress directly from data instead of useEffect+setState ---
+  const emailAddress = useMemo(() => {
     if (profileData?.profile?.user?.__typename === 'UserDetail') {
       const result = profileData.profile;
       const { email, secondaryEmails, unconfirmedEmails } = result.user;
       const temp: Array<EmailAddressType> = [];
-      temp[0] = { emailAddress: email, type: 'PRIMARY' };
-      secondaryEmails?.forEach((emailAddress) =>
-        temp.push({ emailAddress, type: 'SECONDARY' }),
+      temp.push({ emailAddress: email, type: 'PRIMARY' });
+      secondaryEmails?.forEach((address) =>
+        temp.push({ emailAddress: address, type: 'SECONDARY' }),
       );
-      unconfirmedEmails?.forEach((emailAddress) =>
-        temp.push({ emailAddress, type: 'UNCONFIRMED' }),
+      unconfirmedEmails?.forEach((address) =>
+        temp.push({ emailAddress: address, type: 'UNCONFIRMED' }),
       );
-      setEmailAddress(temp);
-      onSetLoading(false);
+      return temp;
     }
-  }, [profileData, onSetLoading]);
+    return [];
+  }, [profileData]);
 
   const onRefresh = () => {
-    onSetLoading(true);
+    // setLoading(true) is optional here since userLoading handles the spinner usually, 
+    // but keeping it to match original logic if needed for mutations
     refetch();
   };
 

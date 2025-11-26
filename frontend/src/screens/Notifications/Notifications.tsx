@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+// --- FIX: Removed unused useEffect ---
+import React, { useState } from 'react';
 import {
   ActionSheetIOS,
   Modal,

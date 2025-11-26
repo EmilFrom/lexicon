@@ -6,6 +6,7 @@ import {
   View,
   ViewStyle,
   useWindowDimensions,
+  ImageErrorEventData,
 } from 'react-native';
 import { useReactiveVar } from '@apollo/client';
 
@@ -35,7 +36,6 @@ export function CustomImage(props: Props) {
   const { src, style, debugLabel, maxHeightRatio = 0.7 } = props;
 
   const [show, setShow] = useState(false);
-  // Local loading state
   const [isDownloading, setIsDownloading] = useState(!!src);
   const [hasError, setHasError] = useState(false);
 
@@ -44,12 +44,11 @@ export function CustomImage(props: Props) {
   const containerHeight = Math.max(200, windowHeight * maxHeightRatio);
   const normalizedSrc = src ? resolveUploadUrl(convertUrl(src)) : undefined;
 
-  // Construct source with headers
   const imgSource = normalizedSrc
     ? {
-        uri: normalizedSrc,
-        headers: { Authorization: token ? `Bearer ${token}` : '' },
-      }
+      uri: normalizedSrc,
+      headers: { Authorization: token ? `Bearer ${token}` : '' },
+    }
     : { uri: DEFAULT_IMAGE };
 
   if (DEBUG_IMAGES) {
@@ -77,11 +76,11 @@ export function CustomImage(props: Props) {
     height: containerHeight,
   };
 
-  const handleImageError = (e: any) => {
+  const handleImageError = (e: ImageErrorEventData) => {
     setHasError(true);
     setIsDownloading(false);
     if (DEBUG_IMAGES) {
-      console.warn('[CustomImage] error:', e);
+      console.warn('[CustomImage] error:', e.error);
     }
   };
 

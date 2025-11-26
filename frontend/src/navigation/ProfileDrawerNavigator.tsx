@@ -3,7 +3,7 @@ import {
   DrawerContentScrollView,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Platform, TouchableOpacity, View } from 'react-native';
 
 import { MarkdownRenderer, UserStatus } from '../components'; //
@@ -21,6 +21,7 @@ import {
   Messages,
   Notifications,
   Preferences,
+  // --- FIX: Removed unused Profile import ---
 } from '../screens';
 import { makeStyles, useTheme } from '../theme';
 import { RootStackParamList, UserDetail } from '../types';
@@ -79,30 +80,6 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
 
   const useAuthResults = useAuth();
 
-  /* const [user, setUser] = useState<UserDetail>({
-    __typename: 'UserDetail',
-    avatar: '',
-    bioRaw: '',
-    dateOfBirth: '',
-    location: '',
-    name: '',
-    username: '',
-    websiteName: '',
-    email: '',
-    secondaryEmails: [],
-    unconfirmedEmails: [],
-    canEditUsername: true,
-    admin: true,
-    status: {
-      emoji: '',
-      description: '',
-      endsAt: '',
-    },
-  });
-  const [splittedBio, setSplittedBio] = useState<Array<string>>();
- */
-
-
   const { data } = useProfile(
     {
       variables: { username },
@@ -145,14 +122,6 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
     fetchPolicy: 'network-only',
   });
 
-
-  /*   useEffect(() => {
-      if (data?.profile?.user?.__typename === 'UserDetail') {
-        setUser(data.profile.user);
-        setSplittedBio(data.profile.user.bioRaw?.split(/\r\n|\r|\n/));
-      }
-    }, [data]);
-   */
   const { logout } = useLogout({
     onCompleted: async () => {
       await useAuthResults.cleanSession();

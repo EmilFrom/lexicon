@@ -5,7 +5,6 @@ import {
   View,
   ViewProps,
   Pressable,
-  useWindowDimensions,
 } from 'react-native';
 
 import { Icon, Text } from '../../core-ui';
@@ -86,10 +85,9 @@ function BasePostItem(props: Props) {
     prevScreen,
     content,
     style,
-    showImageRow = false,
+    // --- FIX: Removed showImageRow and imageDimensionsMap ---
     nonclickable = false,
     imageDimensions,
-    imageDimensionsMap,
     isHidden = false,
     footer,
     onPressViewIgnoredContent = () => { },
@@ -100,7 +98,7 @@ function BasePostItem(props: Props) {
     postId,
     testIDStatus,
     pinned,
-    images: propImages, // Destructure images prop
+    images: propImages,
     ...otherProps
   } = props;
 
@@ -129,10 +127,8 @@ function BasePostItem(props: Props) {
     [navigate],
   );
 
-  // 1. Memoize the HTML conversion so it only happens if 'content' text changes
   const htmlContent = React.useMemo(() => markdownToHtml(content), [content]);
 
-  // 2. Memoize the image extraction
   const images = React.useMemo(() => {
     return (
       propImages ??
@@ -141,20 +137,14 @@ function BasePostItem(props: Props) {
     );
   }, [propImages, htmlContent]);
 
-  // 3. This hook is now safe because 'images' is a stable array
   const { dimensions: fetchedDimensions } = useImageDimensions(images);
 
-  // --- FIX: ROBUST DIMENSION MATCHING ---
   const finalDimensionsMap = React.useMemo(() => {
     const combined: Record<string, ImageDimension> = {};
 
-    // Helper: Removes Discourse resolution suffix (e.g. "_2_690x388" or "_2_1024x768")
-    // Regex looks for: _DIGIT_DIGITSxDIGITS before the extension
     const normalizeUrl = (u: string) =>
       u.replace(/_\d+_\d+x\d+(?=\.[a-zA-Z]+$)/, '');
 
-    // 1. Create a lookup map of [Normalized URL] -> [Dimension Object]
-    // This allows us to match even if the resolution suffix differs
     const normalizedLookup: Record<string, ImageDimension> = {};
     Object.values(fetchedDimensions).forEach((dim) => {
       if (dim && dim.url) {
@@ -162,13 +152,10 @@ function BasePostItem(props: Props) {
       }
     });
 
-    // 2. Iterate through the images we want to display
     images.forEach((imgUrl) => {
-      // Try exact match first
       if (fetchedDimensions[imgUrl]) {
         combined[imgUrl] = fetchedDimensions[imgUrl];
       }
-      // Try normalized match
       else {
         const norm = normalizeUrl(imgUrl);
         if (normalizedLookup[norm]) {
@@ -177,7 +164,6 @@ function BasePostItem(props: Props) {
       }
     });
 
-    // 3. Fallback to props dimensions (thumbnails) for the first image if still missing
     if (images.length > 0 && imageDimensions && !combined[images[0]]) {
       combined[images[0]] = {
         url: images[0],
@@ -190,8 +176,6 @@ function BasePostItem(props: Props) {
     return combined;
   }, [fetchedDimensions, imageDimensions, images]);
 
-  // DEBUG LOG
-  // Only log if we have images but the map is empty, or if we have data
   if (__DEV__) {
     const firstImg = images[0];
     const hasData =
@@ -200,8 +184,7 @@ function BasePostItem(props: Props) {
 
     if (images.length > 0) {
       if (!hasData) {
-        // This is normal while loading
-        // console.log('[PostItem] Waiting for dimensions...');
+        // waiting
       } else if (!hasMatch) {
         console.warn('[PostItem] Data loaded, but KEY MISMATCH.', {
           lookingFor: firstImg,
@@ -219,7 +202,6 @@ function BasePostItem(props: Props) {
 
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
-  // --- END OF PATTERN ---
 
   const contentTitle = (
     <Text
@@ -298,7 +280,6 @@ function BasePostItem(props: Props) {
       <ImageCarousel
         images={images}
         onImagePress={(uri) => setFullScreenImage(uri)}
-        // Pass the full map instead of single serverDimensions
         imageDimensionsMap={finalDimensionsMap}
       />
     </View>

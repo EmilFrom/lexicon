@@ -1,6 +1,6 @@
 import { OperationVariables, useFragment } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { TopicFragment, TopicFragmentDoc } from '../../generatedAPI/server';
 import { transformTopicToPost, useStorage } from '../../helpers';
@@ -42,10 +42,12 @@ function BaseHomePostItem(props: Props) {
   const channelsData = storage.getItem('channels');
 
   // 3. CALCULATION: Safely prepare data for the callback
-  // If cacheTopic is missing, we use 'undefined' so transformTopicToPost isn't called with null
-  const postData = cacheTopic 
-    ? transformTopicToPost({ ...cacheTopic, channels: channelsData ?? [] })
-    : undefined;
+  // --- FIX: Wrap postData calculation in useMemo to stabilize it ---
+  const postData = useMemo(() => {
+    return cacheTopic
+      ? transformTopicToPost({ ...cacheTopic, channels: channelsData ?? [] })
+      : undefined;
+  }, [cacheTopic, channelsData]);
 
   // Derive content safe for the callback dependency
   const content = firstPostContent || postData?.content || '';
@@ -61,12 +63,10 @@ function BaseHomePostItem(props: Props) {
     });
   }, [navigate, topicId, prevScreen, content, isHidden]);
 
-  // --- FIX START ---
   // 5. GUARD: Now it is safe to return early because all hooks have executed.
   if (!cacheTopicResult.complete || !cacheTopic || !postData) {
     return null;
   }
-  // --- FIX END ---
 
   // 6. DESTRUCTURE: Now we can safely extract variables from postData
   const {

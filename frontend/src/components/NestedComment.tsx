@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import React, { memo, useEffect, useState } from 'react';
 import { View, ViewProps } from 'react-native';
 
@@ -12,7 +11,7 @@ import { markdownToHtml } from '../helpers/markdownToHtml';
 import { getCompleteImageVideoUrls } from '../helpers/api/processRawContent';
 import { usePostRaw } from '../hooks';
 import { Color, makeStyles, useTheme } from '../theme';
-import { Post, RootStackNavProp } from '../types';
+import { Post } from '../types';
 
 import { ActivityIndicator, Divider, Icon } from '../core-ui';
 import { Author } from './Author';
@@ -103,7 +102,6 @@ function BaseNestedComment(props: Props) {
     ...otherProps
   } = props;
 
-  // --- START OF CHANGES ---
   const { postRaw, loading, data: postRawData } = usePostRaw();
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [manuallyUnhidden, setManuallyUnhidden] = useState(false);
@@ -111,27 +109,19 @@ function BaseNestedComment(props: Props) {
   const isTopicOwner = username === storage.getItem('user')?.username;
   const time = formatRelativeTime(createdAt);
 
-  // Derived State
-  // If we fetched raw data, use it. Otherwise use props.
   const fetchedContent = postRawData?.postRaw?.cooked?.markdownContent;
   const effectiveContent = fetchedContent ?? contentFromProps;
 
-  // Logic: Hidden if (prop is hidden AND not manually unhidden AND not fetched raw data)
-  // If data was fetched (fetchedContent exists), we imply it's now visible.
   const isContentHidden =
     (hidden ?? false) && !manuallyUnhidden && !fetchedContent;
 
   const color: Color = isContentHidden ? 'textLight' : 'textNormal';
 
-  // --- END OF CHANGES ---
-
-  // --- NEW CONTENT PROCESSING PATTERN ---
   const htmlContent = markdownToHtml(effectiveContent);
   const images =
     (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || [];
   const imageTagRegex = /<img[^>]*>/g;
   const contentWithoutImages = htmlContent.replace(imageTagRegex, '');
-  // --- END OF PATTERN ---
 
   useEffect(() => {
     if (onLayout) {

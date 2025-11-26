@@ -34,12 +34,10 @@ import {
   PostDraftType,
   UploadTypeEnum,
 } from '../generatedAPI/server';
-// import { LIST_POST_DRAFT } from '../graphql/server/postDraft';
 import {
   bottomMenu,
   BottomMenuNavigationParams,
   BottomMenuNavigationScreens,
-  combineContentWithPollContent,
   createReactNativeFile,
   errorHandlerAlert,
   formatExtensions,
@@ -113,7 +111,7 @@ export default function NewMessage() {
 
   const users: Array<string> | undefined = watch('messageTargetSelectedUsers');
   const polls: Array<PollFormContextValues> | undefined = watch('polls');
-  const { isDraft, draftKey } = getValues();
+  const { isDraft } = getValues();
 
   const memoizedLinkParams = useMemo(() => {
     return {
@@ -165,11 +163,6 @@ export default function NewMessage() {
       );
 
       let routesMap = [...newRoutesFilter];
-
-      /**
-       * This condition is used if we edit a new message from the post draft scene.
-       * When we click send, it will navigate to the message, and when we go back, it will return to the post draft.
-       */
 
       if (
         isDraft &&
@@ -398,6 +391,8 @@ export default function NewMessage() {
     ],
   );
 
+  const { upload: uploadStateless } = useStatelessUpload();
+
   const onSendMessage = handleSubmit(async (data) => {
     Keyboard.dismiss();
 
@@ -415,7 +410,8 @@ export default function NewMessage() {
       if (!reactNativeFile || !user) {
         throw new Error('File creation failed');
       }
-      const result = await upload({
+      // Use renamed hook
+      const result = await uploadStateless({
         variables: {
           input: {
             file: reactNativeFile,
@@ -435,15 +431,16 @@ export default function NewMessage() {
         .map((url) => `![image](${url})`)
         .join('\n');
 
-      setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
+      const finalContent = `${getValues('raw')}\n${markdownLinks}`;
+      setValue('raw', finalContent);
       setLocalImages([]);
 
-      sendMessage({
+      newMessage({
         variables: {
-          input: {
+          newPrivateMessageInput: {
             ...data,
             raw: finalContent,
-            targetRecipients: data.targetRecipients.join(','),
+            targetRecipients: data.messageTargetSelectedUsers || [],
           },
         },
       });
@@ -455,16 +452,9 @@ export default function NewMessage() {
     }
   });
 
-  const messageValidity = useMemo(() => {
-    const { title, targetRecipients, raw } = getValues();
-    return (
-      title.length > 0 &&
-      targetRecipients.length > 0 &&
-      (raw.length > 0 ||
-        (polls && polls.length > 0) ||
-        localImages.some((image) => image.isUploading))
-    );
-  }, [getValues, localImages, polls]);
+  const onPressSelectUser = () => {
+    navigate('SelectUser');
+  };
 
   const setMentionValue = (text: string) => {
     setValue('raw', text);
@@ -640,14 +630,14 @@ export default function NewMessage() {
                 >
                   {length > 0
                     ? t('{users} {length}', {
-                        users: selectedUsers[0],
-                        length:
-                          length - 1 > 0
-                            ? '+' +
-                              (length - 1) +
-                              (length - 1 === 1 ? ' other' : ' others')
-                            : '',
-                      })
+                      users: selectedUsers[0],
+                      length:
+                        length - 1 > 0
+                          ? '+' +
+                          (length - 1) +
+                          (length - 1 === 1 ? ' other' : ' others')
+                          : '',
+                    })
                     : t('Add a recipient')}
                 </Text>
                 <Icon name="ChevronRight" color={colors.textLighter} />

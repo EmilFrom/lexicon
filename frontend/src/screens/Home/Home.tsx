@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -12,8 +13,8 @@ import {
   Dimensions,
   PixelRatio,
   Platform,
-  StyleSheet,
   View,
+  ViewToken,
 } from 'react-native';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import Animated, {
@@ -42,7 +43,6 @@ import { FloatingButton } from '../../core-ui';
 import {
   TopicFragment,
   TopicFragmentDoc,
-  TopicsQuery,
   TopicsQueryVariables,
   TopicsSortEnum,
 } from '../../generatedAPI/server';
@@ -184,16 +184,13 @@ export default function Home() {
     TopicsSortEnum.Latest,
   );
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
+
   const [selectedChannelId, setSelectedChannelId] = useState(
     NO_CHANNEL_FILTER.id,
   );
-  const [topicsData, setTopicsData] = useState<Array<PostWithoutId> | null>(
-    null,
-  );
+
   const [page, setPage] = useState(FIRST_PAGE);
-  const [hasMoreTopics, setHasMoreTopics] = useState(false);
-  const [allTopicCount, setAllTopicCount] = useState(0);
+
   const [width, setWidth] = useState(0);
   const [visibleTopicIds, setVisibleTopicIds] = useState<number[]>([]);
 
@@ -214,46 +211,12 @@ export default function Home() {
     }
   }, [channelsData, storage]);
 
-  useEffect(() => {
-    if (channelsError) {
-      setRefreshing(false);
-      setLoading(false);
-    }
-  }, [channelsError]);
+  // Removed problematic useEffect: setRefreshing(false) based on channelsError
 
-  // Ensure useAbout returns data and we use useEffect
   const { getAbout, data: aboutData } = useAbout({}, 'HIDE_ALERT');
 
-  useEffect(() => {
-    if (aboutData) {
-      const { topicCount } = aboutData.about;
-      setAllTopicCount(topicCount);
-    }
-  }, [aboutData]);
-
-  const setData = useCallback(
-    ({ topics }: TopicsQuery) => {
-      const rawTopicsData = topics?.topicList?.topics
-        ? topics.topicList.topics
-        : [];
-      const channelsData = storage.getItem('channels');
-      const normalizedTopicsData: Array<PostWithoutId> = rawTopicsData.map(
-        (topic) => {
-          return transformTopicToPost({
-            ...topic,
-            channels: channelsData ?? [],
-          });
-        },
-      );
-      if (normalizedTopicsData.length === allTopicCount) {
-        setHasMoreTopics(false);
-      } else {
-        setHasMoreTopics(true);
-      }
-      setTopicsData(normalizedTopicsData);
-    },
-    [allTopicCount, storage],
-  );
+  // --- FIX: Removed state for allTopicCount, derive it instead ---
+  const allTopicCount = aboutData?.about?.topicCount ?? 0;
 
   const {
     getTopicList,
@@ -261,35 +224,44 @@ export default function Home() {
     refetch: refetchTopics,
     fetchMore: fetchMoreTopics,
     data: fetchedTopicsData,
-  } = useLazyTopicList({}); // Remove variables and callbacks
+    loading: topicsLoading,
+  } = useLazyTopicList({});
 
-  useEffect(() => {
-    if (fetchedTopicsData) {
-      setLoading(false);
-      setData(fetchedTopicsData);
-    }
-  }, [fetchedTopicsData, setData]);
+  // --- Derived State (Fixes setState in useEffect) ---
+  const topicsData = useMemo(() => {
+    if (!fetchedTopicsData?.topics?.topicList?.topics) return null;
 
-  useEffect(() => {
-    if (topicsError) {
-      setRefreshing(false);
-      setLoading(false);
-    }
-  }, [topicsError]);
+    const rawTopicsData = fetchedTopicsData.topics.topicList.topics;
+    const channelsData = storage.getItem('channels');
+
+    return rawTopicsData.map((topic) =>
+      transformTopicToPost({
+        ...topic,
+        channels: channelsData ?? [],
+      })
+    );
+  }, [fetchedTopicsData, storage]);
+
+  const hasMoreTopics = useMemo(() => {
+    if (!topicsData) return false;
+    // Use strict inequality or safe checks
+    return topicsData.length !== allTopicCount;
+  }, [topicsData, allTopicCount]);
+  // --- End Derived State ---
+
+  // Removed problematic useEffect: setRefreshing(false) based on topicsError
 
   const { deletePostDraft } = useDeletePostDraft();
   const { checkPostDraft } = useLazyCheckPostDraft();
 
-  // Prefetch first post content for visible topics + 30% buffer
   usePrefetchVisibleTopics({
     visibleTopicIds,
     enabled: !!topicsData && topicsData.length > 0,
   });
 
-  // Callback for tracking visible items
-  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     const ids = viewableItems
-      .map((item: any) => item.item?.topicId)
+      .map((item) => item.item?.topicId)
       .filter(Boolean);
     setVisibleTopicIds(ids);
   }, []);
@@ -310,14 +282,6 @@ export default function Home() {
 
   useEffect(() => {
     const unsubscribe = addListener('focus', () => {
-      /**
-       * We need to call `getHomeChannelId` to retrieve the initial value because this function will only be called once during the first render.
-       *
-       * During the first render, the value of `receivedChannelId` has not changed outside of the `useEffect`. This can result in the function using the previously selected channel's value.
-       *
-       * In the previous code, we utilized param screen or `watch` from `react-hook-form`, ensuring that the value had already changed during the initial render or before calling this function.
-       */
-
       const receivedChannelId = storage.getItem('homeChannelId');
       const channels = storage.getItem('channels');
       if (channels && receivedChannelId) {
@@ -361,12 +325,6 @@ export default function Home() {
     addListener,
   ]);
 
-  /**
-   * this function used when select channel using tablet side bar
-   *
-   * @param id id of selected channel from sidebar
-   */
-
   const onPressSideBarSelectedChannel = (id: number) => {
     let currentPage = page;
 
@@ -388,10 +346,6 @@ export default function Home() {
     getData(variables);
 
     if (isPortrait) {
-      /**
-       * Tablets keep the drawer mounted at all times, so we delay the close action slightly
-       * to match the gesture animation before resetting the selected channel.
-       */
       setTimeout(() => drawerRef.current?.closeDrawer(), 300);
     }
   };
@@ -399,10 +353,6 @@ export default function Home() {
   const toggleSideBar = () => {
     const nextOpenState = !openSideBar;
     if (isPortrait) {
-      /**
-       * Delay the drawer toggle to keep the animation smooth and avoid
-       * accessing the ref synchronously during render.
-       */
       setTimeout(() => {
         if (nextOpenState) {
           drawerRef.current?.openDrawer();
@@ -421,11 +371,6 @@ export default function Home() {
     if (!routeParams) {
       return;
     }
-
-    /**
-     * `headerViewHeight` is derived from static module-level measurements,
-     * therefore it does not need to live in the dependency array.
-     */
     postListRef.current?.scrollToIndex({
       index: 0,
       viewOffset: headerViewHeight,
@@ -439,9 +384,6 @@ export default function Home() {
   const onPressAdd = async () => {
     const currentUserId = storage.getItem('user')?.id;
     if (currentUserId) {
-      /**
-       * Set the channel ID in a new post to use the same channel as the home channel.
-       */
       setValue(
         'channelId',
         storage.getItem('homeChannelId') || NO_CHANNEL_FILTER.id,
@@ -466,18 +408,20 @@ export default function Home() {
     if (refetchTopics) {
       setPage(FIRST_PAGE);
 
-      // Explicitly pass page: 0.
-      // Our new client.ts logic checks `if (page === 0)` to perform a hard replace.
       const variables = isNoChannelFilter(selectedChannelId)
         ? { sort: sortState, page: 0, username }
         : { sort: sortState, categoryId: selectedChannelId, page: 0, username };
 
       refetchTopics(variables)
         .then(() => {
-          // Optional: Update channels too
           channelsRefetch();
         })
+        .catch(() => {
+          // Handle error silently or show toast, already handled by hook errors mostly
+        })
         .finally(() => setRefreshing(false));
+    } else {
+      setRefreshing(false);
     }
   };
 
@@ -497,7 +441,7 @@ export default function Home() {
         categoryId: selectedChannelId,
         page: FIRST_PAGE,
       };
-    setTopicsData(null);
+    // Resetting data happens via hook refetch, so we don't manually nullify state
     setPage(FIRST_PAGE);
     getData(variables);
   };
@@ -576,21 +520,11 @@ export default function Home() {
     }
     try {
       isFetchingMoreTopics.current = true;
-      const result = await fetchMoreTopics({ variables });
+      await fetchMoreTopics({ variables });
       isFetchingMoreTopics.current = false;
-      if (result.data.topics.topicList?.topics?.length === 0) {
-        setHasMoreTopics(false);
-      } else {
-        setPage(nextPage);
-      }
-      setLoading(false);
+      setPage(nextPage);
     } catch {
-      /**
-       * Any fetch error is rendered through LoadingOrError;
-       * here we simply clear the pagination guards.
-       */
       isFetchingMoreTopics.current = false;
-      setLoading(false);
     }
   };
 
@@ -639,7 +573,8 @@ export default function Home() {
       );
     }
 
-    if (!topicsData || channelsLoading || loading) {
+    // Loading state check using hook values instead of local state
+    if (!topicsData && (channelsLoading || topicsLoading)) {
       return <LoadingOrError loading />;
     }
     if (topicsData && topicsData.length < 1) {
@@ -648,9 +583,8 @@ export default function Home() {
     return (
       <PostList
         postListRef={postListRef}
-        data={topicsData}
+        data={topicsData ?? []}
         contentInset={{
-          // statusBarHeight ios phone device value from expo is bigger than tablet and android. when check android and tablet around 25-30 but ios phone show result 54
           top: headerViewHeight - (ios && !isTablet ? statusBarHeight / 3 : 0),
         }}
         contentOffset={{
@@ -671,7 +605,7 @@ export default function Home() {
         onEndReachedThreshold={0.1}
         onEndReached={onEndReached}
         onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={VIEWABILITY_CONFIG} // Fix: Passed static config
+        viewabilityConfig={VIEWABILITY_CONFIG}
         renderItem={({ item }) => {
           return (
             <HomePostItem
