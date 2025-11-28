@@ -61,7 +61,7 @@ export function bottomMenu(params: BottomMenuParams) {
         return;
       }
       const imageUri = result.uri;
-      navigate(prevScreen, {
+      (navigate as (screen: string, params: unknown) => void)(prevScreen, {
         imageUri,
         title,
         topicId,

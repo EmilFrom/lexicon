@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { Icon, Text } from '../../../core-ui';
 import { ChatFragment, ChatFragmentDoc } from '../../../generatedAPI/server';
 import { makeStyles, useTheme } from '../../../theme';
-import { StackNavProp, ThreadDetailFirstContent } from '../../../types';
+import { StackNavProp, ThreadDetailFirstContent, User } from '../../../types';
 
 import { ChatMessageItem } from './ChatMessageItem';
 
@@ -41,6 +41,10 @@ function BaseThreadDetailsHeader(props: Props) {
       : threadData!;
 
   const onPressAvatar = () => {
+    // Type guard: ensure user exists and has username
+    if (!safeMessage.user || !safeMessage.user.username) {
+      return;
+    }
     navigate('UserInformation', {
       username: safeMessage.user.username,
     });
@@ -50,8 +54,8 @@ function BaseThreadDetailsHeader(props: Props) {
     <>
       <View style={styles.container}>
         <ChatMessageItem
-          content={safeMessage}
-          sender={safeMessage.user}
+          content={safeMessage as ChatFragment}
+          sender={safeMessage.user as User}
           newTimestamp={true}
           onPressAvatar={() => onPressAvatar()}
           unread={false}

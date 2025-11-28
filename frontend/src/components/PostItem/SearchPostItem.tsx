@@ -75,15 +75,14 @@ function BaseSearchPostItem(props: Props) {
   return (
     <PostItem
       topicId={topicId}
-      title={cachedSearchTopic.title}
-      content={cacheSearchPost.blurb}
-      avatar={getImage(cacheSearchPost.avatarTemplate)}
+      title={cachedSearchTopic.title ?? ''}
+      content={cacheSearchPost.blurb ?? ''}
+      avatar={getImage(cacheSearchPost.avatarTemplate ?? '')}
       channel={channel}
-      tags={cachedSearchTopic.tags ?? []}
-      createdAt={cacheSearchPost.createdAt}
-      username={cacheSearchPost.username}
+      tags={(cachedSearchTopic.tags ?? []).filter((tag): tag is string => typeof tag === 'string')}
+      createdAt={cacheSearchPost.createdAt ?? ''}
+      username={cacheSearchPost.username ?? ''}
       isLiked={cachedSearchTopic.liked ?? false}
-      numberOfLines={5}
       testID={`Search:SearchPostItem:${topicId}`}
     />
   );

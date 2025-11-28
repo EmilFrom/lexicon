@@ -64,20 +64,20 @@ function BaseUserInformationPostItem(props: Props) {
     channels,
   });
 
-  const avatar = getImage(avatarTemplate);
+  const avatar = getImage(avatarTemplate ?? '');
   const isLiked = actionType === LIKED_ACTION_TYPE;
 
   return (
     <PostItem
       topicId={topicId}
-      title={title}
+      title={title ?? ''}
       currentUser={currentUser}
-      content={content || excerpt}
+      content={content ?? excerpt ?? ''}
       avatar={avatar}
       channel={channel}
       hidden={!!hidden}
-      createdAt={createdAt}
-      username={username}
+      createdAt={createdAt ?? ''}
+      username={username ?? ''}
       isLiked={isLiked}
       showLabel
       showImageRow

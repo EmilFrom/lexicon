@@ -41,12 +41,16 @@ function BaseHomePostItem(props: Props) {
 
   const channelsData = storage.getItem('channels');
 
-  // 3. CALCULATION: Safely prepare data for the callback
-  // --- FIX: Wrap postData calculation in useMemo to stabilize it ---
   const postData = useMemo(() => {
-    return cacheTopic
-      ? transformTopicToPost({ ...cacheTopic, channels: channelsData ?? [] })
-      : undefined;
+    // Type guard: ensure we have a complete topic with required fields
+    if (!cacheTopic || typeof cacheTopic.id !== 'number') {
+      return undefined;
+    }
+    // Now TypeScript knows cacheTopic has all required fields
+    return transformTopicToPost({
+      ...cacheTopic as TopicFragment,
+      channels: channelsData ?? []
+    });
   }, [cacheTopic, channelsData]);
 
   // Derive content safe for the callback dependency
@@ -103,7 +107,6 @@ function BaseHomePostItem(props: Props) {
       createdAt={createdAt}
       username={username}
       isLiked={isLiked}
-      numberOfLines={5}
       showImageRow={!firstPostContent && !!imagePreviewUrls?.length}
       pinned={pinned}
       style={style}

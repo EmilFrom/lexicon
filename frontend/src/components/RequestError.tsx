@@ -40,7 +40,7 @@ const toastContents: Record<
     visibilityTime: 5000,
   },
 };
-let networkCheckIntervalId: NodeJS.Timer | undefined;
+let networkCheckIntervalId: ReturnType<typeof setInterval> | undefined;
 let shouldShowNetworkOnline = false;
 
 export function RequestError(props: Props) {

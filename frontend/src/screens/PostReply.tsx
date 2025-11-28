@@ -239,7 +239,11 @@ export default function PostReply() {
     screen: BottomMenuNavigationScreens,
     params: BottomMenuNavigationParams,
   ) => {
-    navigate(screen, params);
+    if (screen === 'HyperLink') {
+      navigate(screen, params as RootStackParamList['HyperLink']);
+    } else if (screen === 'NewPoll') {
+      navigate(screen, params as RootStackParamList['NewPoll']);
+    }
   };
 
   const {
@@ -363,7 +367,7 @@ export default function PostReply() {
         editedUser,
       });
     } catch (error) {
-      errorHandlerAlert(error as Error);
+      errorHandlerAlert((error as Error).message);
       setLocalImages((prev) =>
         prev.map((image) => ({ ...image, isUploading: false })),
       );
@@ -373,7 +377,7 @@ export default function PostReply() {
   const postValidity = useMemo(() => {
     if (editPostId) {
       const { isValid } = existingPostIsValid({
-        uploadsInProgress: localImages.some((image) => image.isUploading),
+        uploadsInProgress: localImages.filter((image) => image.isUploading).length,
         title,
         oldTitle: title,
         content: rawContent,
@@ -385,7 +389,7 @@ export default function PostReply() {
     return newPostIsValid(
       title,
       rawContent,
-      localImages.some((image) => image.isUploading),
+      localImages.filter((image) => image.isUploading).length,
       polls,
     );
   }, [editPostId, localImages, oldContent, polls, rawContent, title]);
@@ -425,7 +429,7 @@ export default function PostReply() {
             <HeaderItem
               label={t('Next')}
               onPressItem={onPreview}
-              isLoading={localImages.some((image) => image.isUploading)}
+              loading={localImages.some((image) => image.isUploading)}
               disabled={
                 !postValidity ||
                 loadingCreateAndUpdatePostDraft ||

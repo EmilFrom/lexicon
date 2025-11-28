@@ -1,7 +1,3 @@
-export * from './useAnimated';
-export * from './useAuth';
-export * from './useChatChannelDetail';
-export * from './useChatChannelMessages';
-export * from './useChatChannelNotifications';
-export * from './useCreatePost';
-export * from './useCreateThread';
+// This file is deprecated. All hooks have been moved to src/hooks/
+// Import from src/hooks instead
+export { };

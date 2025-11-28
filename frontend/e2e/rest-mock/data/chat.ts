@@ -24,6 +24,7 @@ export const mockThreads: Array<ThreadMessage> = [
     uploads: [
       {
         id: 110,
+        url: 'https://example.com/upload/110.jpg',
       },
     ],
   },

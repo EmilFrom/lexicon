@@ -12,6 +12,7 @@ import {
   View,
   Keyboard,
   ActivityIndicator,
+  Image as RNImage,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDebouncedCallback } from 'use-debounce';
@@ -69,6 +70,7 @@ import {
   NewPostForm,
   PollFormContextValues,
   RootStackNavProp,
+  RootStackParamList,
   RootStackRouteProp,
 } from '../types';
 import { useModal } from '../utils';
@@ -187,7 +189,6 @@ export default function NewMessage() {
 
   const { upload, tempArray, completedToken } = useStatefulUpload(
     imagesArray,
-    currentUploadToken,
   );
 
   const { newMessage, loading: newMessageLoading } = useNewMessage({
@@ -312,7 +313,11 @@ export default function NewMessage() {
     screen: BottomMenuNavigationScreens,
     params: BottomMenuNavigationParams,
   ) => {
-    navigate(screen, params);
+    if (screen === 'HyperLink') {
+      navigate(screen, params as RootStackParamList['HyperLink']);
+    } else if (screen === 'NewPoll') {
+      navigate(screen, params as RootStackParamList['NewPoll']);
+    }
   };
 
   const {
@@ -445,7 +450,7 @@ export default function NewMessage() {
         },
       });
     } catch (error) {
-      errorHandlerAlert(error as Error);
+      errorHandlerAlert((error as Error).message);
       setLocalImages((prev) =>
         prev.map((image) => ({ ...image, isUploading: false })),
       );
@@ -649,7 +654,7 @@ export default function NewMessage() {
             <View style={styles.localImagesContainer}>
               {localImages.map((image, index) => (
                 <View key={index} style={styles.localImageWrapper}>
-                  <Image
+                  <RNImage
                     source={{ uri: image.uri }}
                     style={styles.localImage}
                   />

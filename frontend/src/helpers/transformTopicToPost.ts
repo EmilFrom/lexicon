@@ -91,12 +91,12 @@ const transformTopicToPost = ({
       ? [typeof imageUrl === 'string' ? imageUrl : imageUrl.url]
       : undefined,
     imageDimensions:
-      imageUrl && typeof imageUrl === 'object' && imageUrl.width
+      imageUrl && typeof imageUrl === 'object' && imageUrl.width && imageUrl.height
         ? {
-            width: imageUrl.width,
-            height: imageUrl.height,
-            aspectRatio: imageUrl.aspectRatio,
-          }
+          width: imageUrl.width,
+          height: imageUrl.height,
+          aspectRatio: imageUrl.aspectRatio ?? imageUrl.width / imageUrl.height,
+        }
         : undefined,
   };
 };
