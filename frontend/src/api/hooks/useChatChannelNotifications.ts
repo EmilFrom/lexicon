@@ -45,8 +45,7 @@ export function useGetChatChannelNotificationPreference(channelId: number) {
       channel_id: number;
       push_enabled: boolean;
     };
-  }
-  >(GET_NOTIFICATION_PREFERENCE, {
+  }>(GET_NOTIFICATION_PREFERENCE, {
     variables: { channelId },
     skip: !channelId,
   });
@@ -65,8 +64,7 @@ export function useUpdateChatChannelNotificationPreference() {
       channel_id: number;
       push_enabled: boolean;
     };
-  }
-  >(UPDATE_NOTIFICATION_PREFERENCE);
+  }>(UPDATE_NOTIFICATION_PREFERENCE);
 
   const updatePreference = useCallback(
     (channelId: number, pushEnabled: boolean) => {

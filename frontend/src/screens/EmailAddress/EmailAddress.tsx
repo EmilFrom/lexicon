@@ -29,7 +29,11 @@ export default function EmailAddress() {
 
   const ios = Platform.OS === 'ios';
 
-  const { loading: userLoading, refetch, data: profileData } = useProfile({
+  const {
+    loading: userLoading,
+    refetch,
+    data: profileData,
+  } = useProfile({
     variables: { username },
     fetchPolicy: 'network-only',
   });
@@ -53,7 +57,7 @@ export default function EmailAddress() {
   }, [profileData]);
 
   const onRefresh = () => {
-    // setLoading(true) is optional here since userLoading handles the spinner usually, 
+    // setLoading(true) is optional here since userLoading handles the spinner usually,
     // but keeping it to match original logic if needed for mutations
     refetch();
   };

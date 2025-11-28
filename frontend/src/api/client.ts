@@ -109,7 +109,7 @@ const cache = new InMemoryCache({
             // 2. Identify if this is a "Refresh" or "First Load" (page 0)
             // Some calls might pass page:0, others might omit it.
             const page = variables.page ?? 0;
-            
+
             if (page === 0) {
               // STALENESS FIX: Completely ignore 'existing' when fetching page 0.
               // This makes Pull-to-Refresh work immediately.
@@ -120,7 +120,9 @@ const cache = new InMemoryCache({
             // 3. Pagination logic (appending)
             const mergedTopics = handleDuplicates({
               newArray: incoming['topics@type({"name":"Topic"})'],
-              oldArray: existing ? existing['topics@type({"name":"Topic"})'] : [],
+              oldArray: existing
+                ? existing['topics@type({"name":"Topic"})']
+                : [],
               newArrayIs: 'appended',
             });
 
@@ -189,19 +191,19 @@ const cache = new InMemoryCache({
           merge: (existing, incoming, { variables }) => {
             // 1. If no incoming data (e.g. poll returned empty), keep existing
             if (!incoming || incoming.length === 0) return existing;
-            
+
             // Chat is inverted.
             const incomingReversed = [...incoming].reverse();
 
             // --- FIX START ---
-            // If we are polling or doing an initial load (no pagination target), 
+            // If we are polling or doing an initial load (no pagination target),
             // we assume this is the "latest" state.
             const isPagination = variables?.targetMessageId !== undefined;
 
-            // If this is a fresh fetch (not scrolling up to load past), 
+            // If this is a fresh fetch (not scrolling up to load past),
             // we trust the new data implicitly for the recent messages.
             if (!isPagination) {
-               return incomingReversed;
+              return incomingReversed;
             }
             // --- FIX END ---
 

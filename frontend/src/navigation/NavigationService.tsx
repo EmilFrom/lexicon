@@ -12,9 +12,9 @@ export function navigate(
   params:
     | [screen: RootStackRouteName]
     | [
-      screen: RootStackRouteName,
-      params: RootStackParamList[RootStackRouteName],
-    ],
+        screen: RootStackRouteName,
+        params: RootStackParamList[RootStackRouteName],
+      ],
 ) {
   if (navigationRef.isReady()) {
     // @ts-expect-error - TypeScript cannot properly narrow the union type for spread parameters

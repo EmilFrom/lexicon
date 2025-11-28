@@ -79,7 +79,9 @@ function BaseSearchPostItem(props: Props) {
       content={cacheSearchPost.blurb ?? ''}
       avatar={getImage(cacheSearchPost.avatarTemplate ?? '')}
       channel={channel}
-      tags={(cachedSearchTopic.tags ?? []).filter((tag): tag is string => typeof tag === 'string')}
+      tags={(cachedSearchTopic.tags ?? []).filter(
+        (tag): tag is string => typeof tag === 'string',
+      )}
       createdAt={cacheSearchPost.createdAt ?? ''}
       username={cacheSearchPost.username ?? ''}
       isLiked={cachedSearchTopic.liked ?? false}

@@ -26,7 +26,12 @@ const CachedImage = ({
   if (isBackground && typeof visible === 'boolean' && setVisible) {
     return (
       <ImageView
-        images={[{ uri: typeof source === 'object' && 'uri' in source ? source.uri : '' }]}
+        images={[
+          {
+            uri:
+              typeof source === 'object' && 'uri' in source ? source.uri : '',
+          },
+        ]}
         imageIndex={0}
         visible={visible}
         onRequestClose={setVisible}
@@ -62,10 +67,14 @@ const CachedImage = ({
         source={
           typeof source === 'object' && 'uri' in source
             ? {
-              uri: source.uri,
-              ...(typeof source.width === 'number' && { width: source.width }),
-              ...(typeof source.height === 'number' && { height: source.height }),
-            }
+                uri: source.uri,
+                ...(typeof source.width === 'number' && {
+                  width: source.width,
+                }),
+                ...(typeof source.height === 'number' && {
+                  height: source.height,
+                }),
+              }
             : (source as number)
         }
         style={style}

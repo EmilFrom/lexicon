@@ -165,10 +165,7 @@ export default function NewPost() {
 
   // --- FIX START: Stabilize selectedTags for use in dependency arrays ---
   const rawSelectedTags = watch('tags');
-  const selectedTags = useMemo(
-    () => rawSelectedTags || [],
-    [rawSelectedTags],
-  );
+  const selectedTags = useMemo(() => rawSelectedTags || [], [rawSelectedTags]);
   // --- FIX END ---
 
   const defaultChannelId = channels?.[0].id || NO_CHANNEL_FILTER.id;
@@ -644,8 +641,9 @@ export default function NewPost() {
             >
               <Dot
                 variant="large"
-                color={`#${channels?.find(({ id }) => id === selectedChannel)?.color
-                  }`}
+                color={`#${
+                  channels?.find(({ id }) => id === selectedChannel)?.color
+                }`}
                 style={{ marginEnd: spacing.m }}
               />
               <Text color="textNormal">

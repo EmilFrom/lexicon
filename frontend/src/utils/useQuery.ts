@@ -1,5 +1,4 @@
 import {
-
   DocumentNode,
   OperationVariables,
   QueryHookOptions,
@@ -14,14 +13,15 @@ import { ErrorAlertOptionType } from '../types';
 
 // --- FIX START ---
 // Added constraint: TVariables extends OperationVariables
-export function useQuery<TData, TVariables extends OperationVariables = OperationVariables>(
+export function useQuery<
+  TData,
+  TVariables extends OperationVariables = OperationVariables,
+>(
   query: DocumentNode,
   options?: QueryHookOptions<TData, TVariables>,
   errorAlert: ErrorAlertOptionType = 'SHOW_ALERT',
 ): QueryResult<TData, TVariables> {
   // --- FIX END ---
-
-
 
   // Destructure onError and onCompleted to prevent passing them to useQueryBase
   const {

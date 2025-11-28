@@ -187,9 +187,7 @@ export default function NewMessage() {
     });
   };
 
-  const { upload, tempArray, completedToken } = useStatefulUpload(
-    imagesArray,
-  );
+  const { upload, tempArray, completedToken } = useStatefulUpload(imagesArray);
 
   const { newMessage, loading: newMessageLoading } = useNewMessage({
     onCompleted: () => {
@@ -635,14 +633,14 @@ export default function NewMessage() {
                 >
                   {length > 0
                     ? t('{users} {length}', {
-                      users: selectedUsers[0],
-                      length:
-                        length - 1 > 0
-                          ? '+' +
-                          (length - 1) +
-                          (length - 1 === 1 ? ' other' : ' others')
-                          : '',
-                    })
+                        users: selectedUsers[0],
+                        length:
+                          length - 1 > 0
+                            ? '+' +
+                              (length - 1) +
+                              (length - 1 === 1 ? ' other' : ' others')
+                            : '',
+                      })
                     : t('Add a recipient')}
                 </Text>
                 <Icon name="ChevronRight" color={colors.textLighter} />

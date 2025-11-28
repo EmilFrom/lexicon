@@ -48,8 +48,8 @@ function BaseHomePostItem(props: Props) {
     }
     // Now TypeScript knows cacheTopic has all required fields
     return transformTopicToPost({
-      ...cacheTopic as TopicFragment,
-      channels: channelsData ?? []
+      ...(cacheTopic as TopicFragment),
+      channels: channelsData ?? [],
     });
   }, [cacheTopic, channelsData]);
 

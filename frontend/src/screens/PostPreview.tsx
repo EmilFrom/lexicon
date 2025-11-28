@@ -47,8 +47,6 @@ import {
 } from '../types';
 import { useModal } from '../utils';
 
-
-
 const ios = Platform.OS === 'ios';
 
 export default function PostPreview() {
@@ -81,7 +79,8 @@ export default function PostPreview() {
 
   const imagesFromContent = useMemo(() => {
     return (
-      (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) || []
+      (getCompleteImageVideoUrls(htmlContent)?.filter(Boolean) as string[]) ||
+      []
     );
   }, [htmlContent]);
 
@@ -98,8 +97,6 @@ export default function PostPreview() {
         newMap[item.shortUrl] = item.url;
       });
       setResolvedUrlMap(newMap);
-
-
     },
   });
 
@@ -120,8 +117,6 @@ export default function PostPreview() {
   // Fetch dimensions for the resolved images
   const { dimensions } = useImageDimensions(displayImages);
 
-
-
   const forceRefreshTopics = () => {
     // This nuclear option deletes the cached list of topics.
     // The next time Home.tsx renders or focuses, it WILL fetch from the network.
@@ -139,7 +134,6 @@ export default function PostPreview() {
     },
     onError: (error) => errorHandlerAlert(error),
   });
-
 
   const { reply: replyTopic, loading: replyLoading } = useReplyTopic({
     onCompleted: () => {

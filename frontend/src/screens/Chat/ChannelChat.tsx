@@ -57,7 +57,7 @@ export default function ChannelChat() {
     [setSearchValue],
   );
 
-const {
+  const {
     getChatChannels,
     error: errorChannels,
     data: channelDataList,

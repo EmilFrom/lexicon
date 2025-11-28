@@ -44,7 +44,14 @@ export default function Search() {
 
   const skipSearchStatus = searchValue.length < minSearchLength;
 
-  const { getPosts, error, refetch, fetchMore, data: searchData, loading: searchLoading } = useSearchPost();
+  const {
+    getPosts,
+    error,
+    refetch,
+    fetchMore,
+    data: searchData,
+    loading: searchLoading,
+  } = useSearchPost();
 
   const posts = useMemo(() => {
     if (skipSearchStatus || !searchData?.search) {
@@ -64,9 +71,7 @@ export default function Search() {
         likeCount,
         topicId,
       }) => {
-        const tempTopicData = topicsData.find(
-          (item) => item.id === topicId,
-        );
+        const tempTopicData = topicsData.find((item) => item.id === topicId);
 
         const channel = channels?.find(
           (channel) => channel.id === tempTopicData?.categoryId,
@@ -142,9 +147,9 @@ export default function Search() {
   const keyboardDismissProp: ScrollViewProps = ios
     ? { keyboardDismissMode: 'on-drag' }
     : {
-      onScrollBeginDrag: Keyboard.dismiss,
-      keyboardShouldPersistTaps: count > 1 ? 'never' : 'always',
-    };
+        onScrollBeginDrag: Keyboard.dismiss,
+        keyboardShouldPersistTaps: count > 1 ? 'never' : 'always',
+      };
 
   const resultInfo = () => {
     let message = '';

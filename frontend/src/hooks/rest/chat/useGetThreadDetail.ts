@@ -1,5 +1,9 @@
 // --- FIX START ---
-import { LazyQueryHookOptions, useLazyQuery, LazyQueryHookExecOptions } from '@apollo/client';
+import {
+  LazyQueryHookOptions,
+  useLazyQuery,
+  LazyQueryHookExecOptions,
+} from '@apollo/client';
 // --- FIX END ---
 
 import {
@@ -21,7 +25,7 @@ export function useLazyGetThreadDetail(
   });
 
   // Wrapper to inject context
-   // --- FIX START ---
+  // --- FIX START ---
   // Wrap function to pass context correctly and avoid TS namespace error
   const getThreadDetail = (
     executeOptions?: LazyQueryHookExecOptions<
@@ -35,7 +39,6 @@ export function useLazyGetThreadDetail(
     });
   };
   // --- FIX END ---
-
 
   return {
     getThreadDetail,

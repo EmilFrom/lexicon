@@ -30,7 +30,12 @@ if (__DEV__) {
   const originalWarn = console.warn;
   console.warn = (...args) => {
     const msg = args[0];
-    if (typeof msg === 'string' && msg.includes('https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A104%2C%22args%22%3A%5B%22cache.diff%22%2C%22canonizeResults%22%2C%22Please%20remove%20this%20option.%22%5D%7D')) {
+    if (
+      typeof msg === 'string' &&
+      msg.includes(
+        'https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A104%2C%22args%22%3A%5B%22cache.diff%22%2C%22canonizeResults%22%2C%22Please%20remove%20this%20option.%22%5D%7D',
+      )
+    ) {
       return;
     }
     originalWarn(...args);

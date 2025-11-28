@@ -238,7 +238,7 @@ export default function Home() {
       transformTopicToPost({
         ...topic,
         channels: channelsData ?? [],
-      })
+      }),
     );
   }, [fetchedTopicsData, storage]);
 
@@ -259,12 +259,15 @@ export default function Home() {
     enabled: !!topicsData && topicsData.length > 0,
   });
 
-  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    const ids = viewableItems
-      .map((item) => item.item?.topicId)
-      .filter(Boolean);
-    setVisibleTopicIds(ids);
-  }, []);
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const ids = viewableItems
+        .map((item) => item.item?.topicId)
+        .filter(Boolean);
+      setVisibleTopicIds(ids);
+    },
+    [],
+  );
 
   const getData = useCallback(
     (variables: TopicsQueryVariables) => {
@@ -437,10 +440,10 @@ export default function Home() {
     const variables: TopicsQueryVariables = isNoChannelFilter(selectedChannelId)
       ? { sort: sortState, page: FIRST_PAGE }
       : {
-        sort: sortState,
-        categoryId: selectedChannelId,
-        page: FIRST_PAGE,
-      };
+          sort: sortState,
+          categoryId: selectedChannelId,
+          page: FIRST_PAGE,
+        };
     // Resetting data happens via hook refetch, so we don't manually nullify state
     setPage(FIRST_PAGE);
     getData(variables);

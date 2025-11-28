@@ -52,9 +52,9 @@ export function Avatar(props: Props) {
   // Construct source with headers
   const imgSource = normalizedSrc
     ? {
-      uri: normalizedSrc,
-      headers: { Authorization: token ? `Bearer ${token}` : '' },
-    }
+        uri: normalizedSrc,
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      }
     : undefined;
 
   const letterAvatar = (

@@ -48,7 +48,7 @@ function DrawerItem(props: DrawerItemProps) {
         styles.drawerItemContainer,
         isIOS ? styles.drawerItemIOS : styles.drawerItemAndroid,
         active &&
-        (isIOS ? styles.activeBackgroundIOS : styles.activeBackgroundAndroid),
+          (isIOS ? styles.activeBackgroundIOS : styles.activeBackgroundAndroid),
       ]}
       onPress={onPress}
     >
@@ -88,27 +88,28 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
   );
 
   // Calculate derived state immediately
-  const user = data?.profile?.user?.__typename === 'UserDetail'
-    ? data.profile.user
-    : {
-      avatar: '',
-      bioRaw: '',
-      dateOfBirth: '',
-      location: '',
-      name: '',
-      username: '',
-      websiteName: '',
-      email: '',
-      secondaryEmails: [],
-      unconfirmedEmails: [],
-      canEditUsername: true,
-      admin: false,
-      status: {
-        emoji: '',
-        description: '',
-        endsAt: '',
-      },
-    } as UserDetail; // Cast or ensure defaults match type
+  const user =
+    data?.profile?.user?.__typename === 'UserDetail'
+      ? data.profile.user
+      : ({
+          avatar: '',
+          bioRaw: '',
+          dateOfBirth: '',
+          location: '',
+          name: '',
+          username: '',
+          websiteName: '',
+          email: '',
+          secondaryEmails: [],
+          unconfirmedEmails: [],
+          canEditUsername: true,
+          admin: false,
+          status: {
+            emoji: '',
+            description: '',
+            endsAt: '',
+          },
+        } as UserDetail); // Cast or ensure defaults match type
 
   const splittedBio = user.bioRaw?.split(/\r\n|\r|\n/);
   // --- CHANGE END ---

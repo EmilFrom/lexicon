@@ -74,10 +74,10 @@ export default function PostDraft() {
   // Assuming backend returns exact limit if more exists
   const hasMore = draftCount >= expectedCount;
 
-  // Note: loadingMore was set to false in effect. 
-  // Ensure it's set to false in the onEndReached promise/callback if strictly needed, 
+  // Note: loadingMore was set to false in effect.
+  // Ensure it's set to false in the onEndReached promise/callback if strictly needed,
   // or trust the `loading` prop from Apollo if `notifyOnNetworkStatusChange` is true.
-  // For now, we remove the effect syncing. 
+  // For now, we remove the effect syncing.
   // --- CHANGE END ---
 
   /* useEffect(() => {
@@ -275,8 +275,9 @@ export default function PostDraft() {
               size="s"
               color={!isPrivateMessage ? 'primary' : 'success'}
             >
-              {`${isPrivateMessage ? t('PRIVATE MESSAGE') : t('POST')} ${isReply ? t('REPLY') : ''
-                }`}
+              {`${isPrivateMessage ? t('PRIVATE MESSAGE') : t('POST')} ${
+                isReply ? t('REPLY') : ''
+              }`}
             </Text>
             {draftTitle && (
               <Text variant="semiBold" size="l">

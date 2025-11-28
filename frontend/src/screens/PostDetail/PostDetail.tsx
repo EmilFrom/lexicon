@@ -25,7 +25,10 @@ import {
 } from '../../components';
 // --- FIX START ---
 // Import types directly from NestedComment
-import { PressMoreParams, PressReplyParams } from '../../components/NestedComment';
+import {
+  PressMoreParams,
+  PressReplyParams,
+} from '../../components/NestedComment';
 // --- FIX END ---
 
 import {
@@ -158,10 +161,7 @@ export default function PostDetail() {
   // Handle onError logic
   useEffect(() => {
     if (error && error.message.includes('Invalid Access')) {
-      if (
-        !useInitialLoadResult.loading &&
-        !useInitialLoadResult.isLoggedIn
-      ) {
+      if (!useInitialLoadResult.loading && !useInitialLoadResult.isLoggedIn) {
         reset({
           index: 1,
           routes: [
@@ -641,10 +641,10 @@ export default function PostDetail() {
           error
             ? errorHandler(error, true, t('topic'))
             : isLoading
-              ? replyLoading
-                ? t('Finishing your Reply')
-                : undefined
-              : t('Post is not available')
+            ? replyLoading
+              ? t('Finishing your Reply')
+              : undefined
+            : t('Post is not available')
         }
       />
     );

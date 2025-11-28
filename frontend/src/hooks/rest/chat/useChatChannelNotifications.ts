@@ -24,7 +24,7 @@ const GET_NOTIFICATION_PREFERENCE = gql`
   query getNotificationPreference($channelId: Int!) {
     chatChannelNotificationPreference(channelId: $channelId)
       @rest(
-        type: "ChatChannelNotificationsOutput" 
+        type: "ChatChannelNotificationsOutput"
         path: "/lexicon/chat-notifications/{args.channelId}"
         method: "GET"
       ) {
@@ -108,11 +108,14 @@ export function useGetAllChatChannelNotificationPreferences() {
 }
 
 export function useGetChatChannelNotificationPreference(channelId: number) {
-  const { data, ...rest } = useQuery<GetNotificationPreferenceData>(GET_NOTIFICATION_PREFERENCE, {
-    variables: { channelId },
-    skip: !channelId,
-    fetchPolicy: 'cache-first',
-  });
+  const { data, ...rest } = useQuery<GetNotificationPreferenceData>(
+    GET_NOTIFICATION_PREFERENCE,
+    {
+      variables: { channelId },
+      skip: !channelId,
+      fetchPolicy: 'cache-first',
+    },
+  );
 
   return {
     preference: data?.chatChannelNotificationPreference,
@@ -121,7 +124,10 @@ export function useGetChatChannelNotificationPreference(channelId: number) {
 }
 
 export function useUpdateChatChannelNotificationPreference() {
-  const [mutate, { loading, error, ...rest }] = useMutation<UpdateNotificationPreferenceData>(UPDATE_NOTIFICATION_PREFERENCE);
+  const [mutate, { loading, error, ...rest }] =
+    useMutation<UpdateNotificationPreferenceData>(
+      UPDATE_NOTIFICATION_PREFERENCE,
+    );
 
   const updatePreference = useCallback(
     (channelId: number, pushEnabled: boolean) => {

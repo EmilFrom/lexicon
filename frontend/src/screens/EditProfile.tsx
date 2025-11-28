@@ -209,11 +209,11 @@ export default function EditProfile(props: ProfileProps) {
     },
     refetchQueries: isTabletLandscape
       ? [
-        {
-          query: ProfileDocument,
-          variables: { username },
-        },
-      ]
+          {
+            query: ProfileDocument,
+            variables: { username },
+          },
+        ]
       : undefined,
   });
 

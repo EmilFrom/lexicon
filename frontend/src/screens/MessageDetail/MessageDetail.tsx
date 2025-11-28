@@ -250,10 +250,7 @@ export default function MessageDetail() {
 
   useEffect(() => {
     if (error && error.message.includes('Invalid Access')) {
-      if (
-        !useInitialLoadResult.loading &&
-        !useInitialLoadResult.isLoggedIn
-      ) {
+      if (!useInitialLoadResult.loading && !useInitialLoadResult.isLoggedIn) {
         reset({
           index: 1,
           routes: [
@@ -898,7 +895,7 @@ export default function MessageDetail() {
       setInitialHeight(
         Math.round(
           event.nativeEvent.contentSize.height -
-          event.nativeEvent.layoutMeasurement.height,
+            event.nativeEvent.layoutMeasurement.height,
         ),
       );
     }

@@ -140,7 +140,6 @@ export default function PostReply() {
   const storage = useStorage();
   const user = storage.getItem('user');
 
-
   const { authorizedExtensions } = useSiteSettings();
   const extensions = authorizedExtensions?.split('|');
   const normalizedExtensions = formatExtensions(extensions);
@@ -377,7 +376,8 @@ export default function PostReply() {
   const postValidity = useMemo(() => {
     if (editPostId) {
       const { isValid } = existingPostIsValid({
-        uploadsInProgress: localImages.filter((image) => image.isUploading).length,
+        uploadsInProgress: localImages.filter((image) => image.isUploading)
+          .length,
         title,
         oldTitle: title,
         content: rawContent,

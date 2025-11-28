@@ -1,11 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback } from 'react';
-import {
-  TouchableOpacity,
-  View,
-  ViewProps,
-  Pressable,
-} from 'react-native';
+import { TouchableOpacity, View, ViewProps, Pressable } from 'react-native';
 
 import { Icon, Text } from '../../core-ui';
 import { FullScreenImageModal } from '../FullScreenImageModal';
@@ -90,7 +85,7 @@ function BasePostItem(props: Props) {
     imageDimensions,
     isHidden = false,
     footer,
-    onPressViewIgnoredContent = () => { },
+    onPressViewIgnoredContent = () => {},
     showStatus,
     emojiCode,
     polls,
@@ -106,7 +101,7 @@ function BasePostItem(props: Props) {
     createdAt === ''
       ? t('Loading...')
       : (prevScreen === 'Home' ? t('Last Activity ') : '') +
-      formatRelativeTime(createdAt);
+        formatRelativeTime(createdAt);
 
   const isCreator = username === storage.getItem('user')?.username;
   const color: Color = hidden ? 'textLight' : 'textNormal';
@@ -155,8 +150,7 @@ function BasePostItem(props: Props) {
     images.forEach((imgUrl) => {
       if (fetchedDimensions[imgUrl]) {
         combined[imgUrl] = fetchedDimensions[imgUrl];
-      }
-      else {
+      } else {
         const norm = normalizeUrl(imgUrl);
         if (normalizedLookup[norm]) {
           combined[imgUrl] = normalizedLookup[norm];

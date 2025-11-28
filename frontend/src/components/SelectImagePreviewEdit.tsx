@@ -27,13 +27,7 @@ type Props = Omit<ImageBackgroundProps, 'source' | 'style'> & {
 
 export default function SelectImagePreviewEdit(props: Props) {
   // --- FIX: Removed unused 'otherProps' ---
-  const {
-    src,
-    imageSize = 'm',
-    onDelete,
-    style,
-    disableDelete,
-  } = props;
+  const { src, imageSize = 'm', onDelete, style, disableDelete } = props;
   const styles = useStyles();
 
   const sizeStyle = {

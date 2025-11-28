@@ -89,11 +89,17 @@ function BasePostDetailHeaderItem(props: Props) {
   const resolvedPostItemPropsResult = resolvePostItemProps({
     postDetailContent,
     // Type guard: only pass if we have complete data with id
-    cachedTopic: cachedTopic && typeof cachedTopic.id === 'number' ? cachedTopic as TopicFragment : undefined,
+    cachedTopic:
+      cachedTopic && typeof cachedTopic.id === 'number'
+        ? (cachedTopic as TopicFragment)
+        : undefined,
     username,
     channels,
     // Type guard: only pass if we have complete data with id
-    cachedFirstPost: cachedFirstPost && typeof cachedFirstPost.id === 'number' ? cachedFirstPost as PostFragment : undefined,
+    cachedFirstPost:
+      cachedFirstPost && typeof cachedFirstPost.id === 'number'
+        ? (cachedFirstPost as PostFragment)
+        : undefined,
   });
 
   if (!resolvedPostItemPropsResult) {
@@ -169,9 +175,9 @@ const resolvePostItemProps = ({
   cachedFirstPost,
 }: ResolvePostItemPropsParams):
   | {
-    postItemProps: Omit<PostItemProps, 'topicId'>;
-    postItemFooterProps: Omit<PostItemFooterProps, 'topicId' | 'postList'>;
-  }
+      postItemProps: Omit<PostItemProps, 'topicId'>;
+      postItemFooterProps: Omit<PostItemFooterProps, 'topicId' | 'postList'>;
+    }
   | undefined => {
   if (!postDetailContent && !cachedTopic) {
     return;
@@ -183,11 +189,11 @@ const resolvePostItemProps = ({
     if (!firstPost && cachedFirstPost?.id) {
       const freqPosters = cachedTopic?.posters
         ? cachedTopic.posters.map(({ user }) => ({
-          id: user.id,
-          username: user.username,
-          avatar: getImage(user.avatar),
-          name: user.name,
-        }))
+            id: user.id,
+            username: user.username,
+            avatar: getImage(user.avatar),
+            name: user.name,
+          }))
         : [];
       const channel = channels?.find(
         (channel) => channel.id === cachedTopic?.categoryId,

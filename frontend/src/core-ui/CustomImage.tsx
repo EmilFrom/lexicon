@@ -46,9 +46,9 @@ export function CustomImage(props: Props) {
 
   const imgSource = normalizedSrc
     ? {
-      uri: normalizedSrc,
-      headers: { Authorization: token ? `Bearer ${token}` : '' },
-    }
+        uri: normalizedSrc,
+        headers: { Authorization: token ? `Bearer ${token}` : '' },
+      }
     : { uri: DEFAULT_IMAGE };
 
   if (DEBUG_IMAGES) {

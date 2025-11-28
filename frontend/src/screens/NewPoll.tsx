@@ -252,13 +252,13 @@ export default function NewPoll() {
 
     const closeDateTime = closeDate
       ? new Date(
-        closeDate.getFullYear(),
-        closeDate.getMonth(),
-        closeDate.getDate(),
-        closeDate.getHours(),
-        closeDate.getMinutes(),
-        closeDate.getSeconds(),
-      ).toISOString()
+          closeDate.getFullYear(),
+          closeDate.getMonth(),
+          closeDate.getDate(),
+          closeDate.getHours(),
+          closeDate.getMinutes(),
+          closeDate.getSeconds(),
+        ).toISOString()
       : '';
 
     const newPoll = generatePollMarkdown({
@@ -332,8 +332,8 @@ export default function NewPoll() {
 
   const groupsDropdownOptions = groups
     ? groups.map((group) => {
-      return { label: group.name, value: group.name };
-    })
+        return { label: group.name, value: group.name };
+      })
     : [];
 
   return (
@@ -400,9 +400,9 @@ export default function NewPoll() {
                   return (
                     (value > 0 &&
                       value <=
-                      (pollTypeMultiple
-                        ? pollOptions.length
-                        : DEFAULT_NUMBER_RATING_MAX_CHOICE) &&
+                        (pollTypeMultiple
+                          ? pollOptions.length
+                          : DEFAULT_NUMBER_RATING_MAX_CHOICE) &&
                       value <= maxChoice) ||
                     PollValueOutOfRange
                   );
@@ -441,9 +441,9 @@ export default function NewPoll() {
                       value >= minChoice &&
                       value >= step &&
                       value <=
-                      (pollTypeMultiple
-                        ? pollOptions.length
-                        : DEFAULT_NUMBER_RATING_MAX_CHOICE)) ||
+                        (pollTypeMultiple
+                          ? pollOptions.length
+                          : DEFAULT_NUMBER_RATING_MAX_CHOICE)) ||
                     PollValueOutOfRange
                   );
                 },
@@ -640,11 +640,11 @@ export default function NewPoll() {
                       selectedIndex={
                         value.length > 0
                           ? value.map((dataSelected) => {
-                            const index = groupsDropdownOptions.findIndex(
-                              (item) => item.value === dataSelected,
-                            );
-                            return index;
-                          })
+                              const index = groupsDropdownOptions.findIndex(
+                                (item) => item.value === dataSelected,
+                              );
+                              return index;
+                            })
                           : []
                       }
                       placeholder={t('Select...')}

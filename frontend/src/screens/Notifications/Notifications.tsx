@@ -80,7 +80,6 @@ export default function Notifications() {
 
   const [page, setPage] = useState<number>(1);
 
-
   /*   const [errorMsg, setErrorMsg] = useState<string>(''); */
 
   const [showMore, setShowMore] = useState<boolean>(false);
@@ -105,7 +104,7 @@ export default function Notifications() {
    // --- FIX END --- */
 
   const { markAsRead, loading: markAsReadLoading } = useMarkRead({
-    onError: () => { },
+    onError: () => {},
   });
 
   /**

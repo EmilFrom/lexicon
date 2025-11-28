@@ -210,8 +210,8 @@ function BaseNestedComment(props: Props) {
               content={
                 replyToPostId
                   ? handleUnsupportedMarkdown(
-                    deleteQuoteBbCode(contentWithoutImages),
-                  )
+                      deleteQuoteBbCode(contentWithoutImages),
+                    )
                   : handleUnsupportedMarkdown(contentWithoutImages)
               }
               fontColor={colors[color]}

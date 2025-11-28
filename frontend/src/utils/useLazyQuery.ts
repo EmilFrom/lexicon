@@ -1,5 +1,4 @@
 import {
-
   DocumentNode,
   LazyQueryHookOptions,
   OperationVariables,
@@ -9,13 +8,15 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect } from 'react'; // Import useEffect
 
-
 import { errorHandlerAlert } from '../helpers';
 import { ErrorAlertOptionType } from '../types';
 
 // --- FIX START ---
 // Added constraint: TVariables extends OperationVariables
-export function useLazyQuery<TData, TVariables extends OperationVariables = OperationVariables>(
+export function useLazyQuery<
+  TData,
+  TVariables extends OperationVariables = OperationVariables,
+>(
   query: DocumentNode,
   options?: LazyQueryHookOptions<TData, TVariables> & {
     pollingEnabled?: boolean;
@@ -25,8 +26,6 @@ export function useLazyQuery<TData, TVariables extends OperationVariables = Oper
   // --- FIX END ---
 
   const isFocused = useIsFocused();
-
-
 
   // Destructure variables and onError to avoid passing them to initialization
   const {

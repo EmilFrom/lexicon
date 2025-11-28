@@ -149,23 +149,15 @@ export default function ChatChannelDetail() {
         );
       }
     }
-  }, [
-    chatMessages,
-    canLoadMoreFuture,
-    targetMessageId,
-    isInitialRequest,
-    ios,
-  ]);
+  }, [chatMessages, canLoadMoreFuture, targetMessageId, isInitialRequest, ios]);
 
   const { preference, refetch: refetchPreference } =
     useGetChatChannelNotificationPreference(channelId);
 
   const isPushEnabled = preference ? preference.pushEnabled : true;
 
-  const {
-    updatePreference,
-    loading: updatePreferenceLoading,
-  } = useUpdateChatChannelNotificationPreference();
+  const { updatePreference, loading: updatePreferenceLoading } =
+    useUpdateChatChannelNotificationPreference();
 
   const { leaveChannel } = useLeaveChannel({
     onError: (error) => {
@@ -532,8 +524,8 @@ export default function ChatChannelDetail() {
           contentInset={{
             top: textInputFocused
               ? ((isTablet ? (isTabletLandscape ? 45 : 25) : 30) *
-                screen.height) /
-              100
+                  screen.height) /
+                100
               : 0,
             bottom: textInputFocused ? ((2 * screen.height) / 100) * -1 : 0,
           }}
