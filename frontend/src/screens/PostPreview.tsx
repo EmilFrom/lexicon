@@ -58,7 +58,14 @@ export default function PostPreview() {
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
 
   const {
-    params: { reply, postData, editPostId, editTopicId, editedUser },
+    params: {
+      reply,
+      postData,
+      editPostId,
+      editTopicId,
+      editedUser,
+      imageMarkdown = '',
+    },
   } = useRoute<RootStackRouteProp<'PostPreview'>>();
 
   const storage = useStorage();
@@ -70,8 +77,12 @@ export default function PostPreview() {
     {},
   );
 
-  const { title, raw: content, tags, channelId } = getValues();
+  const { title, raw: formContent, tags, channelId } = getValues();
   const draftKey: string | undefined = watch('draftKey');
+
+  // Combine form content with image markdown for preview
+  const content = `${formContent}\n${imageMarkdown}`;
+
   const shortUrls = getPostShortUrl(content) ?? [];
 
   // --- NEW CONTENT PROCESSING PATTERN ---
@@ -184,9 +195,9 @@ export default function PostPreview() {
 
   useEffect(() => {
     if (shortUrls.length > 0) {
-      getImageUrls();
+      getImageUrls({ variables: { lookupUrlInput: { shortUrls } } });
     }
-  }, [getImageUrls, shortUrls.length]);
+  }, [getImageUrls, JSON.stringify(shortUrls)]);
 
   useEffect(
     () =>

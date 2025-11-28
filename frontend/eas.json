@@ -36,19 +36,21 @@
         "distribution": "internal"
       },
       "env": {
-            "ANDROID_SDK_ROOT": "/Users/emil/Library/Android/sdk"
-        }
+        "ANDROID_SDK_ROOT": "/Users/emil/Library/Android/sdk"
+      }
     },
     "production": {
       "autoIncrement": true,
       "channel": "production",
       "developmentClient": false,
-      "distribution": "internal",
+      "distribution": "store",
       "corepack": "true",
       "ios": {
         "simulator": false
       }
-      
+      "env": {
+        "EAS_BUILD_ENABLE_COREPACK": "1"
+      }
     }
   },
   "submit": {

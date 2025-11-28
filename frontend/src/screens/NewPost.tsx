@@ -350,6 +350,10 @@ export default function NewPost() {
 
     try {
       const uploadPromises = localImages.map(async (image) => {
+        if (image.uploadedUrl) {
+          return image.uploadedUrl;
+        }
+
         const manipulatedImage = await ImageManipulator.manipulateAsync(
           image.uri,
           [],
@@ -378,8 +382,14 @@ export default function NewPost() {
         .map((url) => `![image](${url})`)
         .join('\n');
 
-      setValue('raw', `${getValues('raw')}\n${markdownLinks}`);
-      setLocalImages([]);
+      // Update local images with uploaded URLs to avoid re-uploading
+      setLocalImages((prev) =>
+        prev.map((image, index) => ({
+          ...image,
+          isUploading: false,
+          uploadedUrl: uploadedUrls[index] || undefined,
+        })),
+      );
 
       navigate('PostPreview', {
         reply: false,
@@ -394,6 +404,7 @@ export default function NewPost() {
             : undefined,
         editedUser,
         focusedPostNumber: editTopicId ? 1 : undefined,
+        imageMarkdown: markdownLinks,
       });
     } catch (error) {
       errorHandlerAlert(String(error));
@@ -641,9 +652,8 @@ export default function NewPost() {
             >
               <Dot
                 variant="large"
-                color={`#${
-                  channels?.find(({ id }) => id === selectedChannel)?.color
-                }`}
+                color={`#${channels?.find(({ id }) => id === selectedChannel)?.color
+                  }`}
                 style={{ marginEnd: spacing.m }}
               />
               <Text color="textNormal">

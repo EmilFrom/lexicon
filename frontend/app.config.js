@@ -66,7 +66,7 @@ module.exports = {
     ],
     ios: {
       supportsTablet: true,
-      buildNumber: "1.0.1",
+      buildNumber: "1.0.0",
       config: {
         usesNonExemptEncryption: false
       },

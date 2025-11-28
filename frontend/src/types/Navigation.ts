@@ -89,6 +89,7 @@ type PostPreviewParams = {
   editPostId?: number;
   editTopicId?: number;
   editedUser?: EditedUser;
+  imageMarkdown?: string;
 };
 
 type PostDetailParams = {
@@ -143,12 +144,12 @@ type EditUserStatusParams = {
 type NewPollParams = {
   pollIndex?: number;
   prevScreen:
-    | 'NewPost'
-    | 'PostReply'
-    | 'NewMessage'
-    | 'MessageDetail'
-    | 'ImagePreview'
-    | 'EditPollsList';
+  | 'NewPost'
+  | 'PostReply'
+  | 'NewMessage'
+  | 'MessageDetail'
+  | 'ImagePreview'
+  | 'EditPollsList';
   editPost?: boolean;
   messageTopicId?: number;
 };
@@ -187,9 +188,9 @@ export type ThreadParams = {
   channelId: number;
   threadId: number;
 } & ( // Ensure that only one of threadFirstMessageId or threadTargetMessageId is provided
-  | { threadFirstMessageId: number; threadTargetMessageId?: never }
-  | { threadTargetMessageId: number; threadFirstMessageId?: never }
-);
+    | { threadFirstMessageId: number; threadTargetMessageId?: never }
+    | { threadTargetMessageId: number; threadFirstMessageId?: never }
+  );
 
 type EditPollsListParams = {
   messageTopicId: number;
