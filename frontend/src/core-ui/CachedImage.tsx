@@ -26,7 +26,7 @@ const CachedImage = ({
   if (isBackground && typeof visible === 'boolean' && setVisible) {
     return (
       <ImageView
-        images={[{ uri: source.uri }]}
+        images={[{ uri: typeof source === 'object' && 'uri' in source ? source.uri : '' }]}
         imageIndex={0}
         visible={visible}
         onRequestClose={setVisible}
@@ -59,7 +59,15 @@ const CachedImage = ({
   if (isLocalFile) {
     return (
       <RNImage
-        source={source}
+        source={
+          typeof source === 'object' && 'uri' in source
+            ? {
+              uri: source.uri,
+              ...(typeof source.width === 'number' && { width: source.width }),
+              ...(typeof source.height === 'number' && { height: source.height }),
+            }
+            : (source as number)
+        }
         style={style}
         resizeMode="cover"
         onLoad={() => {
@@ -71,7 +79,7 @@ const CachedImage = ({
                 : 'N/A',
             );
           }
-          rest.onLoad?.();
+          // Note: RN Image onLoad has different signature than expo-image, so we don't forward
         }}
         onError={(error) => {
           if (__DEV__) {
@@ -83,7 +91,7 @@ const CachedImage = ({
               error,
             });
           }
-          rest.onError?.(error);
+          // Note: RN Image onError has different signature than expo-image, so we don't forward
         }}
       />
     );
@@ -97,14 +105,14 @@ const CachedImage = ({
       source={source}
       style={style}
       cachePolicy={cachePolicy}
-      onLoad={() => {
+      onLoad={(event) => {
         if (__DEV__) {
           console.log(
             '[CachedImage] Expo Image loaded:',
             typeof source === 'object' && 'uri' in source ? source.uri : 'N/A',
           );
         }
-        rest.onLoad?.();
+        rest.onLoad?.(event);
       }}
       onError={(error) => {
         if (__DEV__) {

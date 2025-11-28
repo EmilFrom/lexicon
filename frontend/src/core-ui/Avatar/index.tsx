@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ImageBackgroundProps, TouchableOpacity } from 'react-native';
-import { Image } from 'expo-image';
+import { TouchableOpacity, StyleProp, ImageStyle } from 'react-native';
+import { Image, ImageProps } from 'expo-image';
 import { useReactiveVar } from '@apollo/client';
 
 import {
@@ -14,13 +14,14 @@ import { tokenVar } from '../../reactiveVars';
 
 import { LetterAvatar } from './LetterAvatar';
 
-type Props = Omit<ImageBackgroundProps, 'source'> & {
+type Props = Omit<ImageProps, 'source' | 'style'> & {
   src?: string;
   size?: AVATAR_ICON_SIZE_VARIANTS;
   label?: string;
   color?: string;
   defaultImage?: boolean;
   onPress?: () => void;
+  style?: StyleProp<ImageStyle>;
 };
 
 export { Props as AvatarProps };

@@ -1,8 +1,6 @@
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { useCallback } from 'react';
 
-import { Mutation, Query } from '../../generatedAPI/server';
-
 const GET_NOTIFICATION_PREFERENCE = gql`
   query getNotificationPreference($channelId: Int!) {
     chatChannelNotificationPreference(channelId: $channelId)
@@ -40,8 +38,14 @@ const UPDATE_NOTIFICATION_PREFERENCE = gql`
 `;
 
 export function useGetChatChannelNotificationPreference(channelId: number) {
-  const { data, ...rest } = useQuery<
-    Pick<Query, 'chatChannelNotificationPreference'>
+  const { data, ...rest } = useQuery<{
+    chatChannelNotificationPreference?: {
+      __typename?: string;
+      user_id: number;
+      channel_id: number;
+      push_enabled: boolean;
+    };
+  }
   >(GET_NOTIFICATION_PREFERENCE, {
     variables: { channelId },
     skip: !channelId,
@@ -54,8 +58,14 @@ export function useGetChatChannelNotificationPreference(channelId: number) {
 }
 
 export function useUpdateChatChannelNotificationPreference() {
-  const [mutate, { ...rest }] = useMutation<
-    Pick<Mutation, 'updateChatChannelNotificationPreference'>
+  const [mutate, { ...rest }] = useMutation<{
+    updateChatChannelNotificationPreference?: {
+      __typename?: string;
+      user_id: number;
+      channel_id: number;
+      push_enabled: boolean;
+    };
+  }
   >(UPDATE_NOTIFICATION_PREFERENCE);
 
   const updatePreference = useCallback(
