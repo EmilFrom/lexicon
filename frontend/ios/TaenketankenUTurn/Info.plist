@@ -29,7 +29,6 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>your-scheme-here</string>
           <string>com.emilfrom.tt-uturn</string>
         </array>
       </dict>
@@ -41,7 +40,7 @@
       </dict>
     </array>
     <key>CFBundleVersion</key>
-    <string>1.0.1</string>
+    <string>1.0.0</string>
     <key>EXDefaultScreenOrientationMask</key>
     <string>UIInterfaceOrientationMaskAllButUpsideDown</string>
     <key>ITSAppUsesNonExemptEncryption</key>
