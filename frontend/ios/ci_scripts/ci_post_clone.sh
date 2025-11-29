@@ -10,12 +10,13 @@ brew install node cocoapods
 
 # yarn
 npm install -g yarn
+corepack enable
+corepack prepare yarn@4.1.1 --activate
 
 # install node modules
 yarn install
 
-##corepack
-corepack enable
+
 
 # See note above about patching for GetEnv Issue
 #npm i patch-package
