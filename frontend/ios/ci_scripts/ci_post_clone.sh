@@ -16,10 +16,10 @@ corepack prepare yarn@4.1.1 --activate
 
 # install node modules
 yarn install
+yarn install expo
 
 # 3. Install iOS Pods
-echo "📦 Installing CocoaPods..."
-eas build -p ios --profile production --local --clear-cache
+eas build -p ios --profile production --local
 # See note above about patching for GetEnv Issue
 #npm i patch-package
 #npx patch-package
