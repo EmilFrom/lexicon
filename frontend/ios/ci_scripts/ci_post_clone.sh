@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/s
 set -e
 echo "Running ci_post_clone.sh"
 
@@ -19,8 +19,7 @@ yarn install
 
 # 3. Install iOS Pods
 echo "📦 Installing CocoaPods..."
-cd ios
-npx expo:run ios
+eas build -p ios --profile production --local --clear-cache
 # See note above about patching for GetEnv Issue
 #npm i patch-package
 #npx patch-package
