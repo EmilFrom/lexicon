@@ -19,11 +19,13 @@ corepack prepare yarn@4.1.1 --activate
 # install node modules
 yarn install
 
+npm i patch-package
+npx patch-package
+
 # 3. Install iOS Pods
 eas build -p ios --profile production --local
 # See note above about patching for GetEnv Issue
-#npm i patch-package
-#npx patch-package
+
 
 # xcode cloud sets `CI` env var to 'TRUE':
 # This causes a crash: Error: GetEnv.NoBoolean: TRUE is not a boolean.
