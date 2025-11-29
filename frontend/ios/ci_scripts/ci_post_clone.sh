@@ -11,12 +11,12 @@ brew install node cocoapods
 
 # yarn
 npm install -g corepack
+npm install -g expo
 corepack enable
 corepack prepare yarn@4.1.1 --activate
 
 # install node modules
 yarn install
-yarn install expo
 
 # 3. Install iOS Pods
 eas build -p ios --profile production --local
