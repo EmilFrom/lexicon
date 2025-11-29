@@ -12,6 +12,7 @@ brew install node cocoapods
 # yarn
 npm install -g corepack
 npm install -g expo
+npm install -g eas-cli
 corepack enable
 corepack prepare yarn@4.1.1 --activate
 
