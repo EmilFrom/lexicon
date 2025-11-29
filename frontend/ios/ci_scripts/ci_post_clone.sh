@@ -8,8 +8,9 @@ cd ../../
 # install node and cocoapods
 brew install node cocoapods
 
+
 # yarn
-npm install -g yarn
+npm install -g corepack
 corepack enable
 corepack prepare yarn@4.1.1 --activate
 
