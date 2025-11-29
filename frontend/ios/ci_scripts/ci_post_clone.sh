@@ -1,4 +1,4 @@
-#!/bin/s
+#!/bin/bash
 set -e
 echo "Running ci_post_clone.sh"
 
