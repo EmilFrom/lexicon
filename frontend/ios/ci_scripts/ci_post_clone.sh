@@ -20,7 +20,7 @@ yarn install
 # 3. Install iOS Pods
 echo "📦 Installing CocoaPods..."
 cd ios
-pod install
+yarn ios
 
 # See note above about patching for GetEnv Issue
 #npm i patch-package
