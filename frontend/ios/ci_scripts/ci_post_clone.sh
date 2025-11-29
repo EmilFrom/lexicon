@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 echo "Running ci_post_clone.sh"
 
@@ -17,7 +17,10 @@ corepack prepare yarn@4.1.1 --activate
 # install node modules
 yarn install
 
-
+# 3. Install iOS Pods
+echo "📦 Installing CocoaPods..."
+cd ios
+pod install
 
 # See note above about patching for GetEnv Issue
 #npm i patch-package
