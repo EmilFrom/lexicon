@@ -8,6 +8,9 @@ cd ../../
 # install node and cocoapods
 brew install node cocoapods
 
+# yarn
+npm install -g yarn
+
 # install node modules
 yarn install
 
