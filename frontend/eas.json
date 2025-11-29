@@ -40,16 +40,12 @@
       }
     },
     "production": {
-      "autoIncrement": true,
       "channel": "production",
       "developmentClient": false,
       "distribution": "store",
       "corepack": "true",
       "ios": {
         "simulator": false
-      }
-      "env": {
-        "EAS_BUILD_ENABLE_COREPACK": "1"
       }
     }
   },

@@ -48,7 +48,6 @@ module.exports = {
   expo: {
     name: "TaenketankenUTurn",
     slug: "tt-uturn",
-    scheme: "your-scheme-here",
     version: "1.0.0",
     orientation: "default",
     icon: "./assets/icon.png",
@@ -69,10 +68,12 @@ module.exports = {
       buildNumber: "1.0.0",
       config: {
         usesNonExemptEncryption: false
+
       },
       bundleIdentifier: "com.emilfrom.tt-uturn",
       infoPlist: {
-        CFBundleDisplayName: "Tænketanken U-Turn"
+        CFBundleDisplayName: "Tænketanken U-Turn",
+        ITSAppUsesNonExemptEncryption: false
       },
       privacyManifests: {
         NSPrivacyAccessedAPITypes: [
