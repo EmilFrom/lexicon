@@ -20,8 +20,7 @@ yarn install
 # 3. Install iOS Pods
 echo "📦 Installing CocoaPods..."
 cd ios
-yarn ios
-
+npx expo:run ios
 # See note above about patching for GetEnv Issue
 #npm i patch-package
 #npx patch-package
