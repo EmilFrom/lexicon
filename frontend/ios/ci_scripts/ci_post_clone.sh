@@ -9,11 +9,14 @@ cd ../../
 brew install node cocoapods
 
 # install node modules
-npm install
+yarn install
+
+##corepack
+corepack enable
 
 # See note above about patching for GetEnv Issue
-npm i patch-package
-npx patch-package
+#npm i patch-package
+#npx patch-package
 
 # xcode cloud sets `CI` env var to 'TRUE':
 # This causes a crash: Error: GetEnv.NoBoolean: TRUE is not a boolean.
