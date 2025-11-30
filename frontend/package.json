@@ -175,6 +175,7 @@
   "version": "1.0.0",
   "resolutions": {
     "@typescript-eslint/eslint-plugin": "^8.46.3",
-    "globals": "^15.0.0"
+    "globals": "^15.0.0",
+    "getenv@npm:^2.0.0": "patch:getenv@npm%3A2.0.0#~/.yarn/patches/getenv-npm-2.0.0-f38c6997d7.patch"
   }
 }

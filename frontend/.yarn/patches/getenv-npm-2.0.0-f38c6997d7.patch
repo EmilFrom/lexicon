@@ -1,0 +1,29 @@
+diff --git a/index.js b/index.js
+index e9e607efdc1623035d79ffe4358b9f51123f58c7..130a3c76b5bbe4df60349b8f5c77421da4f6d511 100644
+--- a/index.js
++++ b/index.js
+@@ -53,8 +53,7 @@ const convert = {
+     return +value;
+   },
+   bool: function (value) {
+-    const isBool =
+-      (value || '').toLowerCase() === 'true' || (value || '').toLowerCase() === 'false';
++    const isBool = value === 'true' || value === 'false' || value === 'TRUE' || value === 'FALSE';
+     if (!isBool) {
+       throw new Error('GetEnv.NoBoolean: ' + value + ' is not a boolean.');
+     }
+@@ -65,7 +64,7 @@ const convert = {
+     try {
+       return convert.bool(value);
+     } catch (err) {
+-      const isBool = value === '1' || value === '0';
++      const isBool = value === 'true' || value === 'false' || value === 'TRUE' || value === 'FALSE' || value === '1' || value === '0';
+       if (!isBool) {
+         throw new Error('GetEnv.NoBoolean: ' + value + ' is not a boolean.');
+       }
+@@ -147,5 +146,3 @@ getenv.disableErrors = function () {
+ getenv.enableErrors = function () {
+   throwError = true;
+ };
+-
+-module.exports = getenv;
