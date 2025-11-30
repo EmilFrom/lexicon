@@ -6,7 +6,7 @@ echo "Running ci_post_clone.sh"
 cd ../../
 
 # install node and cocoapods
-brew install node cocoapods eas-cli
+brew install node cocoapods
 
 
 # yarn
@@ -18,7 +18,6 @@ corepack prepare yarn@4.1.1 --activate
 yarn install
 
 yarn add expo
-yarn add eas-cli
 
 yarn patch
 
