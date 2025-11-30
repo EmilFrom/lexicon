@@ -8987,7 +8987,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:~54.0.25":
+"expo@npm:^54.0.25":
   version: 54.0.25
   resolution: "expo@npm:54.0.25"
   dependencies:
@@ -9484,7 +9484,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^7.0.1"
-    expo: "npm:~54.0.25"
+    expo: "npm:^54.0.25"
     expo-apple-authentication: "npm:~8.0.7"
     expo-blur: "npm:^15.0.7"
     expo-build-properties: "npm:~1.0.9"
