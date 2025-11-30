@@ -19,7 +19,8 @@ yarn install
 
 yarn add expo
 
-yarn patch
+npm i patch-package
+npm patch-package
 
 # 3. Install iOS Pods
 #npx build -p ios --profile production --local
