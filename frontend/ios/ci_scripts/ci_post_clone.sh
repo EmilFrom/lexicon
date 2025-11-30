@@ -22,7 +22,10 @@ yarn add expo
 yarn patch
 
 # 3. Install iOS Pods
-eas build -p ios --profile production --local
+#npx build -p ios --profile production --local
+
+npx expo prebuild --platform ios
+
 # See note above about patching for GetEnv Issue
 
 
