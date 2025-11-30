@@ -19,11 +19,6 @@ yarn install
 
 yarn add expo
 
-yarn patch patches/getenv+1.0.0.patch
-
-yarn patch-package getenv
-
-yarn patch getenv
 # 3. Install iOS Pods
 #npx build -p ios --profile production --local
 
