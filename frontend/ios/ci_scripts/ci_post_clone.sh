@@ -15,9 +15,9 @@ corepack enable
 corepack prepare yarn@4.1.1 --activate
 
 # install node modules
+yarn global add expo
+yarn global add eas-cli
 yarn install
-yarn install -g expo
-yarn install -g eas-cli
 
 yarn patch
 
