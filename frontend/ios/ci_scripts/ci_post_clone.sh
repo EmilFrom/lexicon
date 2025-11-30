@@ -22,12 +22,10 @@ yarn add expo
 # 3. Install iOS Pods
 #npx build -p ios --profile production --local
 
-npx expo prebuild --platform ios
-
 # See note above about patching for GetEnv Issue
 
 
 # xcode cloud sets `CI` env var to 'TRUE':
 # This causes a crash: Error: GetEnv.NoBoolean: TRUE is not a boolean.
 # This is a workaround for that issue.
-CI="true" npx expo prebuild
+CI="true" npx expo prebuild --platform ios
