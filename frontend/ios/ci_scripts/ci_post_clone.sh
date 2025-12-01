@@ -22,9 +22,11 @@ yarn install
 yarn add expo
 
 # Generate the missing API files before building
+cd ../
 echo "Generating API files..."
 yarn generate
 # ===================
+cd frontend/
 
 # 3. Install iOS Pods
 #npx build -p ios --profile production --local
