@@ -49,6 +49,7 @@ module.exports = {
     name: "TaenketankenUTurn",
     slug: "tt-uturn",
     version: "1.0.0",
+    scheme: "tt-uturn",
     orientation: "default",
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",
