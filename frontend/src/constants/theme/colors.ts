@@ -117,6 +117,18 @@ export const FUNCTIONAL_COLORS = {
   alertErrorText: BASE_COLORS.pinkRed,
   alertInfoBackground: BASE_COLORS.lightBlue,
   alertInfoText: BASE_COLORS.royalBlue,
+
+  // Chat bubble colors
+  chatBubbleSent: BASE_COLORS.royalBlue,        // User's messages (blue)
+  chatBubbleReceived: BASE_COLORS.grey,         // Others' messages (grey)
+  chatBubbleSentText: BASE_COLORS.pureWhite,    // Text in sent messages
+  chatBubbleReceivedText: BASE_COLORS.black100, // Text in received messages
+
+  // Dark mode variants
+  darkChatBubbleSent: BASE_COLORS.royalBlue,
+  darkChatBubbleReceived: BASE_COLORS.blackSmoke,
+  darkChatBubbleSentText: BASE_COLORS.pureWhite,
+  darkChatBubbleReceivedText: BASE_COLORS.white100,
 };
 
 // NOTE: Change this to a randeom color generator

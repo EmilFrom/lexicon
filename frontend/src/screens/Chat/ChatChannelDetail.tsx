@@ -32,7 +32,9 @@ import {
   errorHandlerAlert,
   fetchPaginatedMessages,
   shouldDisplayTimestamp,
+  useStorage,
 } from '../../helpers';
+import { getMessageGroupInfo } from '../../helpers/chatMessageGrouping';
 import {
   useChatChannelDetail,
   useChatChannelMessages,
@@ -124,6 +126,10 @@ export default function ChatChannelDetail() {
   );
   const hasOlderMessages = messagesResult?.canLoadMorePast ?? true;
   const canLoadMoreFuture = messagesResult?.canLoadMoreFuture ?? false;
+
+  // Get storage instance and current user ID for bubble chat
+  const storage = useStorage();
+  const currentUserId = storage.getItem('user')?.id;
 
   const shouldMaintainVisiblePosition = canLoadMoreFuture;
 
@@ -325,6 +331,17 @@ export default function ChatChannelDetail() {
     const unread = hasUnread ? lastMessageId === item.id : false;
     const { threadId, id, user } = item;
 
+    // Calculate message grouping info for bubble chat
+    const groupInfo = currentUserId
+      ? getMessageGroupInfo(chatMessages, index, currentUserId, true)
+      : {
+        isFirstInGroup: false,
+        isLastInGroup: false,
+        showAvatar: false,
+        showTimestamp: false,
+        timeSinceLastMessage: 0,
+      };
+
     const onReplies = () => {
       if (threadId) {
         navigateToThread(threadId, id);
@@ -357,6 +374,11 @@ export default function ChatChannelDetail() {
           )
         }
         isLoading={loadingMessageId === id}
+        currentUserId={currentUserId}
+        isFirstInGroup={groupInfo.isFirstInGroup}
+        isLastInGroup={groupInfo.isLastInGroup}
+        showAvatar={groupInfo.showAvatar}
+        showTimestamp={groupInfo.showTimestamp}
       />
     );
   };
@@ -524,8 +546,8 @@ export default function ChatChannelDetail() {
           contentInset={{
             top: textInputFocused
               ? ((isTablet ? (isTabletLandscape ? 45 : 25) : 30) *
-                  screen.height) /
-                100
+                screen.height) /
+              100
               : 0,
             bottom: textInputFocused ? ((2 * screen.height) / 100) * -1 : 0,
           }}

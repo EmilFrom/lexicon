@@ -69,6 +69,18 @@ function colorTheme(isDarkMode: boolean) {
     loading: isDarkMode
       ? FUNCTIONAL_COLORS.pureWhite
       : FUNCTIONAL_COLORS.primary,
+    chatBubbleSent: isDarkMode
+      ? FUNCTIONAL_COLORS.darkChatBubbleSent
+      : FUNCTIONAL_COLORS.chatBubbleSent,
+    chatBubbleReceived: isDarkMode
+      ? FUNCTIONAL_COLORS.darkChatBubbleReceived
+      : FUNCTIONAL_COLORS.chatBubbleReceived,
+    chatBubbleSentText: isDarkMode
+      ? FUNCTIONAL_COLORS.darkChatBubbleSentText
+      : FUNCTIONAL_COLORS.chatBubbleSentText,
+    chatBubbleReceivedText: isDarkMode
+      ? FUNCTIONAL_COLORS.darkChatBubbleReceivedText
+      : FUNCTIONAL_COLORS.chatBubbleReceivedText,
   };
 }
 
