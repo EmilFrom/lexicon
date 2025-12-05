@@ -94,17 +94,17 @@ export default function Profile() {
             screen: 'ProfileScreen',
             params: undefined,
           });
-          getProfile();
+          getProfile({ variables: { username } });
         }
       });
     } else {
       unsubscribe = navigation.addListener('focus', () => {
-        getProfile();
+        getProfile({ variables: { username } });
       });
     }
 
     return unsubscribe;
-  }, [navigation, getProfile, isTablet]);
+  }, [navigation, getProfile, isTablet, username]);
 
   const { logout, loading: logoutLoading } = useLogout({
     onCompleted: async () => {
@@ -170,7 +170,7 @@ export default function Profile() {
                   </Text>
                   {allowUserStatus &&
                     (!profileUser.status?.description &&
-                    !profileUser.status?.emoji ? (
+                      !profileUser.status?.emoji ? (
                       <IconWithLabel
                         label={t('Set Status')}
                         icon="Edit"
@@ -247,7 +247,7 @@ export default function Profile() {
               />
               {allowUserStatus &&
                 (!profileUser.status?.description &&
-                !profileUser.status?.emoji ? (
+                  !profileUser.status?.emoji ? (
                   <IconWithLabel
                     label={t('Set Status')}
                     icon="Edit"
@@ -276,7 +276,7 @@ export default function Profile() {
                 style={styles.button}
                 disabled={!data}
                 onPress={() =>
-                  navigateInProfile('EditProfile', { user: profileUser })
+                  navigation.navigate('EditProfile', { user: profileUser })
                 }
                 testID="Profile:Button:EditProfile"
               />

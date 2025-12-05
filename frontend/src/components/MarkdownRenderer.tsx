@@ -20,6 +20,7 @@ type Props = {
   fontColor?: string;
   style?: StyleProp<ViewStyle>;
   nonClickable?: boolean;
+  fontSize?: number; // Custom font size for message text
 };
 
 function BaseMarkdownRenderer({
@@ -27,6 +28,7 @@ function BaseMarkdownRenderer({
   fontColor,
   style,
   nonClickable,
+  fontSize,
 }: Props) {
   const { navigate, push } = useNavigation<StackNavProp<'UserInformation'>>();
   // --- FIX: Removed unused 'spacing' ---
@@ -36,7 +38,7 @@ function BaseMarkdownRenderer({
 
   const tagsStyles: Readonly<Record<string, MixedStyleDeclaration>> = useMemo(
     () => ({
-      body: { color: fontColor || colors.textNormal, fontSize: fontSizes.m },
+      body: { color: fontColor || colors.textNormal, fontSize: fontSize || fontSizes.m },
       p: { marginTop: 0, marginBottom: 0 },
       blockquote: {
         backgroundColor: colors.border,
@@ -49,7 +51,7 @@ function BaseMarkdownRenderer({
       em: { fontStyle: 'italic' },
       a: { color: colors.primary, textDecorationLine: 'none' },
     }),
-    [fontColor, colors, fontSizes],
+    [fontColor, colors, fontSizes, fontSize],
   );
 
   const source = useMemo(() => ({ html: content }), [content]);

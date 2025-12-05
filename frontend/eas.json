@@ -43,10 +43,14 @@
       "channel": "production",
       "developmentClient": false,
       "distribution": "store",
-      "corepack": "true",
+      "corepack": true,
       "ios": {
         "simulator": false
       }
+    },
+    "android": {
+      "corepack": true,
+      "distribution": "store"
     }
   },
   "submit": {
@@ -57,7 +61,8 @@
         "appleTeamId": "K2L2XPK739"
       },
       "android": {
-        "serviceAccountKeyPath": "./playstore_secret.json"
+        "serviceAccountKeyPath": "./playstore_secret.json",
+        "track": "internal"
       }
     }
   }

@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useMemo } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, Pressable } from 'react-native';
 
 import { MarkdownRenderer } from '../../../components/MarkdownRenderer';
 import { ImageCarousel } from '../../../components/ImageCarousel';
@@ -20,6 +20,7 @@ import { useImageDimensions } from '../../../hooks/useImageDimensions';
 import { discourseHost } from '../../../constants';
 import { markdownToHtml } from '../../../helpers/markdownToHtml';
 import { MessageTail } from './MessageTail';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type BubbleChatMessageProps = {
     content: ChatMessageContent;
@@ -42,7 +43,7 @@ type BubbleChatMessageProps = {
  */
 export const BubbleChatMessage: React.FC<BubbleChatMessageProps> = React.memo((props) => {
     const styles = useStyles();
-    const { colors } = useTheme();
+    const { colors, spacing } = useTheme();
     const {
         content,
         sender,
@@ -59,6 +60,7 @@ export const BubbleChatMessage: React.FC<BubbleChatMessageProps> = React.memo((p
     } = props;
 
     const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+    const [showTimestampOverlay, setShowTimestampOverlay] = useState(false);
 
     const { id, time, markdownContent } = content;
 
@@ -193,6 +195,11 @@ export const BubbleChatMessage: React.FC<BubbleChatMessageProps> = React.memo((p
         ? colors.chatBubbleSentText
         : colors.chatBubbleReceivedText;
 
+    // Gradient colors for sent messages (very subtle)
+    const gradientColors = isCurrentUser
+        ? ([colors.chatBubbleSent, `${colors.chatBubbleSent}E6`] as const) // 90% opacity for subtle effect
+        : ([bubbleBackgroundColor, bubbleBackgroundColor] as const); // No gradient for received
+
     const renderUnsupported = () => (
         <View style={styles.unsupported}>
             <Icon
@@ -228,15 +235,18 @@ export const BubbleChatMessage: React.FC<BubbleChatMessageProps> = React.memo((p
                 <MarkdownRenderer
                     fontColor={bubbleTextColor}
                     content={markdownContentScene}
+                    fontSize={18}
                 />
             )}
             {images.length > 0 && (
-                <ImageCarousel
-                    images={images}
-                    onImagePress={(uri) => setFullScreenImage(uri)}
-                    imageDimensionsMap={dimensions}
-                    maxHeight={250}
-                />
+                <View style={styles.imageContainer}>
+                    <ImageCarousel
+                        images={images}
+                        onImagePress={(uri) => setFullScreenImage(uri)}
+                        imageDimensionsMap={dimensions}
+                        maxHeight={250}
+                    />
+                </View>
             )}
             {unsupported && renderUnsupported()}
         </>
@@ -247,8 +257,30 @@ export const BubbleChatMessage: React.FC<BubbleChatMessageProps> = React.memo((p
         return null;
     }
 
+    // Calculate dynamic spacing based on message grouping
+    // Single message: 8px spacing
+    // First in group: 8px top, 1px bottom
+    // Middle in group: 1px both sides
+    // Last in group: 1px top, 8px bottom
+    const getContainerSpacing = () => {
+        if (isFirstInGroup && isLastInGroup) {
+            // Single message - normal spacing
+            return { marginVertical: spacing.m }; // 8px
+        }
+        if (isFirstInGroup) {
+            // First in group - spacing above, minimal below
+            return { marginTop: spacing.m, marginBottom: 1 };
+        }
+        if (isLastInGroup) {
+            // Last in group - minimal above, spacing below
+            return { marginTop: 1, marginBottom: spacing.m };
+        }
+        // Middle of group - minimal spacing
+        return { marginVertical: 1 };
+    };
+
     return (
-        <View style={styles.container} testID={testID}>
+        <View style={[styles.container, getContainerSpacing()]} testID={testID}>
             <View
                 style={[
                     styles.messageRow,
@@ -284,28 +316,45 @@ export const BubbleChatMessage: React.FC<BubbleChatMessageProps> = React.memo((p
                         </Text>
                     )}
 
-                    {/* Bubble with content */}
-                    <View
-                        style={[
-                            styles.bubble,
-                            getBubbleStyle(),
-                            { backgroundColor: bubbleBackgroundColor },
-                        ]}
+                    {/* Bubble with content - wrapped in Pressable for long-press */}
+                    <Pressable
+                        onLongPress={() => setShowTimestampOverlay(true)}
+                        onPressOut={() => setTimeout(() => setShowTimestampOverlay(false), 2000)}
+                        delayLongPress={500}
                     >
-                        {renderMessageContent()}
+                        <LinearGradient
+                            colors={gradientColors}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={[
+                                styles.bubble,
+                                getBubbleStyle(),
+                            ]}
+                        >
+                            {renderMessageContent()}
 
-                        {/* Show tail on last message in group */}
-                        {isLastInGroup && (
-                            <MessageTail
-                                color={bubbleBackgroundColor}
-                                side={isCurrentUser ? 'right' : 'left'}
-                                size={8}
-                            />
+                            {/* Show tail on last message in group */}
+                            {isLastInGroup && (
+                                <MessageTail
+                                    color={bubbleBackgroundColor}
+                                    side={isCurrentUser ? 'right' : 'left'}
+                                    size={8}
+                                />
+                            )}
+                        </LinearGradient>
+
+                        {/* Timestamp overlay - shows on long-press */}
+                        {showTimestampOverlay && (
+                            <View style={styles.timestampOverlay}>
+                                <Text size="xs" style={styles.timestampOverlayText}>
+                                    {formatTime({ dateString: time, hour12: true })}
+                                </Text>
+                            </View>
                         )}
-                    </View>
+                    </Pressable>
 
-                    {/* Timestamp */}
-                    {showTimestamp && (
+                    {/* Timestamp - Hidden by default, shown on long-press via overlay */}
+                    {/* {showTimestamp && (
                         <Text
                             size="xs"
                             style={[
@@ -316,7 +365,7 @@ export const BubbleChatMessage: React.FC<BubbleChatMessageProps> = React.memo((p
                         >
                             {formatTime({ dateString: time, hour12: true })}
                         </Text>
-                    )}
+                    )} */}
 
                     {/* Thread replies button */}
                     {!hideReplies &&
@@ -358,7 +407,7 @@ BubbleChatMessage.displayName = 'BubbleChatMessage';
 
 const useStyles = makeStyles(({ spacing, colors }) => ({
     container: {
-        marginVertical: spacing.xs,
+        // Spacing applied dynamically based on grouping
     },
     messageRow: {
         flexDirection: 'row',
@@ -392,9 +441,18 @@ const useStyles = makeStyles(({ spacing, colors }) => ({
         marginLeft: spacing.s,
     },
     bubble: {
-        paddingHorizontal: spacing.m,
-        paddingVertical: spacing.s,
+        paddingHorizontal: 12, // Increased to 12px for 18px font
+        paddingVertical: 8, // Increased to 8px for 18px font
         position: 'relative',
+        // Very subtle shadow for depth
+        shadowColor: colors.shadow,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.05, // Very subtle - only 5% opacity
+        shadowRadius: 2,
+        elevation: 1, // Android
     },
     timestamp: {
         marginTop: spacing.xs,
@@ -442,5 +500,25 @@ const useStyles = makeStyles(({ spacing, colors }) => ({
     },
     unsupportedText: {
         textAlign: 'center',
+    },
+    imageContainer: {
+        borderRadius: 8,
+        overflow: 'hidden',
+        marginTop: spacing.xs,
+        borderWidth: 0, // Explicitly remove any borders
+    },
+    timestampOverlay: {
+        position: 'absolute',
+        top: -28,
+        alignSelf: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        paddingHorizontal: spacing.m,
+        paddingVertical: spacing.xs,
+        borderRadius: 12,
+        zIndex: 1000,
+    },
+    timestampOverlayText: {
+        color: colors.pureWhite,
+        fontSize: 11,
     },
 }));
