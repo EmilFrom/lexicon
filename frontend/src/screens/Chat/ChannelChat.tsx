@@ -17,7 +17,7 @@ import { useLazyGetChatChannels } from '../../hooks';
 import { makeStyles, useTheme } from '../../theme';
 import { ChannelListOutput, StackNavProp } from '../../types';
 
-import { ChannelList, Search } from './components';
+import { ChannelList, Search, NewChatButton, NewChatModal } from './components';
 
 const title = t('Live Chat');
 
@@ -38,6 +38,7 @@ export default function ChannelChat() {
 
   const [channelData, setChannelData] = useState<ChannelListOutput>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [isNewChatModalVisible, setIsNewChatModalVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState<{
     index: number;
     value: ChatChannelStatus;
@@ -102,7 +103,7 @@ export default function ChannelChat() {
     setHasMoreChannels(
       channels
         ? channels.length % CHAT_CHANNEL_DETAIL_PAGE_SIZE === 0 &&
-            channels.length !== 0
+        channels.length !== 0
         : false,
     );
   }, []);
@@ -262,6 +263,14 @@ export default function ChannelChat() {
         valuePaddingScene={spacing.xl}
       />
       {content()}
+      <NewChatButton
+        onPress={() => setIsNewChatModalVisible(true)}
+        testID="Channel:NewChatButton"
+      />
+      <NewChatModal
+        visible={isNewChatModalVisible}
+        onClose={() => setIsNewChatModalVisible(false)}
+      />
     </View>
   );
 }

@@ -150,3 +150,22 @@ export const LEAVE_CHANNEL = gql`
     }
   }
 `;
+
+export const CREATE_DIRECT_MESSAGE_CHANNEL = gql`
+  ${CHANNEL_LIST_FRAGMENT}
+  mutation CreateDirectMessageChannel(
+    $createDMInput: CreateDirectMessageChannelInput!
+  ) {
+    createDirectMessageChannel(createDMInput: $createDMInput)
+      @rest(
+        type: "CreateDirectMessageChannelOutput"
+        path: "/chat/api/direct-messages.json"
+        method: "POST"
+        bodyKey: "createDMInput"
+      ) {
+      channel @type(name: "ChannelList") {
+        ...ChannelListFragment
+      }
+    }
+  }
+`;
