@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
-  TouchableOpacity,
+  Pressable,
   View,
   ViewStyle,
   useWindowDimensions,
@@ -126,9 +126,14 @@ export function AuthenticatedImage({
 
   if (onPress) {
     return (
-      <TouchableOpacity onPress={() => onPress(url)} activeOpacity={0.9}>
+      <Pressable
+        onPress={() => onPress(url)}
+        style={({ pressed }) => [{
+          opacity: pressed ? 0.9 : 1,
+        }]}
+      >
         {imageContent}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
