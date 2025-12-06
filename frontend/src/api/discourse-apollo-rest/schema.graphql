@@ -1104,6 +1104,7 @@ input MarkReadChatInput {
 input ReplyChatInput {
   message: String!
   uploadIds: [Int!]
+```
   threadId: Int
   stagingIds: [String!]
 }
@@ -1115,6 +1116,7 @@ input CreateDirectMessageChannelInput {
   icon_upload_id: Int
   upsert: Boolean
 }
+
 
 input CreateThreadInput {
   originalMessageId: Int!
@@ -1226,7 +1228,7 @@ type Mutation {
   ): ChatChannelNotificationsOutput!
   createDirectMessageChannel(
     createDMInput: CreateDirectMessageChannelInput!
-  ): CreateDirectMessageChannelOutput!
+  ): CreateDirectMessageChannelOutput
 }
 
 scalar PathBuilder

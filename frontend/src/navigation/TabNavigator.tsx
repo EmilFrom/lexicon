@@ -14,6 +14,7 @@ import { useKeyboardListener } from '../hooks';
 import {
   ChannelChat as ChannelChatScene,
   Home as HomeScene,
+  MessagesScreen,
   PostDraft,
   Profile as ProfileScene,
 } from '../screens';
@@ -69,11 +70,11 @@ function TabBar({
             testID={
               route.name === 'Profile'
                 ? 'Tab:Profile'
-                : route.name === 'Chat'
-                ? 'Tab:Chat'
-                : route.name === 'Draft'
-                ? 'Tab:Draft'
-                : 'Tab:Home'
+                : route.name === 'Messaging'
+                  ? 'Tab:Messaging'
+                  : route.name === 'Draft'
+                    ? 'Tab:Draft'
+                    : 'Tab:Home'
             }
           >
             <View
@@ -86,11 +87,11 @@ function TabBar({
                 name={
                   route.name === 'Home'
                     ? 'Home'
-                    : route.name === 'Chat'
-                    ? 'ChatBubble'
-                    : route.name === 'Draft'
-                    ? 'Draft'
-                    : 'Person'
+                    : route.name === 'Messaging'
+                      ? 'ChatBubble'
+                      : route.name === 'Draft'
+                        ? 'Draft'
+                        : 'Person'
                 }
                 size="xl"
                 color={
@@ -163,8 +164,8 @@ export default function TabNavigator() {
       {token && (
         <>
           <Tab.Screen
-            name="Chat"
-            component={ChannelChatScene}
+            name="Messaging"
+            component={MessagesScreen}
             options={{ headerShown: false }}
           />
           <Tab.Screen name="Draft" component={PostDraft} />

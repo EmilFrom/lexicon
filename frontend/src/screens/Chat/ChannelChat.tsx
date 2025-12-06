@@ -31,7 +31,11 @@ type ChatOption = (typeof chatSegmentedOption)[number];
 
 const FIRST_OFFSET = 0;
 
-export default function ChannelChat() {
+type Props = {
+  hideHeader?: boolean;
+};
+
+export default function ChannelChat({ hideHeader = false }: Props) {
   const styles = useStyles();
   const { spacing } = useTheme();
   const { addListener } = useNavigation<StackNavProp<'TabNav'>>();
@@ -237,18 +241,20 @@ export default function ChannelChat() {
         setWidth(width);
       }}
     >
-      <View style={styles.statusBar} />
+      {!hideHeader && <View style={styles.statusBar} />}
 
-      <View style={styles.titleContainer}>
-        <Text
-          numberOfLines={1}
-          variant="semiBold"
-          size="l"
-          style={styles.title}
-        >
-          {title}
-        </Text>
-      </View>
+      {!hideHeader && (
+        <View style={styles.titleContainer}>
+          <Text
+            numberOfLines={1}
+            variant="semiBold"
+            size="l"
+            style={styles.title}
+          >
+            {title}
+          </Text>
+        </View>
+      )}
       <Search
         placeholder={t('Search')}
         value={searchValue}

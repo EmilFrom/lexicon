@@ -241,7 +241,7 @@ export type RootStackParamList = {
 export type TabParamList = {
   Home: undefined | HomeProps;
   Profile: undefined;
-  Chat: undefined;
+  Messaging: undefined;
   Draft: undefined;
 };
 

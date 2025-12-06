@@ -18,7 +18,6 @@ import {
   EditProfile,
   EditUSerStatus,
   EmailAddress,
-  Messages,
   Notifications,
   Preferences,
   // --- FIX: Removed unused Profile import ---
@@ -48,7 +47,7 @@ function DrawerItem(props: DrawerItemProps) {
         styles.drawerItemContainer,
         isIOS ? styles.drawerItemIOS : styles.drawerItemAndroid,
         active &&
-          (isIOS ? styles.activeBackgroundIOS : styles.activeBackgroundAndroid),
+        (isIOS ? styles.activeBackgroundIOS : styles.activeBackgroundAndroid),
       ]}
       onPress={onPress}
     >
@@ -92,24 +91,24 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
     data?.profile?.user?.__typename === 'UserDetail'
       ? data.profile.user
       : ({
-          avatar: '',
-          bioRaw: '',
-          dateOfBirth: '',
-          location: '',
-          name: '',
-          username: '',
-          websiteName: '',
-          email: '',
-          secondaryEmails: [],
-          unconfirmedEmails: [],
-          canEditUsername: true,
-          admin: false,
-          status: {
-            emoji: '',
-            description: '',
-            endsAt: '',
-          },
-        } as UserDetail); // Cast or ensure defaults match type
+        avatar: '',
+        bioRaw: '',
+        dateOfBirth: '',
+        location: '',
+        name: '',
+        username: '',
+        websiteName: '',
+        email: '',
+        secondaryEmails: [],
+        unconfirmedEmails: [],
+        canEditUsername: true,
+        admin: false,
+        status: {
+          emoji: '',
+          description: '',
+          endsAt: '',
+        },
+      } as UserDetail); // Cast or ensure defaults match type
 
   const splittedBio = user.bioRaw?.split(/\r\n|\r|\n/);
   // --- CHANGE END ---
@@ -209,12 +208,6 @@ function DrawerContent({ state }: DrawerContentComponentProps) {
           active={isActive('Notifications')}
         />
         <DrawerItem
-          label={t('Messages')}
-          icon="Mail"
-          onPress={() => navigateInProfile('Messages', undefined)}
-          active={isActive('Messages')}
-        />
-        <DrawerItem
           label={t('Activity')}
           icon="Chart"
           onPress={() => navigateInProfile('Activity', undefined)}
@@ -262,11 +255,6 @@ export default function ProfileDrawerNavigator() {
         name="Notifications"
         component={Notifications}
         options={{ title: t('Notifications'), headerLeft: () => undefined }}
-      />
-      <ProfileDrawer.Screen
-        name="Messages"
-        component={Messages}
-        options={{ title: t('Messages'), headerLeft: () => undefined }}
       />
       <ProfileDrawer.Screen
         name="Activity"

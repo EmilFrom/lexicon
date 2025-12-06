@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Platform, RefreshControl, VirtualizedList } from 'react-native';
+import { Platform, RefreshControl, VirtualizedList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -26,7 +26,11 @@ type MessageType = NonNullable<
 
 type MessageRenderItem = { item: MessageType; index: number };
 
-export default function Messages() {
+type Props = {
+  hideHeader?: boolean;
+};
+
+export default function Messages({ hideHeader = false }: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
   const { isTabletLandscape } = useDevice();
@@ -178,6 +182,20 @@ export default function Messages() {
         style={styles.messageContainer}
         testID="Messages:List"
       />
+    );
+  }
+
+  const Container = hideHeader ? React.Fragment : SafeAreaView;
+  const containerProps = hideHeader ? {} : { style: styles.container };
+
+  if (hideHeader) {
+    return (
+      <View style={styles.container}>
+        {content}
+        {!ios && (
+          <FloatingButton onPress={onPressNewMessage} style={styles.fab} />
+        )}
+      </View>
     );
   }
 

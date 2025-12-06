@@ -3860,6 +3860,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-navigation/material-top-tabs@npm:^6.6.14":
+  version: 6.6.14
+  resolution: "@react-navigation/material-top-tabs@npm:6.6.14"
+  dependencies:
+    color: "npm:^4.2.3"
+    warn-once: "npm:^0.1.0"
+  peerDependencies:
+    "@react-navigation/native": ^6.0.0
+    react: "*"
+    react-native: "*"
+    react-native-pager-view: ">= 4.0.0"
+    react-native-tab-view: ">= 3.0.0"
+  checksum: 10c0/eb4adab3fe3b311dd51e71abb8ed040e5e0d7aa7aea04822e7f0dafa1e0cc73a4145d558fa9ae71b5f9ec0b36f74cf60bf61476dce1c758a8cb95943303c0747
+  languageName: node
+  linkType: hard
+
 "@react-navigation/native@npm:^6.0.11":
   version: 6.1.18
   resolution: "@react-navigation/native@npm:6.1.18"
@@ -9459,6 +9475,7 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:^6.3.2"
     "@react-navigation/drawer": "npm:^6.6.15"
     "@react-navigation/elements": "npm:^1.3.4"
+    "@react-navigation/material-top-tabs": "npm:^6.6.14"
     "@react-navigation/native": "npm:^6.0.11"
     "@react-navigation/stack": "npm:^6.2.2"
     "@shopify/flash-list": "npm:2.0.2"
@@ -9538,6 +9555,7 @@ __metadata:
     react-native-keyboard-aware-scroll-view: "npm:0.9.5"
     react-native-linear-gradient: "npm:^2.8.3"
     react-native-modal-datetime-picker: "npm:^17.1.0"
+    react-native-pager-view: "npm:^7.0.2"
     react-native-parsed-text: "npm:^0.0.22"
     react-native-pie-chart: "npm:^3.0.1"
     react-native-reanimated: "npm:~4.1.1"
@@ -9548,6 +9566,7 @@ __metadata:
     react-native-skeleton-placeholder: "npm:^5.2.4"
     react-native-svg: "npm:15.12.1"
     react-native-svg-transformer: "npm:^1.4.0"
+    react-native-tab-view: "npm:^4.2.0"
     react-native-testing-library: "npm:^6.0.0"
     react-native-toast-message: "npm:^2.1.5"
     react-native-webview: "npm:13.15.0"
@@ -15200,6 +15219,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-pager-view@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "react-native-pager-view@npm:7.0.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/f90e2e765b6cde96c3c625df51eeab92e873dc96200aeff347b0c67decc5161ba580135c857b5961c1c37dcd4afd67e3edfcd625b64bf1aa94dfe91bfdc18f14
+  languageName: node
+  linkType: hard
+
 "react-native-parsed-text@npm:^0.0.22":
   version: 0.0.22
   resolution: "react-native-parsed-text@npm:0.0.22"
@@ -15329,6 +15358,19 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/ed94b57007125c715283fc760438ac8eac0677ced3201f6e272a7cd4459f3fecb672a8eed2c32664e5b8e6e0367585353b0f83f99b231f603d75094bb052c01f
+  languageName: node
+  linkType: hard
+
+"react-native-tab-view@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "react-native-tab-view@npm:4.2.0"
+  dependencies:
+    use-latest-callback: "npm:^0.2.4"
+  peerDependencies:
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-pager-view: ">= 6.0.0"
+  checksum: 10c0/14f1f619cc656cb0e7b19108fb2421de9c613d7659ef978fe2f8081950a1756c8aa7b65b243c0047079ad3b6846f047e88f667d9e697819f131eef599c3275be
   languageName: node
   linkType: hard
 
@@ -18086,7 +18128,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-latest-callback@npm:^0.2.1":
+"use-latest-callback@npm:^0.2.1, use-latest-callback@npm:^0.2.4":
   version: 0.2.6
   resolution: "use-latest-callback@npm:0.2.6"
   peerDependencies:

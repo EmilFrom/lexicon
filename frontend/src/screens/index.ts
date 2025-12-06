@@ -18,6 +18,7 @@ import ImagePreview from './MessageDetail/ImagePreview';
 import MessageDetail from './MessageDetail/MessageDetail';
 import Poll from './MessageDetail/Poll';
 import Messages from './Messages/Messages';
+import { MessagesScreen } from './Messages/MessagesScreen';
 import NewMessage from './NewMessage';
 import NewPoll from './NewPoll';
 import NewPost from './NewPost';
@@ -58,6 +59,7 @@ export {
   ImagePreview,
   MessageDetail,
   Messages,
+  MessagesScreen,
   NewMessage,
   NewPoll,
   NewPost,

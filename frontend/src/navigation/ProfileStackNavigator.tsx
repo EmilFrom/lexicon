@@ -8,7 +8,6 @@ import {
   EditProfile,
   EditUSerStatus,
   EmailAddress,
-  Messages,
   Notifications,
   Preferences,
   Profile,
@@ -34,11 +33,6 @@ export default function ProfileStackNavigator() {
         name="ProfileScreen"
         component={Profile}
         options={{ title: '' }}
-      />
-      <ProfileStack.Screen
-        name="Messages"
-        component={Messages}
-        options={{ title: t('Messages') }}
       />
       <ProfileStack.Screen
         name="AddEmail"

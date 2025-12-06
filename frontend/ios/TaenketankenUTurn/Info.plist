@@ -29,6 +29,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>tt-uturn</string>
           <string>com.emilfrom.tt-uturn</string>
         </array>
       </dict>
