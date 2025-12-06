@@ -11,10 +11,16 @@ import { useDebouncedCallback } from 'use-debounce';
 import { Text, Icon, Avatar } from '../../../core-ui';
 import { useSearchUsers } from '../../../hooks';
 import { makeStyles, useTheme } from '../../../theme';
-import { UserIcon } from '../../../types/api/user';
+
+type SearchUser = {
+    id: number;
+    username: string;
+    avatar: string; // GraphQL query aliases avatarTemplate as avatar
+    name?: string | null;
+};
 
 type Props = {
-    onSelectUser: (user: UserIcon) => void;
+    onSelectUser: (user: SearchUser) => void;
     selectedUserIds: number[];
     placeholder?: string;
 };
@@ -39,7 +45,7 @@ export function UserSearchAutocomplete({
         setSearchTerm(text);
     }, 300);
 
-    const renderUserItem = ({ item }: { item: UserIcon }) => {
+    const renderUserItem = ({ item }: { item: SearchUser }) => {
         const isSelected = selectedUserIds.includes(item.id);
 
         return (

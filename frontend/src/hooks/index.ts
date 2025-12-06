@@ -16,6 +16,7 @@ export * from './rest/auth/usePushNotifications';
 export * from './rest/chat/useChatChannelDetail';
 export * from './rest/chat/useChatChannelMessages';
 export * from './rest/chat/useChatChannelNotifications';
+export * from './rest/chat/useCreateDirectMessageChannel';
 export * from './rest/chat/useCreateThread';
 export * from './rest/chat/useGetChatChannels';
 export * from './rest/chat/useGetThreadDetail';

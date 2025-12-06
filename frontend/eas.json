@@ -20,6 +20,15 @@
       "corepack": "true",
       "ios": {
         "simulator": true
+      },
+      "android": {
+        "buildType": "apk",
+        "corepack": "true",
+        "gradleCommand": ":app:assembleRelease",
+        "distribution": "internal"
+      },
+      "env": {
+        "ANDROID_SDK_ROOT": "/Users/emil/Library/Android/sdk"
       }
     },
     "preview": {

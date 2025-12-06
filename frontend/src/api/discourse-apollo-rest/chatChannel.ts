@@ -159,7 +159,7 @@ export const CREATE_DIRECT_MESSAGE_CHANNEL = gql`
     createDirectMessageChannel(createDMInput: $createDMInput)
       @rest(
         type: "CreateDirectMessageChannelOutput"
-        path: "/chat/api/direct-messages.json"
+        path: "/chat/direct_messages.json"
         method: "POST"
         bodyKey: "createDMInput"
       ) {

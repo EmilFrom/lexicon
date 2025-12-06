@@ -837,6 +837,10 @@ type CreateThreadOutput {
   lastMessageId: Int!
 }
 
+type CreateDirectMessageChannelOutput {
+  channel: ChannelList!
+}
+
 type OriginalMessage {
   id: Int!
   time: String!
@@ -1099,7 +1103,17 @@ input MarkReadChatInput {
 
 input ReplyChatInput {
   message: String!
+  uploadIds: [Int!]
   threadId: Int
+  stagingIds: [String!]
+}
+
+input CreateDirectMessageChannelInput {
+  target_usernames: [String!]!
+  message: String!
+  name: String
+  icon_upload_id: Int
+  upsert: Boolean
 }
 
 input CreateThreadInput {
@@ -1210,6 +1224,9 @@ type Mutation {
     channelId: Int!
     pushEnabled: Boolean!
   ): ChatChannelNotificationsOutput!
+  createDirectMessageChannel(
+    createDMInput: CreateDirectMessageChannelInput!
+  ): CreateDirectMessageChannelOutput!
 }
 
 scalar PathBuilder
