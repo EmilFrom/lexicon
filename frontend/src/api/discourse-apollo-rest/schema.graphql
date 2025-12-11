@@ -1140,6 +1140,28 @@ input CreateAndUpdatePostDraftInputRest {
   forceSave: Boolean!
 }
 
+input CreateProjectInput {
+  name: String!
+  description: String
+  color: String
+  create_chat: Boolean
+  chat_channel_name: String
+  chat_channel_description: String
+}
+
+type CreateProjectCategory {
+  id: Int!
+  name: String!
+  slug: String!
+  url: String!
+}
+
+type CreateProjectOutput {
+  category: CreateProjectCategory!
+  chat_channel_id: Int
+  warning: String
+}
+
 type Mutation {
   addEmail(addEmailInput: AddEmailInput!, username: String!): String!
   changePassword(
@@ -1229,6 +1251,9 @@ type Mutation {
   createDirectMessageChannel(
     createDMInput: CreateDirectMessageChannelInput!
   ): CreateDirectMessageChannelOutput
+  createProject(
+    createProjectInput: CreateProjectInput!
+  ): CreateProjectOutput!
 }
 
 scalar PathBuilder

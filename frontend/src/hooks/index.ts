@@ -60,6 +60,7 @@ export * from './rest/profile/useProfile';
 export * from './rest/site/useAbout';
 export * from './rest/site/useChannels';
 export * from './rest/site/useSiteSettings';
+export * from './rest/useCreateProject';
 export * from './rest/useUpload';
 
 export * from './rest/user/useDeleteUserStatus';
