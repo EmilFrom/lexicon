@@ -20,6 +20,10 @@ export const PROFILE = gql`
         unconfirmedEmails
         canEditUsername
         admin
+        groups @type(name: "GroupSiteSetting") {
+          id
+          name
+        }
         status @type(name: "UserStatus") {
           ...UserStatusFragment
         }

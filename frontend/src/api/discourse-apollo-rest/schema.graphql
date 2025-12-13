@@ -65,6 +65,7 @@ type UserDetail {
   primaryGroupFlairUrl: String
   primaryGroupId: Int
   primaryGroupName: String
+  groups: [GroupSiteSetting!]
   profileViewCount: Int!
   recentTimeRead: Int!
   regularCategoryIds: [Int!]!
@@ -1104,7 +1105,6 @@ input MarkReadChatInput {
 input ReplyChatInput {
   message: String!
   uploadIds: [Int!]
-```
   threadId: Int
   stagingIds: [String!]
 }
@@ -1147,6 +1147,7 @@ input CreateProjectInput {
   create_chat: Boolean
   chat_channel_name: String
   chat_channel_description: String
+  group_ids: [Int!]
 }
 
 type CreateProjectCategory {

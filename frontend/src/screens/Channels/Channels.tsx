@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Platform, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useFormContext } from 'react-hook-form';
@@ -11,10 +11,12 @@ import {
   NO_CHANNEL_FILTER_ID,
 } from '../../constants';
 import { useStorage } from '../../helpers';
+import { useChannels } from '../../hooks';
 import { makeStyles } from '../../theme';
 import { RootStackNavProp, RootStackRouteProp } from '../../types';
 
 import ChannelItem from './Components/ChannelItem';
+import { NewProjectModal } from './Components/NewProjectModal';
 
 export default function Channels() {
   const styles = useStyles();
@@ -36,6 +38,40 @@ export default function Channels() {
 
   const ios = Platform.OS === 'ios';
 
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const { refetch: refetchChannels, data: channelsData } = useChannels(
+    {},
+    'HIDE_ALERT',
+  );
+
+  // Update storage when channels data changes
+  useEffect(() => {
+    if (channelsData?.category?.categories) {
+      const updatedChannels = channelsData.category.categories.map((channel) => {
+        const { id, color, name, descriptionText } = channel;
+        return { id, color, name, description: descriptionText ?? null };
+      });
+      storage.setItem('channels', updatedChannels);
+    }
+  }, [channelsData, storage]);
+
+  const handleNewProjectSuccess = async (categoryId: number) => {
+    // Close the modal first
+    setShowNewProjectModal(false);
+    
+    // Refetch channels to get the newly created project
+    await refetchChannels();
+    
+    // Select the newly created project and navigate to Home
+    if (prevScreen === 'Home') {
+      storage.setItem('homeChannelId', categoryId);
+      navigate('TabNav', { screen: 'Home' });
+    } else {
+      setValue('channelId', categoryId, { shouldDirty: true });
+      navigate(prevScreen);
+    }
+  };
+
   const onPress = (id: number) => {
     if (prevScreen === 'Home') {
       storage.setItem('homeChannelId', id);
@@ -52,9 +88,20 @@ export default function Channels() {
         <ModalHeader
           title={t('Channels')}
           left={<HeaderItem label={t('Cancel')} onPressItem={goBack} left />}
+          right={
+            <HeaderItem
+              icon="Add"
+              onPressItem={() => setShowNewProjectModal(true)}
+            />
+          }
         />
       ) : (
-        <CustomHeader title={t('Channels')} noShadow />
+        <CustomHeader
+          title={t('Channels')}
+          noShadow
+          rightIcon="Add"
+          onPressRight={() => setShowNewProjectModal(true)}
+        />
       )}
 
       <ScrollView>
@@ -79,6 +126,12 @@ export default function Channels() {
           );
         })}
       </ScrollView>
+
+      <NewProjectModal
+        visible={showNewProjectModal}
+        onClose={() => setShowNewProjectModal(false)}
+        onSuccess={handleNewProjectSuccess}
+      />
     </SafeAreaView>
   );
 }

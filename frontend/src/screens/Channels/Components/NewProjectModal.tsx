@@ -8,12 +8,12 @@ import {
   Switch,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 
 import { Text, TextInput, Icon } from '../../../core-ui';
 import { TextArea } from '../../../components';
-import { useCreateProject } from '../../../hooks';
+import { useCreateProject, useUserGroups } from '../../../hooks';
 import { makeStyles, useTheme } from '../../../theme';
 import { t } from '../../../i18n/translate';
 
@@ -32,6 +32,7 @@ type FormData = {
   createChat: boolean;
   chatChannelName: string;
   chatChannelDescription: string;
+  groupIds: number[];
 };
 
 // Default Discourse category colors (matching admin UI)
@@ -56,6 +57,7 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
   const styles = useStyles();
   const { colors, spacing } = useTheme();
   const { createProject, loading } = useCreateProject();
+  const { groups, loading: groupsLoading } = useUserGroups();
 
   const {
     control,
@@ -75,12 +77,31 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
       createChat: false,
       chatChannelName: 'General',
       chatChannelDescription: '',
+      groupIds: [],
     },
   });
 
   const createChat = watch('createChat');
   const name = watch('name');
   const color = watch('color');
+  const description = watch('description');
+  const chatChannelDescription = watch('chatChannelDescription');
+  const selectedGroupIds = watch('groupIds');
+  
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [descriptionType, setDescriptionType] = useState<'category' | 'chat'>('category');
+
+  // Set default to "Medlemmer" group if it exists
+  useEffect(() => {
+    if (groups.length > 0 && selectedGroupIds.length === 0) {
+      const medlemmerGroup = groups.find((g) => 
+        g.name?.toLowerCase() === 'medlemmer' || g.name?.toLowerCase() === 'members'
+      );
+      if (medlemmerGroup?.id) {
+        setValue('groupIds', [medlemmerGroup.id]);
+      }
+    }
+  }, [groups, selectedGroupIds.length, setValue]);
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -114,6 +135,7 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
             chat_channel_description: data.createChat
               ? data.chatChannelDescription.trim() || undefined
               : undefined,
+            group_ids: data.groupIds.length > 0 ? data.groupIds : undefined,
           },
         },
       });
@@ -195,7 +217,7 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
             />
           </View>
 
-          {/* Description */}
+          {/* Description - Optional button */}
           <View style={styles.fieldContainer}>
             <Controller
               control={control}
@@ -206,20 +228,32 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
                   message: t('Description is too long (max 1000 characters)'),
                 },
               }}
-              render={({ field: { onChange, value } }) => (
+              render={() => (
                 <View>
                   <Text size="s" style={styles.label}>
                     {t('Description')} ({t('Optional')})
                   </Text>
-                  <TextArea
-                    value={value}
-                    onChangeValue={onChange}
-                    placeholder={t('Enter description...')}
-                    onSelectedChange={() => {}}
-                    inputRef={React.createRef()}
-                    isKeyboardShow={false}
-                    mentionToggled={false}
-                  />
+                  <TouchableOpacity
+                    style={styles.descriptionButton}
+                    onPress={() => {
+                      setDescriptionType('category');
+                      setShowDescriptionModal(true);
+                    }}
+                  >
+                    <View style={styles.descriptionButtonContent}>
+                      <Text
+                        size="m"
+                        style={[
+                          styles.descriptionButtonText,
+                          !description && styles.descriptionButtonPlaceholder,
+                        ]}
+                        numberOfLines={2}
+                      >
+                        {description || t('Tap to add description (optional)')}
+                      </Text>
+                      <Icon name="ChevronRight" size="m" color={colors.textLight} />
+                    </View>
+                  </TouchableOpacity>
                   {errors.description && (
                     <Text size="s" color="error" style={styles.errorText}>
                       {errors.description.message}
@@ -323,6 +357,63 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
             </View>
           </View>
 
+          {/* Group Selection */}
+          {groups.length > 0 && (
+            <View style={styles.fieldContainer}>
+              <Text size="s" style={styles.label}>
+                {t('Add groups')} ({t('Optional')})
+              </Text>
+              <Text size="xs" style={styles.helperText}>
+                {t('All members of selected groups will be added to the project and chat channel')}
+              </Text>
+              {groupsLoading ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <View style={styles.groupContainer}>
+                  {groups.map((group) => {
+                    const isSelected = selectedGroupIds.includes(group.id);
+                    return (
+                      <TouchableOpacity
+                        key={group.id}
+                        style={[
+                          styles.groupItem,
+                          isSelected && styles.groupItemSelected,
+                        ]}
+                        onPress={() => {
+                          const currentIds = selectedGroupIds;
+                          if (isSelected) {
+                            setValue(
+                              'groupIds',
+                              currentIds.filter((id) => id !== group.id),
+                            );
+                          } else {
+                            setValue('groupIds', [...currentIds, group.id]);
+                          }
+                        }}
+                      >
+                        <View style={styles.groupItemContent}>
+                          <View
+                            style={[
+                              styles.checkbox,
+                              isSelected && styles.checkboxSelected,
+                            ]}
+                          >
+                            {isSelected && (
+                              <Icon name="Done" size="s" color={colors.pureWhite} />
+                            )}
+                          </View>
+                          <Text size="m" style={styles.groupItemText}>
+                            {group.name}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          )}
+
           {/* Create Chat Channel Toggle */}
           <View style={styles.fieldContainer}>
             <View style={styles.toggleContainer}>
@@ -391,20 +482,34 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
                     ),
                   },
                 }}
-                render={({ field: { onChange, value } }) => (
+                render={() => (
                   <View>
                     <Text size="s" style={styles.label}>
                       {t('Chat channel description')} ({t('Optional')})
                     </Text>
-                    <TextArea
-                      value={value}
-                      onChangeValue={onChange}
-                      placeholder={t('Enter chat channel description...')}
-                      onSelectedChange={() => {}}
-                      inputRef={React.createRef()}
-                      isKeyboardShow={false}
-                      mentionToggled={false}
-                    />
+                    <TouchableOpacity
+                      style={styles.descriptionButton}
+                      onPress={() => {
+                        setDescriptionType('chat');
+                        setShowDescriptionModal(true);
+                      }}
+                    >
+                      <View style={styles.descriptionButtonContent}>
+                        <Text
+                          size="m"
+                          style={[
+                            styles.descriptionButtonText,
+                            !chatChannelDescription &&
+                              styles.descriptionButtonPlaceholder,
+                          ]}
+                          numberOfLines={2}
+                        >
+                          {chatChannelDescription ||
+                            t('Tap to add chat description (optional)')}
+                        </Text>
+                        <Icon name="ChevronRight" size="m" color={colors.textLight} />
+                      </View>
+                    </TouchableOpacity>
                     {errors.chatChannelDescription && (
                       <Text size="s" color="error" style={styles.errorText}>
                         {errors.chatChannelDescription.message}
@@ -435,9 +540,173 @@ export function NewProjectModal({ visible, onClose, onSuccess }: Props) {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
+
+      {/* Description Editor Modal */}
+      <DescriptionEditorModal
+        visible={showDescriptionModal}
+        onClose={() => setShowDescriptionModal(false)}
+        value={descriptionType === 'category' ? description : chatChannelDescription}
+        onChange={(value) => {
+          if (descriptionType === 'category') {
+            setValue('description', value, { shouldValidate: true });
+          } else {
+            setValue('chatChannelDescription', value, { shouldValidate: true });
+          }
+        }}
+        maxLength={descriptionType === 'category' ? 1000 : 500}
+        title={
+          descriptionType === 'category'
+            ? t('Category Description')
+            : t('Chat Channel Description')
+        }
+        placeholder={
+          descriptionType === 'category'
+            ? t('Enter category description...')
+            : t('Enter chat channel description...')
+        }
+        error={
+          descriptionType === 'category'
+            ? errors.description?.message
+            : errors.chatChannelDescription?.message
+        }
+      />
     </Modal>
   );
 }
+
+// Description Editor Modal Component
+type DescriptionEditorModalProps = {
+  visible: boolean;
+  onClose: () => void;
+  value: string;
+  onChange: (value: string) => void;
+  maxLength: number;
+  title: string;
+  placeholder: string;
+  error?: string;
+};
+
+function DescriptionEditorModal({
+  visible,
+  onClose,
+  value,
+  onChange,
+  maxLength,
+  title,
+  placeholder,
+  error,
+}: DescriptionEditorModalProps) {
+  const styles = useDescriptionEditorStyles();
+  const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
+  const [localValue, setLocalValue] = useState(value);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value, visible]);
+
+  const handleSave = () => {
+    onChange(localValue);
+    onClose();
+  };
+
+  const handleCancel = () => {
+    setLocalValue(value); // Reset to original value
+    onClose();
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="fullScreen"
+      onRequestClose={handleCancel}
+    >
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        {/* Header */}
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, spacing.l) }]}>
+          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
+            <Text style={styles.cancelText}>{t('Cancel')}</Text>
+          </TouchableOpacity>
+          <Text variant="semiBold" size="l">
+            {title}
+          </Text>
+          <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+            <Text style={styles.saveText}>{t('Save')}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Content */}
+        <View style={styles.content}>
+          <TextArea
+            value={localValue}
+            onChangeValue={setLocalValue}
+            placeholder={placeholder}
+            onSelectedChange={() => {}}
+            inputRef={React.createRef()}
+            isKeyboardShow={true}
+            mentionToggled={false}
+          />
+          <View style={styles.footer}>
+            <Text size="s" style={styles.charCount}>
+              {localValue.length} / {maxLength}
+            </Text>
+            {error && (
+              <Text size="s" color="error" style={styles.errorText}>
+                {error}
+              </Text>
+            )}
+          </View>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+const useDescriptionEditorStyles = makeStyles(({ colors, spacing }) => ({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.l,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  cancelButton: {
+    paddingVertical: spacing.s,
+  },
+  cancelText: {
+    color: colors.primary,
+    fontSize: 16,
+  },
+  saveButton: {
+    paddingVertical: spacing.s,
+  },
+  saveText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  content: {
+    flex: 1,
+    padding: spacing.xl,
+  },
+  footer: {
+    marginTop: spacing.m,
+    alignItems: 'flex-end',
+  },
+  charCount: {
+    color: colors.textLight,
+  },
+  errorText: {
+    marginTop: spacing.xs,
+  },
+}));
 
 const useStyles = makeStyles(({ colors, spacing }) => ({
   container: {
@@ -553,6 +822,68 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
   createButtonText: {
     color: colors.pureWhite,
     fontSize: 16,
+  },
+  descriptionButton: {
+    backgroundColor: colors.backgroundDarker,
+    borderRadius: 8,
+    padding: spacing.m,
+    marginTop: spacing.s,
+  },
+  descriptionButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  descriptionButtonText: {
+    flex: 1,
+    color: colors.textNormal,
+    marginRight: spacing.s,
+  },
+  descriptionButtonPlaceholder: {
+    color: colors.textLight,
+  },
+  helperText: {
+    color: colors.textLight,
+    marginTop: spacing.xs,
+    marginBottom: spacing.s,
+  },
+  groupContainer: {
+    marginTop: spacing.s,
+  },
+  groupItem: {
+    backgroundColor: colors.backgroundDarker,
+    borderRadius: 8,
+    padding: spacing.m,
+    marginBottom: spacing.s,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  groupItemSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.background,
+  },
+  groupItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.border,
+    marginRight: spacing.m,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+  },
+  checkboxSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  groupItemText: {
+    color: colors.textNormal,
+    flex: 1,
   },
 }));
 
